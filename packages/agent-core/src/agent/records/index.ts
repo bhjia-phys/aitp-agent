@@ -91,6 +91,8 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
     case 'tools.update_store':
       agent.tools.updateStore(input.key, input.value);
       return;
+    case 'tool_lifecycle.started':
+    case 'tool_lifecycle.completed':
     case 'physics_memory.roots_loaded':
     case 'physics_memory.capsule_loaded':
     case 'physics_memory.context_compiled':

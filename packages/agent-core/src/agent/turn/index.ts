@@ -522,13 +522,26 @@ export class TurnFlow {
   private trackToolLifecycle(event: LoopEvent, turnId: number): void {
     if (event.type === 'tool.call') {
       const dupType = this.trackDuplicateToolCall(turnId, event.step, event.name, event.args);
+      const startedAt = Date.now();
       this.toolCallDupType.set(
         event.toolCallId,
         dupType === 'cross_step' ? 'cross_step' : 'normal',
       );
       this.toolCallStartedAt.set(event.toolCallId, {
         name: event.name,
-        startedAt: Date.now(),
+        startedAt,
+      });
+      this.agent.toolLifecycle.recordStarted({
+        source: 'loop',
+        turnId,
+        step: event.step,
+        stepUuid: event.stepUuid,
+        toolCallId: event.toolCallId,
+        toolName: event.name,
+        args: event.args,
+        cwd: this.agent.config.cwd,
+        description: event.description,
+        startedAt,
       });
       return;
     }
@@ -550,6 +563,13 @@ export class TurnFlow {
         properties['error_type'] = errorType;
       }
       this.agent.telemetry.track('tool_call', properties);
+      this.agent.toolLifecycle.recordCompleted({
+        source: 'loop',
+        turnId,
+        toolCallId: event.toolCallId,
+        toolName: started.name,
+        result: event.result,
+      });
     }
   }
 
