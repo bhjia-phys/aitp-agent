@@ -387,6 +387,9 @@ export class ToolManager {
         flags.enabled('physics-memory') &&
           this.agent.physicsMemory &&
           new b.PhysicsMemoryTool(this.agent.physicsMemory),
+        flags.enabled('research-ledger') &&
+          this.agent.researchLedger &&
+          new b.ResearchLedgerTool(this.agent.researchLedger),
         this.agent.subagentHost &&
           new b.AgentTool(
             this.agent.subagentHost,
