@@ -9,11 +9,14 @@ import type { PermissionApprovalResultRecord, PermissionMode } from '../permissi
 import type { UserToolRegistration } from '../tool';
 import type { UsageRecordScope } from '../usage';
 import type {
+  GraphRef,
   PhysicsCapsuleKind,
+  PhysicsCapsuleId,
   PhysicsDomainId,
   PhysicsMemoryRoot,
 } from '../../physics-memory';
 import type { PhysicsMemoryRecordSource } from '../physics-memory';
+import type { ResearchActionOutcome, ResearchActionSource } from '../../research-action';
 import type {
   ResearchLedgerEventStatus,
   ResearchLedgerEventType,
@@ -162,6 +165,20 @@ export interface AgentRecordEvents {
       eventId?: string | undefined;
       proposalId?: string | undefined;
     }[];
+    toolCallId?: string | undefined;
+  };
+
+  'research_action.result_recorded': {
+    source: ResearchActionSource;
+    actionId: string;
+    callId: string;
+    outcome: ResearchActionOutcome;
+    graphRefs: readonly GraphRef[];
+    capsuleRefs: readonly PhysicsCapsuleId[];
+    evidenceRefs: readonly string[];
+    generatedObligationIds: readonly string[];
+    primitiveToolCallIds: readonly string[];
+    nextSuggestedActions: readonly string[];
     toolCallId?: string | undefined;
   };
 }

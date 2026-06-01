@@ -39,6 +39,7 @@ import { PermissionManager, type PermissionManagerOptions } from './permission';
 import { PhysicsMemoryManager } from './physics-memory';
 import { PlanMode } from './plan';
 import { ResearchLedgerManager } from './research-ledger';
+import { ResearchActionManager } from './research-action';
 import {
   AgentRecords,
   BlobStore,
@@ -117,6 +118,7 @@ export class Agent {
   readonly skills: SkillManager | null;
   readonly physicsMemory: PhysicsMemoryManager | null;
   readonly researchLedger: ResearchLedgerManager | null;
+  readonly researchAction: ResearchActionManager;
   readonly tools: ToolManager;
   readonly background: BackgroundManager;
   readonly cron: CronManager | null;
@@ -172,6 +174,7 @@ export class Agent {
       options.researchLedger === undefined
         ? null
         : new ResearchLedgerManager(this, options.researchLedger);
+    this.researchAction = new ResearchActionManager(this);
     this.tools = new ToolManager(this);
     this.background = new BackgroundManager(this);
     this.cron = this.type === 'sub' ? null : new CronManager(this);
