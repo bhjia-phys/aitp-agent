@@ -181,7 +181,7 @@ export class LocalKaos implements Kaos {
   }
 
   pathClass(): 'posix' | 'win32' {
-    return isWindows ? 'win32' : 'posix';
+    return this.osEnv.osKind === 'Windows' ? 'win32' : 'posix';
   }
 
   normpath(path: string): string {

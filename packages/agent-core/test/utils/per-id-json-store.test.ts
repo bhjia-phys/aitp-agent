@@ -138,13 +138,16 @@ describe('createPerIdJsonStore', () => {
     await expect(store.remove('aaaa')).resolves.toBeUndefined();
   });
 
-  it('write creates the subdir with mode 0700', async () => {
+  it.skipIf(process.platform === 'win32')(
+    'write creates the subdir with mode 0700',
+    async () => {
     const store = newStore();
     await store.write('aaaa', { id: 'aaaa', payload: 'x' });
     const st = await stat(join(rootDir, 'things'));
     // eslint-disable-next-line no-bitwise
     expect(st.mode & 0o777).toBe(0o700);
-  });
+    },
+  );
 
   it('rejects path-traversal ids on write/read/remove', async () => {
     const store = newStore();

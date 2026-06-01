@@ -15,6 +15,7 @@ import {
 import type { EnabledPluginSessionStart } from '#/plugin';
 
 import type { McpConnectionManager } from '../mcp';
+import type { PhysicsMemoryRegistry } from '../physics-memory';
 import type { PreparedSystemPromptContext, ResolvedAgentProfile } from '../profile';
 import type { ModelProvider } from '../session/provider-manager';
 import type { SessionSubagentHost } from '../session/subagent-host';
@@ -34,6 +35,7 @@ import { ContextMemory } from './context';
 import { HookEngine } from '../session/hooks';
 import { InjectionManager } from './injection/manager';
 import { PermissionManager, type PermissionManagerOptions } from './permission';
+import { PhysicsMemoryManager } from './physics-memory';
 import { PlanMode } from './plan';
 import {
   AgentRecords,
@@ -74,6 +76,7 @@ export interface AgentOptions {
   readonly modelProvider?: ModelProvider | undefined;
   readonly subagentHost?: SessionSubagentHost | undefined;
   readonly skills?: SkillRegistry;
+  readonly physicsMemory?: PhysicsMemoryRegistry;
   readonly mcp?: McpConnectionManager;
   readonly hookEngine?: HookEngine;
   readonly permission?: PermissionManagerOptions | undefined;
@@ -109,6 +112,7 @@ export class Agent {
   readonly planMode: PlanMode;
   readonly usage: UsageRecorder;
   readonly skills: SkillManager | null;
+  readonly physicsMemory: PhysicsMemoryManager | null;
   readonly tools: ToolManager;
   readonly background: BackgroundManager;
   readonly cron: CronManager | null;
@@ -156,6 +160,10 @@ export class Agent {
     this.planMode = new PlanMode(this);
     this.usage = new UsageRecorder(this);
     this.skills = options.skills ? new SkillManager(this, options.skills) : null;
+    this.physicsMemory =
+      options.physicsMemory === undefined
+        ? null
+        : new PhysicsMemoryManager(this, options.physicsMemory);
     this.tools = new ToolManager(this);
     this.background = new BackgroundManager(this);
     this.cron = this.type === 'sub' ? null : new CronManager(this);

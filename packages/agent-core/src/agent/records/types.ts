@@ -8,6 +8,12 @@ import type { ContextMessage, PromptOrigin } from '../context';
 import type { PermissionApprovalResultRecord, PermissionMode } from '../permission';
 import type { UserToolRegistration } from '../tool';
 import type { UsageRecordScope } from '../usage';
+import type {
+  PhysicsCapsuleKind,
+  PhysicsDomainId,
+  PhysicsMemoryRoot,
+} from '../../physics-memory';
+import type { PhysicsMemoryRecordSource } from '../physics-memory';
 
 export interface AgentRecordEvents {
   metadata: {
@@ -71,6 +77,39 @@ export interface AgentRecordEvents {
   'context.apply_compaction': CompactionResult;
 
   'tools.update_store': ToolStoreUpdate;
+
+  'physics_memory.roots_loaded': {
+    roots: readonly PhysicsMemoryRoot[];
+    source: PhysicsMemoryRecordSource;
+    capsuleCount: number;
+    domains: readonly PhysicsDomainId[];
+    diagnostics: readonly {
+      severity: 'info' | 'warning' | 'error';
+      code: string;
+      capsuleId?: string | undefined;
+      path?: string | undefined;
+      rootPath?: string | undefined;
+    }[];
+  };
+  'physics_memory.capsule_loaded': {
+    source: PhysicsMemoryRecordSource;
+    capsuleId: string;
+    domain: PhysicsDomainId;
+    kind: PhysicsCapsuleKind;
+    toolCallId?: string | undefined;
+  };
+  'physics_memory.context_compiled': {
+    source: PhysicsMemoryRecordSource;
+    domain: PhysicsDomainId;
+    focus: readonly string[];
+    capsuleIds: readonly string[];
+    diagnostics: readonly {
+      severity: 'info' | 'warning' | 'error';
+      code: string;
+      capsuleId?: string | undefined;
+    }[];
+    toolCallId?: string | undefined;
+  };
 }
 
 export type AgentRecord = {

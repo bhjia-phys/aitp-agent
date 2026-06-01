@@ -726,7 +726,7 @@ export class AgentTestContext {
 
   async expectResumeMatches(): Promise<void> {
     const resumed = testAgent({
-      kaos: createResumeNoSideEffectKaos(this.agent.config.cwd),
+      kaos: createResumeNoSideEffectKaos(this.agent.config.cwd, this.agent.kaos.pathClass()),
       runtime: {
         urlFetcher: this.agent.toolServices?.urlFetcher,
         webSearcher: this.agent.toolServices?.webSearcher,
@@ -948,7 +948,10 @@ const failOnResumeGenerate: GenerateFn = async () => {
   throw new Error('Resume replay unexpectedly called the LLM');
 };
 
-function createResumeNoSideEffectKaos(initialCwd: string): Kaos {
+function createResumeNoSideEffectKaos(
+  initialCwd: string,
+  pathClass: ReturnType<Kaos['pathClass']>,
+): Kaos {
   const fail = (method: string): never => {
     throw new Error(`Resume replay unexpectedly called kaos.${method}`);
   };
@@ -960,11 +963,11 @@ function createResumeNoSideEffectKaos(initialCwd: string): Kaos {
   return {
     name: 'resume-no-side-effects',
     osEnv: TEST_OS_ENV,
-    pathClass: () => 'posix',
+    pathClass: () => pathClass,
     normpath: (p: string) => p,
     gethome: () => '/home/test',
     getcwd: () => cwd,
-    withCwd: (next: string) => createResumeNoSideEffectKaos(next),
+    withCwd: (next: string) => createResumeNoSideEffectKaos(next, pathClass),
     chdir: async (next: string) => {
       cwd = next;
     },

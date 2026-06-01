@@ -10,6 +10,7 @@ import type { McpConnectionManager, McpServerEntry } from '../../mcp';
 import { mcpResultToExecutableOutput } from '../../mcp/output';
 import { isMcpToolName, qualifyMcpToolName } from '../../mcp/tool-naming';
 import type { MCPClient } from '../../mcp/types';
+import { flags } from '../../flags';
 import { DEFAULT_AGENT_PROFILES } from '../../profile';
 import { extendWorkspaceWithSkillRoots } from '../../skill';
 import * as b from '../../tools/builtin';
@@ -383,6 +384,9 @@ export class ToolManager {
         this.agent.cron && new b.CronDeleteTool(this.agent.cron),
         this.agent.skills?.registry.listInvocableSkills().length &&
           new b.SkillTool(this.agent),
+        flags.enabled('physics-memory') &&
+          this.agent.physicsMemory &&
+          new b.PhysicsMemoryTool(this.agent.physicsMemory),
         this.agent.subagentHost &&
           new b.AgentTool(
             this.agent.subagentHost,

@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'pathe';
 
@@ -1651,15 +1651,17 @@ function messageText(message: Message | undefined): string {
 }
 
 function hookPayloadLoggerCommand(logPath: string): string {
+  const scriptPath = `${logPath}.cjs`;
   const script = [
     "const fs = require('node:fs');",
     "let input = '';",
     "process.stdin.on('data', (chunk) => { input += chunk; });",
     "process.stdin.on('end', () => {",
-    `  fs.appendFileSync(${JSON.stringify(logPath)}, JSON.stringify(JSON.parse(input)) + '\\n');`,
+    "  fs.appendFileSync(process.argv[2], JSON.stringify(JSON.parse(input)) + '\\n');",
     '});',
-  ].join('');
-  return `node -e ${JSON.stringify(script)}`;
+  ].join('\n');
+  writeFileSync(scriptPath, script, 'utf-8');
+  return `node ${JSON.stringify(scriptPath)} ${JSON.stringify(logPath)}`;
 }
 
 function readHookPayloads(logPath: string): Array<Record<string, unknown>> {

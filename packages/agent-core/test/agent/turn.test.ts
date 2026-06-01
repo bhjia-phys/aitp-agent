@@ -52,6 +52,10 @@ function captureLogs(): { logger: Logger; entries: CapturedLogEntry[] } {
   return { logger, entries };
 }
 
+function nodeCommand(source: string): string {
+  return `node -e "${source.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
+}
+
 describe('Agent turn flow', () => {
   it('tracks turn_started and turn_interrupted telemetry', async () => {
     const records: TelemetryRecord[] = [];
@@ -269,13 +273,14 @@ describe('Agent turn flow', () => {
       {
         event: 'UserPromptSubmit',
         matcher: 'hooked input',
-        command:
-          'node -e "let s=\\"\\";process.stdin.on(\\"data\\",d=>s+=d);process.stdin.on(\\"end\\",()=>{const o=JSON.parse(s);if(Array.isArray(o.prompt)&&o.prompt[0]?.text===\\"hooked input\\"){process.stdout.write(\\"hook response 1\\");process.exit(0);}console.error(\\"bad prompt\\");process.exit(1);})"',
+        command: nodeCommand(
+          "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{const o=JSON.parse(s);if(Array.isArray(o.prompt)&&o.prompt[0]?.text==='hooked input'){process.stdout.write('hook response 1');process.exit(0);}process.stderr.write('bad prompt');process.exit(1);})",
+        ),
       },
       {
         event: 'UserPromptSubmit',
         matcher: 'hooked input',
-        command: "echo 'hook response 2'",
+        command: nodeCommand("process.stdout.write('hook response 2')"),
       },
     ]);
     const ctx = testAgent({ hookEngine });
@@ -336,12 +341,12 @@ describe('Agent turn flow', () => {
       {
         event: 'UserPromptSubmit',
         matcher: 'hooked input',
-        command: "echo '{}'",
+        command: nodeCommand("process.stdout.write('{}')"),
       },
       {
         event: 'UserPromptSubmit',
         matcher: 'hooked input',
-        command: 'echo \'{"hookSpecificOutput":{}}\'',
+        command: nodeCommand("process.stdout.write(JSON.stringify({hookSpecificOutput:{}}))"),
       },
     ]);
     const ctx = testAgent({ hookEngine });
@@ -399,7 +404,7 @@ describe('Agent turn flow', () => {
       {
         event: 'UserPromptSubmit',
         matcher: 'bad words',
-        command: "echo 'no profanity' >&2; exit 2",
+        command: nodeCommand("process.stderr.write('no profanity');process.exit(2)"),
       },
     ]);
     const ctx = testAgent({ hookEngine });
@@ -454,7 +459,7 @@ describe('Agent turn flow', () => {
     const hookEngine = new HookEngine([
       {
         event: 'UserPromptSubmit',
-        command: 'node -e "setTimeout(() => process.stdout.write(\\"late hook\\"), 250)"',
+        command: nodeCommand("setTimeout(()=>process.stdout.write('late hook'),250)"),
         timeout: 5,
       },
     ]);
@@ -491,7 +496,7 @@ describe('Agent turn flow', () => {
     const hookEngine = new HookEngine([
       {
         event: 'Stop',
-        command: "echo 'continue from hook' >&2; exit 2",
+        command: nodeCommand("process.stderr.write('continue from hook');process.exit(2)"),
       },
     ]);
     const ctx = testAgent({ hookEngine });

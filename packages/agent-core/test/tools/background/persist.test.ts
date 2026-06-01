@@ -102,12 +102,15 @@ describe('background/persist', () => {
     await expect(removeTask(sessionDir, 'bash-11111111')).resolves.toBeUndefined();
   });
 
-  it('writeTask creates tasks dir with mode 0700', async () => {
+  it.skipIf(process.platform === 'win32')(
+    'writeTask creates tasks dir with mode 0700',
+    async () => {
     await writeTask(sessionDir, sample());
     const st = await stat(join(sessionDir, 'tasks'));
     // eslint-disable-next-line no-bitwise
     expect(st.mode & 0o777).toBe(0o700);
-  });
+    },
+  );
 
   it('rejects path-traversal task ids', async () => {
     await expect(writeTask(sessionDir, sample({ task_id: '../../etc/passwd' }))).rejects.toThrow(

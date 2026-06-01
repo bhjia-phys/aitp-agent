@@ -1,7 +1,3 @@
-import { mkdtempSync, writeFileSync, chmodSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'pathe';
-
 import type { ContentPart } from '@moonshot-ai/kosong';
 import { describe, expect, it } from 'vitest';
 
@@ -57,28 +53,24 @@ async function importEngine(): Promise<HookEngineCtor> {
   return mod.HookEngine;
 }
 
+function nodeCommand(source: string): string {
+  return `node -e "${source.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
+}
+
 describe('HookEngine integration', () => {
   it('blocks a dangerous Shell command and allows a safe one via a PreToolUse script hook', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'kimi-hooks-int-'));
-    const script = join(dir, 'block-rm.sh');
-    // Use node for the body to keep the test runtime-agnostic.
-    writeFileSync(
-      script,
-      [
-        '#!/bin/bash',
-        'CMD=$(node -e "let s=\\"\\";process.stdin.on(\\"data\\",d=>s+=d);process.stdin.on(\\"end\\",()=>{try{const o=JSON.parse(s);process.stdout.write((o.tool_input&&o.tool_input.command)||\\"\\");}catch(e){}})")',
-        'if echo "$CMD" | grep -q "rm -rf"; then echo "Blocked: rm -rf" >&2; exit 2; fi',
-        'exit 0',
-        '',
-      ].join('\n'),
-      'utf-8',
-    );
-    chmodSync(script, 0o755);
-
     const HookEngine = await importEngine();
     const engine = new HookEngine(
-      [{ event: 'PreToolUse', matcher: 'Shell', command: script, timeout: 5 }],
-      { cwd: dir },
+      [
+        {
+          event: 'PreToolUse',
+          matcher: 'Shell',
+          command: nodeCommand(
+            "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{const o=JSON.parse(s);const cmd=o.tool_input?.command||'';if(cmd.includes('rm -rf')){process.stderr.write('Blocked: rm -rf');process.exit(2);}})",
+          ),
+          timeout: 5,
+        },
+      ],
     );
 
     const safe = await engine.trigger('PreToolUse', {
@@ -100,8 +92,9 @@ describe('HookEngine integration', () => {
     const engine = new HookEngine([
       {
         event: 'Stop',
-        command:
-          'echo \'{"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"tests not written"}}\'',
+        command: nodeCommand(
+          "process.stdout.write(JSON.stringify({hookSpecificOutput:{permissionDecision:'deny',permissionDecisionReason:'tests not written'}}))",
+        ),
         timeout: 5,
       },
     ]);
@@ -114,8 +107,18 @@ describe('HookEngine integration', () => {
   it('fires a Notification hook only when its matcher equals the notification matcher value', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'Notification', matcher: 'task_completed', command: 'echo notified', timeout: 5 },
-      { event: 'Notification', matcher: 'other_type', command: 'echo other', timeout: 5 },
+      {
+        event: 'Notification',
+        matcher: 'task_completed',
+        command: nodeCommand("process.stdout.write('notified')"),
+        timeout: 5,
+      },
+      {
+        event: 'Notification',
+        matcher: 'other_type',
+        command: nodeCommand("process.stdout.write('other')"),
+        timeout: 5,
+      },
     ]);
     const results = await engine.trigger('Notification', {
       matcherValue: 'task_completed',
@@ -128,8 +131,18 @@ describe('HookEngine integration', () => {
   it('runs multiple hooks for the same event in parallel and collects every result', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'PostToolUse', matcher: 'WriteFile', command: 'echo hook1', timeout: 5 },
-      { event: 'PostToolUse', matcher: 'WriteFile', command: 'echo hook2', timeout: 5 },
+      {
+        event: 'PostToolUse',
+        matcher: 'WriteFile',
+        command: nodeCommand("process.stdout.write('hook1')"),
+        timeout: 5,
+      },
+      {
+        event: 'PostToolUse',
+        matcher: 'WriteFile',
+        command: nodeCommand("process.stdout.write('hook2')"),
+        timeout: 5,
+      },
     ]);
     const results = await engine.trigger('PostToolUse', {
       matcherValue: 'WriteFile',
@@ -179,8 +192,9 @@ timeout = 5
       {
         event: 'SessionStart',
         matcher: 'startup',
-        command:
-          'node -e "let s=\\"\\";process.stdin.on(\\"data\\",d=>s+=d);process.stdin.on(\\"end\\",()=>{const o=JSON.parse(s);process.stdout.write(o.source||\\"\\");})"',
+        command: nodeCommand(
+          "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{const o=JSON.parse(s);process.stdout.write(o.source||'');})",
+        ),
         timeout: 5,
       },
     ]);
@@ -205,7 +219,7 @@ timeout = 5
       {
         event: 'PostToolUseFailure',
         matcher: 'Shell',
-        command: 'echo failure_caught',
+        command: nodeCommand("process.stdout.write('failure_caught')"),
         timeout: 5,
       },
     ]);
@@ -223,7 +237,7 @@ timeout = 5
     const engine = new HookEngine([
       {
         event: 'UserPromptSubmit',
-        command: "echo 'no profanity' >&2; exit 2",
+        command: nodeCommand("process.stderr.write('no profanity');process.exit(2)"),
         timeout: 5,
       },
     ]);
@@ -238,7 +252,7 @@ timeout = 5
   it('fires a StopFailure hook on chat provider errors with the error_type field present', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'StopFailure', command: 'echo error_logged', timeout: 5 },
+      { event: 'StopFailure', command: nodeCommand("process.stdout.write('error_logged')"), timeout: 5 },
     ]);
     const results = await engine.trigger('StopFailure', {
       inputData: { error_type: 'ChatProviderError', error_message: 'rate limited' },
@@ -250,7 +264,7 @@ timeout = 5
   it('fires a SessionEnd hook only for the matching reason matcher', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'SessionEnd', matcher: 'exit', command: 'echo goodbye', timeout: 5 },
+      { event: 'SessionEnd', matcher: 'exit', command: nodeCommand("process.stdout.write('goodbye')"), timeout: 5 },
     ]);
 
     const matched = await engine.trigger('SessionEnd', {
@@ -272,7 +286,7 @@ timeout = 5
       {
         event: 'SubagentStart',
         matcher: 'coder',
-        command: 'echo agent_starting',
+        command: nodeCommand("process.stdout.write('agent_starting')"),
         timeout: 5,
       },
     ]);
@@ -287,7 +301,7 @@ timeout = 5
   it('fires a SubagentStop hook on subagent completion', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'SubagentStop', matcher: 'coder', command: 'echo agent_done', timeout: 5 },
+      { event: 'SubagentStop', matcher: 'coder', command: nodeCommand("process.stdout.write('agent_done')"), timeout: 5 },
     ]);
     const results = await engine.trigger('SubagentStop', {
       matcherValue: 'coder',
@@ -300,8 +314,18 @@ timeout = 5
   it('fires PreCompact and PostCompact hooks around compaction with trigger and token payloads', async () => {
     const HookEngine = await importEngine();
     const engine = new HookEngine([
-      { event: 'PreCompact', matcher: 'auto', command: 'echo pre_compact', timeout: 5 },
-      { event: 'PostCompact', matcher: 'auto', command: 'echo post_compact', timeout: 5 },
+      {
+        event: 'PreCompact',
+        matcher: 'auto',
+        command: nodeCommand("process.stdout.write('pre_compact')"),
+        timeout: 5,
+      },
+      {
+        event: 'PostCompact',
+        matcher: 'auto',
+        command: nodeCommand("process.stdout.write('post_compact')"),
+        timeout: 5,
+      },
     ]);
 
     const pre = await engine.trigger('PreCompact', {
@@ -324,7 +348,7 @@ timeout = 5
     const triggered: Array<[string, string, number]> = [];
     const resolved: Array<[string, string, string]> = [];
     const engine = new HookEngine(
-      [{ event: 'PreToolUse', matcher: 'Shell', command: 'exit 0', timeout: 5 }],
+      [{ event: 'PreToolUse', matcher: 'Shell', command: nodeCommand('process.exit(0)'), timeout: 5 }],
       {
         onTriggered: (e, t, c) => triggered.push([e, t, c]),
         onResolved: (e, t, a) => resolved.push([e, t, a]),

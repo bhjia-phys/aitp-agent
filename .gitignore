@@ -12,3 +12,6 @@ coverage/
 .kimi-stash-dir
 plugins/cdn/
 superpowers
+!docs/superpowers/
+!docs/superpowers/plans/
+!docs/superpowers/plans/**
