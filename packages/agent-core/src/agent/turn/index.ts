@@ -541,6 +541,7 @@ export class TurnFlow {
         args: event.args,
         cwd: this.agent.config.cwd,
         description: event.description,
+        workFrameId: this.agent.workFrames.active?.id,
         startedAt,
       });
       return;
