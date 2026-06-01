@@ -17,6 +17,12 @@ export const FLAG_DEFINITIONS = [
     default: false,
     surface: 'core',
   },
+  {
+    id: 'research-ledger',
+    env: 'KIMI_CODE_EXPERIMENTAL_RESEARCH_LEDGER',
+    default: false,
+    surface: 'core',
+  },
 ] as const satisfies readonly FlagDefinitionInput[];
 
 /** Literal union of registered flag ids. */

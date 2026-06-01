@@ -16,6 +16,7 @@ import type { EnabledPluginSessionStart } from '#/plugin';
 
 import type { McpConnectionManager } from '../mcp';
 import type { PhysicsMemoryRegistry } from '../physics-memory';
+import type { ResearchLedgerRegistry } from '../research-ledger';
 import type { PreparedSystemPromptContext, ResolvedAgentProfile } from '../profile';
 import type { ModelProvider } from '../session/provider-manager';
 import type { SessionSubagentHost } from '../session/subagent-host';
@@ -37,6 +38,7 @@ import { InjectionManager } from './injection/manager';
 import { PermissionManager, type PermissionManagerOptions } from './permission';
 import { PhysicsMemoryManager } from './physics-memory';
 import { PlanMode } from './plan';
+import { ResearchLedgerManager } from './research-ledger';
 import {
   AgentRecords,
   BlobStore,
@@ -77,6 +79,7 @@ export interface AgentOptions {
   readonly subagentHost?: SessionSubagentHost | undefined;
   readonly skills?: SkillRegistry;
   readonly physicsMemory?: PhysicsMemoryRegistry;
+  readonly researchLedger?: ResearchLedgerRegistry;
   readonly mcp?: McpConnectionManager;
   readonly hookEngine?: HookEngine;
   readonly permission?: PermissionManagerOptions | undefined;
@@ -113,6 +116,7 @@ export class Agent {
   readonly usage: UsageRecorder;
   readonly skills: SkillManager | null;
   readonly physicsMemory: PhysicsMemoryManager | null;
+  readonly researchLedger: ResearchLedgerManager | null;
   readonly tools: ToolManager;
   readonly background: BackgroundManager;
   readonly cron: CronManager | null;
@@ -164,6 +168,10 @@ export class Agent {
       options.physicsMemory === undefined
         ? null
         : new PhysicsMemoryManager(this, options.physicsMemory);
+    this.researchLedger =
+      options.researchLedger === undefined
+        ? null
+        : new ResearchLedgerManager(this, options.researchLedger);
     this.tools = new ToolManager(this);
     this.background = new BackgroundManager(this);
     this.cron = this.type === 'sub' ? null : new CronManager(this);
