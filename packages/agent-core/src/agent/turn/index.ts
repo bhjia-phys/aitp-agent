@@ -31,6 +31,12 @@ import {
   type LoopTurnStopReason,
 } from '../../loop/index';
 import type { AgentEvent, TurnEndedEvent } from '../../rpc';
+import {
+  evaluateFinalGate,
+  renderFinalGateContinuation,
+  shouldApplyFinalGate,
+  type FinalAnswerClaimStatus,
+} from '../../research-policy';
 import type { TelemetryPropertyValue } from '../../telemetry';
 import { abortable, userCancellationReason } from '../../utils/abort';
 import { USER_PROMPT_ORIGIN, type PromptOrigin } from '../context';
@@ -366,6 +372,7 @@ export class TurnFlow {
 
   private async runTurn(turnId: number, signal: AbortSignal): Promise<LoopTurnStopReason> {
     let stopHookContinuationUsed = false;
+    let finalGateContinuationUsed = false;
     const deduper = new ToolCallDeduplicator();
     await this.agent.mcp?.waitForInitialLoad(signal);
     while (true) {
@@ -419,6 +426,21 @@ export class TurnFlow {
                   },
                 );
                 return { continue: true };
+              }
+
+              if (!finalGateContinuationUsed) {
+                const continuation = this.applyFinalGateContinuation();
+                if (continuation !== undefined) {
+                  finalGateContinuationUsed = true;
+                  this.agent.context.appendUserMessage(
+                    [{ type: 'text', text: continuation }],
+                    {
+                      kind: 'system_trigger',
+                      name: 'final_gate',
+                    },
+                  );
+                  return { continue: true };
+                }
               }
               return { continue: false };
             },
@@ -627,6 +649,39 @@ export class TurnFlow {
     return this.agent.planMode.isActive ? 'plan' : 'agent';
   }
 
+  private applyFinalGateContinuation(): string | undefined {
+    const workFrame = this.agent.workFrames.active;
+    const requestedStatus = requestedFinalStatus(workFrame);
+    const obligations =
+      workFrame === undefined
+        ? []
+        : this.agent.researchAction.listObligations({
+            ids: workFrame.openObligationIds,
+            domain: workFrame.domain,
+            topic: workFrame.topic,
+          });
+    const evidenceRefs = this.agent.researchAction.recentEvidence();
+    if (
+      !shouldApplyFinalGate({
+        requestedStatus,
+        hasWorkFrame: workFrame !== undefined,
+        obligationCount: obligations.length,
+        evidenceCount: evidenceRefs.length,
+      })
+    ) {
+      return undefined;
+    }
+
+    const decision = evaluateFinalGate({
+      requestedStatus,
+      obligations,
+      workFrame,
+      evidenceRefs,
+      sourceRefs: workFrame?.sourceRefs,
+    });
+    return decision.outcome === 'allow' ? undefined : renderFinalGateContinuation(decision);
+  }
+
   private shouldTrackApiError(turnId: number): boolean {
     const failure = this.stepFailureByTurn.get(turnId);
     return failure?.reason === 'error' && failure.activeStep !== undefined;
@@ -758,6 +813,21 @@ function toolOutputText(output: ExecutableToolResult['output']): string {
 
 function interruptedStep(event: LoopTurnInterruptedEvent): number {
   return event.activeStep ?? event.attemptedSteps;
+}
+
+function requestedFinalStatus(workFrame: Agent['workFrames']['active']): FinalAnswerClaimStatus {
+  if (workFrame === undefined) return 'exploratory';
+  switch (workFrame.trustState) {
+    case 'validated':
+      return 'validated';
+    case 'checking':
+    case 'blocked':
+      return 'checked';
+    case 'deriving':
+      return 'provisional';
+    case 'exploratory':
+      return 'exploratory';
+  }
 }
 
 interface ApiErrorClassification {
