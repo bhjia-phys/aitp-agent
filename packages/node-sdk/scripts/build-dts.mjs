@@ -27,10 +27,10 @@ try {
 }
 
 function run(command, args) {
-  const executable = process.platform === 'win32' ? `${command}.cmd` : command;
+  const invocation = commandInvocation(command, args);
 
   return new Promise((resolve, reject) => {
-    const child = spawn(executable, args, {
+    const child = spawn(invocation.executable, invocation.args, {
       cwd: packageRoot,
       stdio: 'inherit',
     });
@@ -46,6 +46,25 @@ function run(command, args) {
       reject(new Error(`${command} failed with ${detail}`));
     });
   });
+}
+
+function commandInvocation(command, args) {
+  if (process.platform !== 'win32') {
+    return {
+      executable: command,
+      args,
+    };
+  }
+
+  const workspaceBin = path.resolve(packageRoot, '..', '..', 'node_modules', '.bin');
+  const localCmd = path.join(workspaceBin, `${command}.cmd`);
+  const executable = existsSync(localCmd) ? localCmd : `${command}.cmd`;
+  const shell = process.env.ComSpec ?? 'cmd.exe';
+  const shellCommand = executable.includes(' ') ? `"${executable}"` : executable;
+  return {
+    executable: shell,
+    args: ['/d', '/s', '/c', shellCommand, ...args],
+  };
 }
 
 async function writeProviderClientShim() {

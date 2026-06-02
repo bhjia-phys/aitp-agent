@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { dirname, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { startPluginMarketplaceServer } from './dev-plugin-marketplace-server.mjs';
@@ -18,18 +19,15 @@ if (env[MARKETPLACE_ENV] === undefined || env[MARKETPLACE_ENV]?.trim().length ==
   console.error(`Plugin marketplace dev server: ${marketplaceServer.marketplaceUrl}`);
 }
 
-const tsxBin = process.platform === 'win32' ? 'tsx.cmd' : 'tsx';
 const cliArgs = process.argv.slice(2);
 if (cliArgs[0] === '--') cliArgs.shift();
-const child = spawn(
-  tsxBin,
-  ['--import', '../../build/register-raw-text-loader.mjs', './src/main.ts', ...cliArgs],
-  {
-    cwd: APP_ROOT,
-    env,
-    stdio: 'inherit',
-  },
-);
+const tsxArgs = ['--import', '../../build/register-raw-text-loader.mjs', './src/main.ts', ...cliArgs];
+const invocation = commandInvocation('tsx', tsxArgs);
+const child = spawn(invocation.executable, invocation.args, {
+  cwd: APP_ROOT,
+  env,
+  stdio: 'inherit',
+});
 
 child.on('error', async (error) => {
   console.error(`Failed to start Kimi Code dev CLI: ${error.message}`);
@@ -44,3 +42,22 @@ child.on('exit', async (code, signal) => {
   }
   process.exit(code ?? 0);
 });
+
+function commandInvocation(command, args) {
+  if (process.platform !== 'win32') {
+    return {
+      executable: command,
+      args,
+    };
+  }
+
+  const workspaceBin = resolve(APP_ROOT, '..', '..', 'node_modules', '.bin');
+  const localCmd = join(workspaceBin, `${command}.cmd`);
+  const executable = existsSync(localCmd) ? localCmd : `${command}.cmd`;
+  const shell = process.env.ComSpec ?? 'cmd.exe';
+  const shellCommand = executable.includes(' ') ? `"${executable}"` : executable;
+  return {
+    executable: shell,
+    args: ['/d', '/s', '/c', shellCommand, ...args],
+  };
+}
