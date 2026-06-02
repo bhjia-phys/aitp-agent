@@ -17,6 +17,7 @@ import type {
 } from '../../physics-memory';
 import type { PhysicsMemoryRecordSource } from '../physics-memory';
 import type { ResearchActionOutcome, ResearchActionSource, WorkFrame } from '../../research-action';
+import type { ResearchContextPack, ResearchContextRecordSource } from '../../research-context';
 import type {
   ResearchLedgerEventStatus,
   ResearchLedgerEventType,
@@ -141,6 +142,12 @@ export interface AgentRecordEvents {
     source: WorkFrameRecordSource;
     frameId: string;
     nextActiveFrameId?: string | undefined;
+    toolCallId?: string | undefined;
+  };
+  'workframe.context_attached': {
+    source: WorkFrameRecordSource;
+    frameId: string;
+    contextPackId: string;
     toolCallId?: string | undefined;
   };
 
@@ -269,6 +276,27 @@ export interface AgentRecordEvents {
     primitiveToolCallId?: string | undefined;
     followupActionId?: string | undefined;
     evidenceRefs: readonly string[];
+  };
+
+  'research_context.context_compiled': {
+    source: ResearchContextRecordSource;
+    pack: ResearchContextPack;
+    workFrameId: string;
+    contextPackId: string;
+    domain: PhysicsDomainId;
+    topic: ResearchTopicId;
+    profileIds: readonly string[];
+    workflowIds: readonly string[];
+    capsuleIds: readonly string[];
+    ledgerProposalIds: readonly string[];
+    actionBindingIds: readonly string[];
+    diagnostics: readonly {
+      severity: 'info' | 'warning' | 'error';
+      code: string;
+      source: string;
+      refId?: string | undefined;
+    }[];
+    toolCallId?: string | undefined;
   };
 }
 
