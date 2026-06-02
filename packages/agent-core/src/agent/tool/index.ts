@@ -19,6 +19,7 @@ import type {
   BuiltinTool,
   McpServerRegistrationResult,
   McpToolCollision,
+  RuntimeToolExposure,
   ToolInfo,
   UserToolRegistration,
 } from './types';
@@ -37,6 +38,7 @@ export class ToolManager {
   /** server name → list of qualified tool names registered for that server. */
   protected readonly mcpToolsByServer: Map<string, string[]> = new Map();
   protected enabledTools: Set<string> = new Set();
+  private runtimeExposure: RuntimeToolExposure | null = null;
   /** Glob patterns (e.g. `mcp__*`, `mcp__github__*`) gating which MCP tools the profile exposes. */
   private mcpAccessPatterns: string[] = [];
   protected readonly store: Partial<ToolStoreData> = {};
@@ -313,16 +315,33 @@ export class ToolManager {
     this.mcpAccessPatterns = names.filter((name) => isMcpToolName(name));
   }
 
+  applyRuntimeToolExposure(
+    exposure: RuntimeToolExposure | null,
+    options: { readonly source: 'controller' | 'replay' },
+  ): void {
+    this.runtimeExposure = exposure === null ? null : { ...exposure };
+    this.agent.records.logRecord({
+      type: 'tools.runtime_exposure',
+      source: options.source,
+      exposure: this.runtimeExposure,
+    });
+  }
+
+  restoreRuntimeToolExposure(exposure: RuntimeToolExposure | null): void {
+    this.runtimeExposure = exposure === null ? null : { ...exposure };
+  }
+
   private isMcpToolEnabled(name: string): boolean {
     return this.mcpAccessPatterns.some((pattern) => picomatch.isMatch(name, pattern));
   }
 
   *toolInfos(): Iterable<ToolInfo> {
+    const activeToolNames = this.effectiveEnabledTools();
     for (const tool of this.builtinTools.values()) {
       yield {
         name: tool.name,
         description: tool.description,
-        active: this.enabledTools.has(tool.name),
+        active: activeToolNames.has(tool.name),
         source: 'builtin',
       };
     }
@@ -330,7 +349,7 @@ export class ToolManager {
       yield {
         name: tool.name,
         description: tool.description,
-        active: this.enabledTools.has(tool.name),
+        active: activeToolNames.has(tool.name),
         source: 'user',
       };
     }
@@ -433,7 +452,7 @@ export class ToolManager {
 
   get loopTools(): readonly ExecutableTool[] {
     const mcpNames = [...this.mcpTools.keys()].filter((name) => this.isMcpToolEnabled(name));
-    return uniq([...this.enabledTools, ...mcpNames])
+    return uniq([...this.effectiveEnabledTools(), ...mcpNames])
       .toSorted((a, b) => a.localeCompare(b))
       .map(
         (name) =>
@@ -442,5 +461,17 @@ export class ToolManager {
           this.builtinTools.get(name),
       )
       .filter((tool) => !!tool);
+  }
+
+  private effectiveEnabledTools(): Set<string> {
+    if (this.runtimeExposure === null) return new Set(this.enabledTools);
+    const effective = new Set(this.enabledTools);
+    for (const name of this.runtimeExposure.managedToolNames) {
+      effective.delete(name);
+    }
+    for (const name of this.runtimeExposure.activeToolNames) {
+      effective.add(name);
+    }
+    return effective;
   }
 }

@@ -6,7 +6,7 @@ import type { CompactionBeginData, CompactionResult } from '../compaction';
 import type { AgentConfigUpdateData } from '../config';
 import type { ContextMessage, PromptOrigin } from '../context';
 import type { PermissionApprovalResultRecord, PermissionMode } from '../permission';
-import type { UserToolRegistration } from '../tool';
+import type { RuntimeToolExposure, UserToolRegistration } from '../tool';
 import type { UsageRecordScope } from '../usage';
 import type {
   GraphRef,
@@ -75,6 +75,10 @@ export interface AgentRecordEvents {
   };
   'tools.set_active_tools': {
     names: readonly string[];
+  };
+  'tools.runtime_exposure': {
+    source: 'controller' | 'replay';
+    exposure: RuntimeToolExposure | null;
   };
 
   'usage.record': {
