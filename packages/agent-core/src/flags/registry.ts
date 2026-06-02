@@ -42,6 +42,12 @@ export const FLAG_DEFINITIONS = [
     surface: 'core',
   },
   {
+    id: 'research-harness',
+    env: 'KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS',
+    default: false,
+    surface: 'core',
+  },
+  {
     id: 'micro-compaction',
     env: 'KIMI_CODE_EXPERIMENTAL_MICRO_COMPACTION',
     default: false,

@@ -12,6 +12,10 @@ import { Agent, type AgentOptions, type AgentType } from '../agent';
 import { HookEngine, type HookDef } from './hooks';
 import type { PermissionManagerOptions, PermissionRule } from '../agent/permission';
 import { parseBooleanEnv, resolveConfigValue, type BackgroundConfig } from '../config';
+import {
+  createDefaultBenchmarkAdapterRegistry,
+  type BenchmarkAdapterRegistry,
+} from '../benchmark-adapter';
 import { DomainProfileRegistry, resolveDomainProfileRoots } from '../domain-profile';
 import { makeErrorPayload } from '../errors';
 import { flags } from '../flags';
@@ -22,6 +26,7 @@ import {
   type SessionMcpConfig,
 } from '../mcp';
 import { PhysicsMemoryRegistry, resolvePhysicsMemoryRoots } from '../physics-memory';
+import { ResearchEvalCaseRegistry, resolveResearchEvalCaseRoots } from '../research-harness';
 import { ResearchLedgerRegistry, resolveResearchLedgerRoots } from '../research-ledger';
 import { WorkflowRecipeRegistry, resolveWorkflowRecipeRoots } from '../workflow-recipe';
 import type { EnabledPluginSessionStart } from '../plugin';
@@ -62,7 +67,9 @@ export interface SessionOptions {
   readonly domainProfiles?: SessionDomainProfileConfig;
   readonly physicsMemory?: SessionPhysicsMemoryConfig;
   readonly researchLedger?: SessionResearchLedgerConfig;
+  readonly researchHarness?: SessionResearchHarnessConfig;
   readonly workflowRecipes?: SessionWorkflowRecipeConfig;
+  readonly benchmarkAdapters?: BenchmarkAdapterRegistry;
   readonly mcpConfig?: SessionMcpConfig;
   readonly telemetry?: TelemetryClient | undefined;
   readonly pluginSessionStarts?: readonly EnabledPluginSessionStart[];
@@ -91,6 +98,12 @@ export interface SessionDomainProfileConfig {
 }
 
 export interface SessionResearchLedgerConfig {
+  readonly userHomeDir?: string;
+  readonly explicitDirs?: readonly string[];
+  readonly extraDirs?: readonly string[];
+}
+
+export interface SessionResearchHarnessConfig {
   readonly userHomeDir?: string;
   readonly explicitDirs?: readonly string[];
   readonly extraDirs?: readonly string[];
@@ -128,6 +141,8 @@ export class Session {
   readonly domainProfiles: DomainProfileRegistry | null;
   readonly physicsMemory: PhysicsMemoryRegistry | null;
   readonly researchLedger: ResearchLedgerRegistry | null;
+  readonly benchmarkAdapters: BenchmarkAdapterRegistry;
+  readonly researchHarness: ResearchEvalCaseRegistry | null;
   readonly workflowRecipes: WorkflowRecipeRegistry | null;
   readonly agents: Map<string, Agent> = new Map();
   readonly mcp: McpConnectionManager;
@@ -139,6 +154,7 @@ export class Session {
   private readonly domainProfilesReady: Promise<void>;
   private readonly physicsMemoryReady: Promise<void>;
   private readonly researchLedgerReady: Promise<void>;
+  private readonly researchHarnessReady: Promise<void>;
   private readonly workflowRecipesReady: Promise<void>;
   metadata: SessionMeta = {
     createdAt: new Date().toISOString(),
@@ -192,6 +208,15 @@ export class Session {
           },
         })
       : null;
+    this.benchmarkAdapters =
+      options.benchmarkAdapters ?? createDefaultBenchmarkAdapterRegistry();
+    this.researchHarness = flags.enabled('research-harness')
+      ? new ResearchEvalCaseRegistry({
+          onWarning: (message, cause) => {
+            this.log.warn('research harness load warning', { message, cause });
+          },
+        })
+      : null;
     this.workflowRecipes = flags.enabled('workflow-recipe')
       ? new WorkflowRecipeRegistry({
           onWarning: (message, cause) => {
@@ -234,6 +259,13 @@ export class Session {
       .then(() => {
         this.refreshAgentBuiltinTools();
       });
+    this.researchHarnessReady = this.loadResearchHarness()
+      .catch((error: unknown) => {
+        this.log.error('research harness load failed', error);
+      })
+      .then(() => {
+        this.refreshAgentBuiltinTools();
+      });
     this.workflowRecipesReady = this.loadWorkflowRecipes()
       .catch((error: unknown) => {
         this.log.error('workflow recipes load failed', error);
@@ -257,6 +289,7 @@ export class Session {
     await this.domainProfilesReady;
     await this.physicsMemoryReady;
     await this.researchLedgerReady;
+    await this.researchHarnessReady;
     await this.workflowRecipesReady;
     const { agents } = await this.readMetadata();
     this.agents.clear();
@@ -328,6 +361,7 @@ export class Session {
     await this.domainProfilesReady;
     await this.physicsMemoryReady;
     await this.researchLedgerReady;
+    await this.researchHarnessReady;
     await this.workflowRecipesReady;
     const type = config.type ?? 'main';
     const id = type === 'main' ? 'main' : this.nextGeneratedAgentId();
@@ -495,6 +529,22 @@ export class Session {
     await this.researchLedger.loadRoots(roots);
   }
 
+  private async loadResearchHarness(): Promise<void> {
+    if (this.researchHarness === null) return;
+    const roots = await resolveResearchEvalCaseRoots({
+      paths: {
+        userHomeDir:
+          this.options.researchHarness?.userHomeDir ??
+          this.options.skills?.userHomeDir ??
+          homedir(),
+        workDir: this.options.kaos.getcwd(),
+      },
+      explicitDirs: this.options.researchHarness?.explicitDirs,
+      extraDirs: this.options.researchHarness?.extraDirs,
+    });
+    await this.researchHarness.loadRoots(roots);
+  }
+
   private async loadWorkflowRecipes(): Promise<void> {
     if (this.workflowRecipes === null) return;
     const roots = await resolveWorkflowRecipeRoots({
@@ -594,6 +644,8 @@ export class Session {
       domainProfiles: this.domainProfiles ?? undefined,
       physicsMemory: this.physicsMemory ?? undefined,
       researchLedger: this.researchLedger ?? undefined,
+      benchmarkAdapters: this.benchmarkAdapters,
+      researchHarness: this.researchHarness ?? undefined,
       workflowRecipes: this.workflowRecipes ?? undefined,
       rpc: proxyWithExtraPayload(this.rpc, { agentId: id }),
       modelProvider: this.options.providerManager,
