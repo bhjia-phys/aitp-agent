@@ -3,6 +3,7 @@ import type { DynamicInjector } from './injector';
 import { PermissionModeInjector } from './permission-mode';
 import { PluginSessionStartInjector } from './plugin-session-start';
 import { PlanModeInjector } from './plan-mode';
+import { ResearchContextInjector } from './research-context';
 import { TodoListReminderInjector } from './todo-list';
 
 export class InjectionManager {
@@ -14,6 +15,7 @@ export class InjectionManager {
       new TodoListReminderInjector(agent),
       new PlanModeInjector(agent),
       new PermissionModeInjector(agent),
+      new ResearchContextInjector(agent),
     ];
   }
 
