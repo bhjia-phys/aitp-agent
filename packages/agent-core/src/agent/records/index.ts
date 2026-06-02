@@ -35,8 +35,6 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
     case 'turn.cancel':
       agent.turn.cancel(input.turnId);
       return;
-    case 'background.stop':
-      return;
     case 'config.update':
       agent.config.update(input);
       return;
@@ -58,6 +56,9 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
     case 'full_compaction.complete':
       agent.fullCompaction.markCompleted();
       return;
+    case 'micro_compaction.apply':
+      agent.microCompaction.apply(input.cutoff);
+      return;
     case 'plan_mode.enter':
       agent.planMode.restoreEnter(input);
       return;
@@ -78,6 +79,9 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
       return;
     case 'context.apply_compaction':
       agent.context.applyCompaction(input);
+      return;
+    case 'context.undo':
+      agent.context.undo(input.count);
       return;
     case 'tools.register_user_tool':
       agent.tools.registerUserTool(input);
@@ -123,8 +127,12 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
   }
 }
 
+export interface RestoringContext {
+  time?: number;
+}
+
 export class AgentRecords {
-  private _restoring = false;
+  private _restoring: RestoringContext | null = null;
   private metadataInitialized = false;
 
   constructor(
@@ -137,7 +145,7 @@ export class AgentRecords {
   }
 
   logRecord(record: AgentRecord): void {
-    if (this._restoring) return;
+    if (this._restoring !== null) return;
     const stamped: AgentRecord =
       record.time !== undefined ? record : { ...record, time: Date.now() };
     if (
@@ -149,6 +157,7 @@ export class AgentRecords {
         type: 'metadata',
         protocol_version: AGENT_WIRE_PROTOCOL_VERSION,
         created_at: Date.now(),
+        app_version: this.agent.appVersion,
       });
       this.metadataInitialized = true;
     }
@@ -159,11 +168,11 @@ export class AgentRecords {
   }
 
   restore(record: AgentRecord): void {
-    this._restoring = true;
+    this._restoring = { time: record.time ?? Date.now() };
     try {
       restoreAgentRecord(this.agent, record);
     } finally {
-      this._restoring = false;
+      this._restoring = null;
     }
   }
 
@@ -211,6 +220,20 @@ export class AgentRecords {
       for (const msg of this.agent.context.history) {
         await this.agent.blobStore.rehydrateParts(msg.content);
       }
+    }
+    const firstRecord = replayedRecords[0];
+    if (
+      firstRecord?.type === 'metadata' &&
+      firstRecord.app_version !== this.agent.appVersion
+    ) {
+      this.persistence.append({
+        type: 'metadata',
+        protocol_version: AGENT_WIRE_PROTOCOL_VERSION,
+        created_at: Date.now(),
+        app_version: this.agent.appVersion,
+        resumed: true,
+      });
+      await this.persistence.flush();
     }
     return { warning };
   }

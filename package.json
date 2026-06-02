@@ -22,7 +22,7 @@
     "clean": "corepack pnpm --config.engine-strict=false -r run clean",
     "changeset": "changeset",
     "version": "changeset version",
-    "version:release": "changeset version && nix run .#update-pnpm-deps",
+    "version:release": "changeset version",
     "publish": "corepack pnpm --config.engine-strict=false run typecheck && corepack pnpm --config.engine-strict=false run lint && corepack pnpm --config.engine-strict=false run sherif && corepack pnpm --config.engine-strict=false run test && corepack pnpm --config.engine-strict=false run build && corepack pnpm --config.engine-strict=false run lint:pkg && changeset publish",
     "prepare": "simple-git-hooks"
   },

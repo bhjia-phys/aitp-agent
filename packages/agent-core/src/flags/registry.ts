@@ -41,6 +41,12 @@ export const FLAG_DEFINITIONS = [
     default: false,
     surface: 'core',
   },
+  {
+    id: 'micro-compaction',
+    env: 'KIMI_CODE_EXPERIMENTAL_MICRO_COMPACTION',
+    default: false,
+    surface: 'core',
+  },
 ] as const satisfies readonly FlagDefinitionInput[];
 
 /** Literal union of registered flag ids. */
