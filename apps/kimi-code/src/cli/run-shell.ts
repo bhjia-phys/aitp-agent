@@ -71,7 +71,7 @@ export async function runShell(
       });
     },
   });
-  log.info('kimi-code starting', {
+  log.info('hakimi starting', {
     version,
     uiMode: CLI_UI_MODE,
     nodeVersion: process.version,

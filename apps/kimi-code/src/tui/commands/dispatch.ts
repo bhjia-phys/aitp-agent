@@ -2,6 +2,8 @@ import type { Component, Focusable } from '@earendil-works/pi-tui';
 import type { DeviceAuthorization } from '@moonshot-ai/kimi-code-oauth';
 import type { KimiHarness, Session } from '@moonshot-ai/kimi-code-sdk';
 
+import { PRODUCT_NAME } from '#/constant/app';
+
 import type { Theme } from '../theme';
 import type { ResolvedTheme } from '../theme/colors';
 import {
@@ -217,7 +219,7 @@ async function handleBuiltInSlashCommand(
       host.showHelpPanel();
       return;
     case 'version':
-      host.showStatus(`Kimi Code v${host.state.appState.version}`);
+      host.showStatus(`${PRODUCT_NAME} v${host.state.appState.version}`);
       return;
     case 'new':
       await host.createNewSession();

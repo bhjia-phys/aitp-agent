@@ -21,7 +21,7 @@ import {
 } from '#/constant/app';
 
 /**
- * Return the root data directory for Kimi Code.
+ * Return the root data directory for Hakimi.
  *
  * Priority: `KIMI_CODE_HOME` env var > `~/.kimi-code`.
  */

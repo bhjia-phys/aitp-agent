@@ -8,6 +8,7 @@ import {
 } from '@earendil-works/pi-tui';
 import chalk from 'chalk';
 
+import { PRODUCT_NAME } from '#/constant/app';
 import type { ColorPalette } from '#/tui/theme/colors';
 
 export type GoalStartPermissionChoice = 'auto' | 'yolo' | 'manual' | 'cancel';
@@ -29,19 +30,19 @@ const OPTIONS: readonly GoalStartOption[] = [
     value: 'auto',
     label: 'Switch to Auto and start',
     description:
-      'Best if you want Kimi Code to keep working while you are away. Tools are approved automatically, and questions are skipped.',
+      `Best if you want ${PRODUCT_NAME} to keep working while you are away. Tools are approved automatically, and questions are skipped.`,
   },
   {
     value: 'yolo',
     label: 'Switch to YOLO and start',
     description:
-      'Tools and plan changes are approved automatically. Kimi Code may still ask you questions.',
+      `Tools and plan changes are approved automatically. ${PRODUCT_NAME} may still ask you questions.`,
   },
   {
     value: 'manual',
     label: 'Start in Manual',
     description:
-      'Keep approvals on. Kimi Code will ask before risky actions, so the goal may stop and wait for you.',
+      `Keep approvals on. ${PRODUCT_NAME} will ask before risky actions, so the goal may stop and wait for you.`,
   },
   {
     value: 'cancel',
@@ -51,7 +52,7 @@ const OPTIONS: readonly GoalStartOption[] = [
 ];
 
 const NOTICE_LINES = [
-  'Manual mode asks you before Kimi Code runs commands, edits files, or takes other risky actions.',
+  `Manual mode asks you before ${PRODUCT_NAME} runs commands, edits files, or takes other risky actions.`,
   'Manual mode is not suitable for unattended goal work.',
   'You can go back without losing your command.',
 ] as const;

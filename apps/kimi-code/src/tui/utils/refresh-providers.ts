@@ -111,7 +111,7 @@ export async function refreshAllProviderModels(host: RefreshProviderHost): Promi
   let config = await host.getConfig();
 
   // -------------------------------------------------------------------------
-  // 1. Managed Kimi Code (OAuth)
+  // 1. Managed Kimi Platform (OAuth)
   // -------------------------------------------------------------------------
   const managedProvider = config.providers[KIMI_CODE_PROVIDER_NAME];
   if (
@@ -151,7 +151,7 @@ export async function refreshAllProviderModels(host: RefreshProviderHost): Promi
           });
           changed.push({
             providerId: KIMI_CODE_PROVIDER_NAME,
-            providerName: 'Kimi Code',
+            providerName: 'Kimi Platform',
             added,
             removed,
           });

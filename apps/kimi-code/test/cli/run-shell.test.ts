@@ -186,7 +186,7 @@ describe('runShell', () => {
     expect(mocks.kimiHarnessConstructor).toHaveBeenCalledWith(
       expect.objectContaining({
         identity: expect.objectContaining({
-          userAgentProduct: 'kimi-code-cli',
+          userAgentProduct: 'hakimi-cli',
           version: '1.2.3-test',
         }),
       }),
@@ -205,7 +205,7 @@ describe('runShell', () => {
       homeDir: '/tmp/kimi-code-test-home',
       deviceId: 'device-1',
       enabled: true,
-      appName: 'kimi-code-cli',
+      appName: 'hakimi-cli',
       version: '1.2.3-test',
       uiMode: 'shell',
       model: 'k2',

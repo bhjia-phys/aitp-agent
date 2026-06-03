@@ -30,7 +30,7 @@ const child = spawn(invocation.executable, invocation.args, {
 });
 
 child.on('error', async (error) => {
-  console.error(`Failed to start Kimi Code dev CLI: ${error.message}`);
+  console.error(`Failed to start Hakimi dev CLI: ${error.message}`);
   await marketplaceServer?.close();
   process.exit(1);
 });

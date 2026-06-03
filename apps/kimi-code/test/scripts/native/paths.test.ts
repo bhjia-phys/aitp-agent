@@ -18,6 +18,10 @@ import {
   SEA_SENTINEL_FUSE,
 } from '../../../scripts/native/paths.mjs';
 
+function slash(path: string): string {
+  return path.replaceAll('\\', '/');
+}
+
 describe('targetTriple', () => {
   it('returns platform-arch when env unset', () => {
     expect(targetTriple({ platform: 'darwin', arch: 'arm64', env: {} })).toBe('darwin-arm64');
@@ -37,39 +41,39 @@ describe('targetTriple', () => {
 });
 
 describe('executableName', () => {
-  it('returns kimi.exe on win32', () => {
-    expect(executableName('win32')).toBe('kimi.exe');
+  it('returns hakimi.exe on win32', () => {
+    expect(executableName('win32')).toBe('hakimi.exe');
   });
 
-  it('returns kimi on other platforms', () => {
-    expect(executableName('darwin')).toBe('kimi');
-    expect(executableName('linux')).toBe('kimi');
+  it('returns hakimi on other platforms', () => {
+    expect(executableName('darwin')).toBe('hakimi');
+    expect(executableName('linux')).toBe('hakimi');
   });
 });
 
 describe('path helpers', () => {
   it('returns absolute intermediates dir under app root', () => {
-    expect(nativeIntermediatesDir()).toBe(`${appRoot}/dist-native/intermediates`);
+    expect(slash(nativeIntermediatesDir())).toBe(`${slash(appRoot)}/dist-native/intermediates`);
   });
 
   it('returns absolute bin dir per target', () => {
-    expect(nativeBinDir('darwin-arm64')).toBe(`${appRoot}/dist-native/bin/darwin-arm64`);
+    expect(slash(nativeBinDir('darwin-arm64'))).toBe(`${slash(appRoot)}/dist-native/bin/darwin-arm64`);
   });
 
   it('returns absolute bin path with executable name', () => {
-    expect(nativeBinPath('darwin-arm64', 'darwin')).toBe(
-      `${appRoot}/dist-native/bin/darwin-arm64/kimi`,
+    expect(slash(nativeBinPath('darwin-arm64', 'darwin'))).toBe(
+      `${slash(appRoot)}/dist-native/bin/darwin-arm64/hakimi`,
     );
-    expect(nativeBinPath('win32-x64', 'win32')).toBe(
-      `${appRoot}/dist-native/bin/win32-x64/kimi.exe`,
+    expect(slash(nativeBinPath('win32-x64', 'win32'))).toBe(
+      `${slash(appRoot)}/dist-native/bin/win32-x64/hakimi.exe`,
     );
   });
 
   it('returns intermediate artifact paths', () => {
-    expect(nativeJsBundlePath()).toBe(`${appRoot}/dist-native/intermediates/main.cjs`);
-    expect(nativeBlobPath()).toBe(`${appRoot}/dist-native/intermediates/kimi.blob`);
-    expect(nativeSeaConfigPath()).toBe(
-      `${appRoot}/dist-native/intermediates/sea-config.json`,
+    expect(slash(nativeJsBundlePath())).toBe(`${slash(appRoot)}/dist-native/intermediates/main.cjs`);
+    expect(slash(nativeBlobPath())).toBe(`${slash(appRoot)}/dist-native/intermediates/hakimi.blob`);
+    expect(slash(nativeSeaConfigPath())).toBe(
+      `${slash(appRoot)}/dist-native/intermediates/sea-config.json`,
     );
   });
 
@@ -78,21 +82,21 @@ describe('path helpers', () => {
   });
 
   it('returns native dist root', () => {
-    expect(nativeDistRoot()).toBe(`${appRoot}/dist-native`);
+    expect(slash(nativeDistRoot())).toBe(`${slash(appRoot)}/dist-native`);
   });
 
   it('returns manifest dir for target', () => {
-    expect(nativeManifestDir('darwin-arm64')).toBe(
-      `${appRoot}/dist-native/intermediates/native-assets/darwin-arm64`,
+    expect(slash(nativeManifestDir('darwin-arm64'))).toBe(
+      `${slash(appRoot)}/dist-native/intermediates/native-assets/darwin-arm64`,
     );
   });
 
   it('returns artifacts dir', () => {
-    expect(nativeArtifactsDir()).toBe(`${appRoot}/dist-native/artifacts`);
+    expect(slash(nativeArtifactsDir())).toBe(`${slash(appRoot)}/dist-native/artifacts`);
   });
 
   it('returns smoke home', () => {
-    expect(nativeSmokeHome()).toBe(`${appRoot}/dist-native/smoke-home`);
+    expect(slash(nativeSmokeHome())).toBe(`${slash(appRoot)}/dist-native/smoke-home`);
   });
 
   it('has correct SEA sentinel fuse value', () => {

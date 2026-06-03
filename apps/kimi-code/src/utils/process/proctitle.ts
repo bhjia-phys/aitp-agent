@@ -2,7 +2,7 @@
  * Early-startup process name initialization.
  *
  * Sets the process title so `ps`/`top` and the terminal tab show
- * `Kimi Code` from the moment the binary launches — before Commander
+ * `Hakimi` from the moment the binary launches — before Commander
  * parses argv, before any preflight, even on `--help`/`--version`.
  *
  * OSC is written to stderr (not stdout) so it still reaches the terminal

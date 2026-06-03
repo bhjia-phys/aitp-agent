@@ -83,7 +83,7 @@ export async function runPrompt(
       track('oauth_refresh', { success: false, reason: outcome.reason });
     },
   });
-  log.info('kimi-code starting', {
+  log.info('hakimi starting', {
     version,
     uiMode: PROMPT_UI_MODE,
     nodeVersion: process.version,

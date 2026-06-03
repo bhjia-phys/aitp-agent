@@ -1,5 +1,7 @@
 import type { Session } from '@moonshot-ai/kimi-code-sdk';
 
+import { PRODUCT_NAME } from '#/constant/app';
+
 import { AgentGroupComponent } from '../components/messages/agent-group';
 import { AssistantMessageComponent } from '../components/messages/assistant-message';
 import { CompactionComponent } from '../components/dialogs/compaction';
@@ -520,7 +522,7 @@ export class StreamingUIController {
     this.host.setAppState({ streamingPhase: 'idle' });
     this.host.resetLivePane();
     notifyTerminalOnce(state, `turn-complete:${completedTurnKey}`, {
-      title: 'Kimi Code task complete',
+      title: `${PRODUCT_NAME} task complete`,
       body: state.appState.sessionTitle ?? undefined,
     });
   }
