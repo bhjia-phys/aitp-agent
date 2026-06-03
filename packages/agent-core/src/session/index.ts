@@ -30,6 +30,7 @@ import { PhysicsMemoryRegistry, resolvePhysicsMemoryRoots } from '../physics-mem
 import { ResearchEvalCaseRegistry, resolveResearchEvalCaseRoots } from '../research-harness';
 import { ResearchLedgerRegistry, resolveResearchLedgerRoots } from '../research-ledger';
 import { WorkflowRecipeRegistry, resolveWorkflowRecipeRoots } from '../workflow-recipe';
+import { registerBuiltinTheoreticalPhysicsDefaults } from '../research-defaults/theoretical-physics';
 import type { EnabledPluginSessionStart } from '../plugin';
 import {
   DEFAULT_AGENT_PROFILES,
@@ -533,6 +534,7 @@ export class Session {
       extraDirs: this.options.domainProfiles?.extraDirs,
     });
     await this.domainProfiles.loadRoots(roots);
+    registerBuiltinTheoreticalPhysicsDefaults({ domainProfiles: this.domainProfiles });
   }
 
   private async loadPhysicsMemory(): Promise<void> {
@@ -549,6 +551,7 @@ export class Session {
       extraDirs: this.options.physicsMemory?.extraDirs,
     });
     await this.physicsMemory.loadRoots(roots);
+    registerBuiltinTheoreticalPhysicsDefaults({ physicsMemory: this.physicsMemory });
   }
 
   private async loadResearchLedger(): Promise<void> {
@@ -581,6 +584,7 @@ export class Session {
       extraDirs: this.options.researchHarness?.extraDirs,
     });
     await this.researchHarness.loadRoots(roots);
+    registerBuiltinTheoreticalPhysicsDefaults({ researchHarness: this.researchHarness });
   }
 
   private async loadWorkflowRecipes(): Promise<void> {
@@ -597,6 +601,7 @@ export class Session {
       extraDirs: this.options.workflowRecipes?.extraDirs,
     });
     await this.workflowRecipes.loadRoots(roots);
+    registerBuiltinTheoreticalPhysicsDefaults({ workflowRecipes: this.workflowRecipes });
   }
 
   private async loadMcpServers(): Promise<void> {

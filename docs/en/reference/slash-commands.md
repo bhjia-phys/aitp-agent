@@ -43,7 +43,7 @@ Some commands are only available in the idle state. Running them while the sessi
 | `/auto [on\|off]` | — | Toggle auto permission mode. Without arguments, flip the current state; pass `on`/`off` explicitly to force the corresponding state. When enabled, tool approvals are handled automatically and the agent will not ask questions. | Yes |
 | `/plan [on\|off]` | — | Toggle Plan mode. Without arguments, flip the current state; pass `on`/`off` explicitly to force the corresponding state. Toggling alone does not create an empty plan file. | Yes |
 | `/plan clear` | — | Clear the current plan. | No |
-| `/goal [status\|pause\|resume\|cancel\|replace <objective>\|<objective>]` | — | Start or manage an autonomous goal. This command is experimental. Enable it with `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=1`. | See below |
+| `/goal [status\|pause\|resume\|cancel\|replace <objective>\|<objective>]` | — | Start or manage an autonomous goal. In Hakimi it is enabled by default; set `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=0` to hide it for one launch. | See below |
 
 ::: warning Note
 `/yolo` skips approval confirmation for ordinary tool calls. Make sure you understand the potential risks before enabling it. It does not skip the approval required to leave Plan mode; in Plan mode, `Bash` follows the same ordinary allow rules as `/yolo`.
@@ -51,10 +51,10 @@ Some commands are only available in the idle state. Running them while the sessi
 
 ## Autonomous goals
 
-`/goal` is an experimental command for tasks where you want Kimi Code to keep working through automatic continuation turns. Enable it when starting `kimi`:
+`/goal` is an experimental command for tasks where you want Kimi Code to keep working through automatic continuation turns. In Hakimi it is available by default. To hide it for one launch:
 
 ```sh
-KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=1 kimi
+KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=0 hakimi
 ```
 
 Experimental flags are read from environment variables. `config.toml` does not currently have an `experimental` option for `/goal`.
@@ -98,7 +98,7 @@ The words `status`, `pause`, `resume`, `cancel`, and `replace` act as subcommand
 In non-interactive prompt mode, only the create forms start goal mode:
 
 ```sh
-KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=1 kimi -p "/goal Fix the failing checkout test"
+hakimi -p "/goal Fix the failing checkout test"
 ```
 
 Prompt mode exits with code `0` when the goal completes, `3` when it blocks, and `6` when it pauses. Other `/goal` subcommands are TUI controls and are not handled by `kimi -p`.

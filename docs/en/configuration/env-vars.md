@@ -121,16 +121,24 @@ export KIMI_DISABLE_TELEMETRY="1"
 
 ## Experimental feature flags
 
-Experimental features are gated behind `KIMI_CODE_EXPERIMENTAL_*` environment variables and are **off by default**. Each flag accepts truthy values (`1`, `true`, `yes`, `on`); the master switch `KIMI_CODE_EXPERIMENTAL_FLAG` forces every experimental feature on. These flags are not read from `config.toml`.
+Experimental features are gated behind `KIMI_CODE_EXPERIMENTAL_*` environment variables. In Hakimi, the core AITP research runtime flags are on by default; set an individual flag to a falsy value (`0`, `false`, `no`, `off`) to opt out for one launch. Each flag also accepts truthy values (`1`, `true`, `yes`, `on`); the master switch `KIMI_CODE_EXPERIMENTAL_FLAG` forces every experimental feature on. These flags are not read from `config.toml`.
 
 | Environment variable | Purpose | Default |
 | --- | --- | --- |
-| `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND` | Enable the `/goal` command and autonomous goal mode. Kimi Code works toward a stated objective across automatic continuation turns until the goal completes, pauses, or becomes blocked. Stop conditions should be written in the objective, for example "stop after 20 turns if still blocked". See [Slash commands: autonomous goals](../reference/slash-commands.md#autonomous-goals). | `false` (off) |
+| `KIMI_CODE_EXPERIMENTAL_PHYSICS_MEMORY` | Enable physics memory capsules, context compilation, and the `PhysicsMemory` tool. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_LEDGER` | Enable source-backed research ledger scanning, writing, capture, and scoped evidence reread. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_ACTION` | Enable WorkFrames, semantic research actions, primitive-tool attribution, graph/formalization/benchmark executors, and the `ResearchAction` tool. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_DOMAIN_PROFILE` | Enable domain profile registries and the built-in generic theoretical-physics fallback profile. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_WORKFLOW_RECIPE` | Enable workflow recipe registries and built-in theoretical-physics workflow scaffolds. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS` | Enable research eval case registries and harness candidate/eval loading. | `true` (on) |
+| `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND` | Enable the `/goal` command and autonomous goal mode. Kimi Code works toward a stated objective across automatic continuation turns until the goal completes, pauses, or becomes blocked. Stop conditions should be written in the objective, for example "stop after 20 turns if still blocked". See [Slash commands: autonomous goals](../reference/slash-commands.md#autonomous-goals). | `true` (on) |
 | `KIMI_CODE_EXPERIMENTAL_FLAG` | Master switch: force every experimental flag on | `false` (off) |
+| `KIMI_CODE_EXPERIMENTAL_MICRO_COMPACTION` | Enable the experimental micro-compaction path. | `false` (off) |
+| `KIMI_CODE_EXPERIMENTAL_BACKGROUND_ASK` | Enable experimental background question behavior for `AskUserQuestion`. | `false` (off) |
 
 ```sh
-# Try goal mode for a single launch
-KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=1 kimi
+# Disable one Hakimi research lane for a single launch
+KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS=0 hakimi
 ```
 
 ## Diagnostic logging

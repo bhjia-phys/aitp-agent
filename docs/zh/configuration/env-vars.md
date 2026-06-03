@@ -121,16 +121,24 @@ export KIMI_DISABLE_TELEMETRY="1"
 
 ## 实验功能 flag
 
-实验功能通过 `KIMI_CODE_EXPERIMENTAL_*` 环境变量控制，并且**默认关闭**。每个 flag 都接受真值（`1`、`true`、`yes`、`on`）；主开关 `KIMI_CODE_EXPERIMENTAL_FLAG` 会强制启用所有实验功能。这些 flag 不会从 `config.toml` 读取。
+实验功能通过 `KIMI_CODE_EXPERIMENTAL_*` 环境变量控制。在 Hakimi 中，核心 AITP 科研 runtime 默认开启；如果只想在某次启动里关闭某项能力，可以把对应 flag 设为假值（`0`、`false`、`no`、`off`）。每个 flag 也接受真值（`1`、`true`、`yes`、`on`）；主开关 `KIMI_CODE_EXPERIMENTAL_FLAG` 会强制启用所有实验功能。这些 flag 不会从 `config.toml` 读取。
 
 | 环境变量 | 用途 | 默认值 |
 | --- | --- | --- |
-| `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND` | 启用 `/goal` 命令和自主 goal 模式。Kimi Code 会围绕指定目标自动续跑多个轮次，直到目标完成、暂停或进入 blocked 状态。停止条件应写在目标本身里，例如「如果仍被阻塞，20 轮后停止」。详见 [斜杠命令：自主 goal](../reference/slash-commands.md#自主-goal)。 | `false`（关闭） |
+| `KIMI_CODE_EXPERIMENTAL_PHYSICS_MEMORY` | 启用 physics memory capsules、context compilation 和 `PhysicsMemory` 工具。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_LEDGER` | 启用 source-backed research ledger 扫描、写入、捕获和 scoped evidence reread。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_ACTION` | 启用 WorkFrame、semantic research actions、primitive-tool attribution、graph/formalization/benchmark executors 和 `ResearchAction` 工具。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_DOMAIN_PROFILE` | 启用 domain profile registries 和内建通用理论物理 fallback profile。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_WORKFLOW_RECIPE` | 启用 workflow recipe registries 和内建理论物理 workflow scaffold。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS` | 启用 research eval case registries 和 harness candidate/eval 加载。 | `true`（开启） |
+| `KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND` | 启用 `/goal` 命令和自主 goal 模式。Kimi Code 会围绕指定目标自动续跑多个轮次，直到目标完成、暂停或进入 blocked 状态。停止条件应写在目标本身里，例如「如果仍被阻塞，20 轮后停止」。详见 [斜杠命令：自主 goal](../reference/slash-commands.md#自主-goal)。 | `true`（开启） |
 | `KIMI_CODE_EXPERIMENTAL_FLAG` | 主开关：强制启用所有实验功能 | `false`（关闭） |
+| `KIMI_CODE_EXPERIMENTAL_MICRO_COMPACTION` | 启用实验性的 micro-compaction 路径。 | `false`（关闭） |
+| `KIMI_CODE_EXPERIMENTAL_BACKGROUND_ASK` | 启用 `AskUserQuestion` 的实验性后台提问行为。 | `false`（关闭） |
 
 ```sh
-# 单次启动时试用 goal 模式
-KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND=1 kimi
+# 单次启动时关闭某条 Hakimi 科研能力
+KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS=0 hakimi
 ```
 
 ## 诊断日志

@@ -313,7 +313,7 @@ describe('ToolManager goal tool registration', () => {
   }
 
   it('omits goal tools when the flag is disabled', () => {
-    delete process.env[GOAL_FLAG];
+    process.env[GOAL_FLAG] = '0';
     const names = loopToolNames('main');
     expect(names).not.toContain('CreateGoal');
     expect(names).not.toContain('GetGoal');

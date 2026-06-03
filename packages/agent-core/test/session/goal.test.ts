@@ -734,7 +734,7 @@ describe('SessionAPIImpl goal flag gating', () => {
   }
 
   it('rejects SDK goal creation when the flag is disabled', async () => {
-    delete process.env[GOAL_FLAG];
+    process.env[GOAL_FLAG] = '0';
     const sessionDir = await makeTempDir();
     const session = makeSession(sessionDir);
     const api = new SessionAPIImpl(session);
