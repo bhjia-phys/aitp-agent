@@ -24,6 +24,7 @@ import type {
   LoopHooks,
   LoopMessageBuilder,
   LoopToolBuilder,
+  RecordStepUsageResult,
   LoopTerminalStepStopReason,
   LoopTurnStopReason,
   TurnResult,
@@ -41,6 +42,9 @@ export interface RunTurnInput {
   readonly log?: Logger | undefined;
   readonly maxSteps?: number | undefined;
   readonly maxRetryAttempts?: number;
+  readonly recordStepUsage?:
+    | ((usage: TokenUsage) => RecordStepUsageResult | void | Promise<RecordStepUsageResult | void>)
+    | undefined;
 }
 
 export async function runTurn(input: RunTurnInput): Promise<TurnResult> {
@@ -56,14 +60,18 @@ export async function runTurn(input: RunTurnInput): Promise<TurnResult> {
     log,
     maxSteps,
     maxRetryAttempts,
+    recordStepUsage: hostRecordStepUsage,
   } = input;
   let usage: TokenUsage = emptyUsage();
   let steps = 0;
   // Normal exits overwrite this with the completed step's stop reason.
   let stopReason: LoopTurnStopReason = 'end_turn';
   let activeStep: number | undefined;
-  const recordStepUsage = (stepUsage: TokenUsage): void => {
+  const recordStepUsage = async (
+    stepUsage: TokenUsage,
+  ): Promise<RecordStepUsageResult | void> => {
     usage = addUsage(usage, stepUsage);
+    return hostRecordStepUsage?.(stepUsage);
   };
 
   try {
@@ -99,18 +107,15 @@ export async function runTurn(input: RunTurnInput): Promise<TurnResult> {
       const terminalStopReason: LoopTerminalStepStopReason = stepResult.stopReason;
       stopReason = terminalStopReason;
 
-      if (
-        !(
-          await hooks?.shouldContinueAfterStop?.({
-            turnId,
-            stepNumber: steps,
-            usage: stepResult.usage,
-            stopReason: terminalStopReason,
-            signal,
-            llm,
-          })
-        )?.continue
-      ) {
+      const continuation = await hooks?.shouldContinueAfterStop?.({
+        turnId,
+        stepNumber: steps,
+        usage: stepResult.usage,
+        stopReason: terminalStopReason,
+        signal,
+        llm,
+      });
+      if (continuation?.continue !== true) {
         break;
       }
     }

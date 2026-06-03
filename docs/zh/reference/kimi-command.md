@@ -162,6 +162,16 @@ kimi migrate
 
 如果你之前使用过旧版 kimi-cli，可以运行此命令将历史会话、配置等数据迁移到 kimi-code 中，避免数据丢失。完整的迁移流程、迁移内容与注意事项见 [从 kimi-cli 迁移](../guides/migration.md)。
 
+### `kimi upgrade`
+
+立即检查最新的 Kimi Code CLI 版本，并展示更新提示。该命令无任何 flag，所选操作结束后退出。
+
+```sh
+kimi upgrade
+```
+
+对于全局 npm、pnpm、yarn、bun，以及 macOS / Linux 的 native 安装，`kimi upgrade` 使用与启动更新检查相同的提示框。选择 `Install update now` 后会运行对应的前台安装命令，也可以继续使用当前版本。如果没有更新版本，它会提示当前已经是最新版本。如果当前安装方式无法自动升级，例如 Windows native 安装或不支持的安装布局，它会改为打印手动更新命令。
+
 ### `kimi provider`
 
 在 shell 中管理供应商，相当于 TUI 中 `/provider` 的非交互版本。适合脚本化部署、CI 初始化、以及在新机器上一行完成配置。
@@ -178,15 +188,15 @@ kimi provider <action> [options]
 
 | 参数 / 选项 | 说明 |
 | --- | --- |
-| `<url>` | Registry 地址，例如 `https://free-tokens.msh.team/v1/models/api.json`。 |
+| `<url>` | Registry 地址，例如 `https://registry.example.com/v1/models/api.json`。 |
 | `--api-key <key>` | 访问 registry 时携带的 Bearer token。未传时回退到环境变量 `KIMI_REGISTRY_API_KEY`。必填。 |
 
 ```sh
 # 一行导入：registry 中的所有 provider 与 model 全部写入 ~/.kimi-code/config.toml
-kimi provider add https://free-tokens.msh.team/v1/models/api.json --api-key YOUR_KEY
+kimi provider add https://registry.example.com/v1/models/api.json --api-key YOUR_KEY
 
 # 或通过环境变量，便于 CI / .envrc 等场景
-KIMI_REGISTRY_API_KEY=YOUR_KEY kimi provider add https://free-tokens.msh.team/v1/models/api.json
+KIMI_REGISTRY_API_KEY=YOUR_KEY kimi provider add https://registry.example.com/v1/models/api.json
 ```
 
 如果某个 provider id 已存在，会先删除（包括其残留的模型 alias），再按 registry 重新写入，与 TUI 的行为一致。不会自动设置默认模型 —— 后续可以用 `-m` 或 TUI 内的 `/model` 选择。

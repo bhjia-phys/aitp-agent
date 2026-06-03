@@ -4,13 +4,13 @@ import picomatch from 'picomatch';
 
 import type { Agent } from '..';
 import { makeErrorPayload } from '../../errors';
+import { flags } from '../../flags';
 import type { ExecutableTool } from '../../loop';
 import { createMcpAuthTool } from '../../mcp/auth-tool';
 import type { McpConnectionManager, McpServerEntry } from '../../mcp';
 import { mcpResultToExecutableOutput } from '../../mcp/output';
 import { isMcpToolName, qualifyMcpToolName } from '../../mcp/tool-naming';
 import type { MCPClient } from '../../mcp/types';
-import { flags } from '../../flags';
 import { DEFAULT_AGENT_PROFILES } from '../../profile';
 import { extendWorkspaceWithSkillRoots } from '../../skill';
 import * as b from '../../tools/builtin';
@@ -44,6 +44,7 @@ export class ToolManager {
   protected builtinTools: Map<string, BuiltinTool> = new Map();
   protected readonly userTools: Map<string, ExecutableTool> = new Map();
   protected readonly mcpTools: Map<string, McpToolEntry> = new Map();
+  private loopToolsOverride: readonly ExecutableTool[] | undefined;
   /** server name → list of qualified tool names registered for that server. */
   protected readonly mcpToolsByServer: Map<string, string[]> = new Map();
   protected enabledTools: Set<string> = new Set();
@@ -340,6 +341,10 @@ export class ToolManager {
     this.runtimeExposure = exposure === null ? null : { ...exposure };
   }
 
+  copyLoopToolsFrom(source: ToolManager): void {
+    this.loopToolsOverride = source.loopTools;
+  }
+
   private isMcpToolEnabled(name: string): boolean {
     return isMcpToolEnabledByPatterns(name, this.mcpAccessPatterns);
   }
@@ -413,6 +418,19 @@ export class ToolManager {
           new b.ReadMediaFileTool(kaos, workspace, modelCapabilities, videoUploader),
         new b.EnterPlanModeTool(this.agent),
         new b.ExitPlanModeTool(this.agent),
+        // Goal tools are main-agent-only and gated by the goal-command flag.
+        flags.enabled('goal-command') &&
+          this.agent.type === 'main' &&
+          new b.CreateGoalTool(this.agent),
+        flags.enabled('goal-command') &&
+          this.agent.type === 'main' &&
+          new b.GetGoalTool(this.agent),
+        flags.enabled('goal-command') &&
+          this.agent.type === 'main' &&
+          new b.SetGoalBudgetTool(this.agent),
+        flags.enabled('goal-command') &&
+          this.agent.type === 'main' &&
+          new b.UpdateGoalTool(this.agent),
         this.agent.rpc?.requestQuestion && new b.AskUserQuestionTool(this.agent),
         new b.TodoListTool(this.toolStore),
         new b.TaskListTool(background),
@@ -460,6 +478,7 @@ export class ToolManager {
   }
 
   get loopTools(): readonly ExecutableTool[] {
+    if (this.loopToolsOverride !== undefined) return this.loopToolsOverride;
     return this.buildLoopTools({
       enabledTools: this.enabledTools,
       mcpAccessPatterns: this.mcpAccessPatterns,
@@ -478,11 +497,13 @@ export class ToolManager {
       userTools: new Map(this.userTools),
       mcpTools: new Map(this.mcpTools),
     };
-    return () =>
-      this.buildLoopTools({
+    return () => {
+      if (this.loopToolsOverride !== undefined) return this.loopToolsOverride;
+      return this.buildLoopTools({
         ...snapshot,
         runtimeExposure: this.runtimeExposure,
       });
+    };
   }
 
   private buildLoopTools(state: LoopToolState): readonly ExecutableTool[] {
@@ -490,8 +511,14 @@ export class ToolManager {
       isMcpToolEnabledByPatterns(name, state.mcpAccessPatterns),
     );
     const activeNames = this.effectiveEnabledTools(state.enabledTools, state.runtimeExposure);
+    // Mutation goal tools are only offered to the model while a goal exists.
+    const hideGoalMutationTools = (this.agent.goals?.getGoal().goal ?? null) === null;
     return uniq([...activeNames, ...mcpNames])
       .toSorted((a, b) => a.localeCompare(b))
+      .filter(
+        (name) =>
+          !(hideGoalMutationTools && (name === 'SetGoalBudget' || name === 'UpdateGoal')),
+      )
       .map(
         (name) =>
           state.userTools.get(name) ??
