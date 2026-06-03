@@ -71,6 +71,7 @@ export interface OpenAILegacyOptions {
   model: string;
   stream?: boolean | undefined;
   maxTokens?: number | undefined;
+  generationKwargs?: OpenAILegacyGenerationKwargs | undefined;
   reasoningKey?: string | undefined;
   httpClient?: unknown;
   defaultHeaders?: Record<string, string>;
@@ -87,6 +88,7 @@ export interface OpenAILegacyGenerationKwargs {
   presence_penalty?: number | undefined;
   frequency_penalty?: number | undefined;
   stop?: string | string[] | undefined;
+  extra_body?: Record<string, unknown> | undefined;
   [key: string]: unknown;
 }
 interface OpenAIMessage {
@@ -102,6 +104,11 @@ interface OpenAIToolCallOut {
   type: string;
   id: string;
   function: { name: string; arguments: string | null };
+}
+
+interface OpenAICompatibleExtraBody {
+  thinking?: Record<string, unknown> | undefined;
+  [key: string]: unknown;
 }
 
 function usesMaxCompletionTokens(model: string): boolean {
@@ -130,6 +137,31 @@ function normalizeGenerationKwargs(
     delete kwargs.max_tokens;
   }
   return kwargs;
+}
+
+function isDeepSeekModel(model: string): boolean {
+  return model.trim().toLowerCase().startsWith('deepseek-');
+}
+
+function reasoningEffortForModel(model: string, effort: ThinkingEffort): string | undefined {
+  if (!isDeepSeekModel(model)) return thinkingEffortToReasoningEffort(effort);
+  switch (effort) {
+    case 'off':
+      return undefined;
+    case 'xhigh':
+    case 'max':
+      return 'max';
+    case 'low':
+    case 'medium':
+    case 'high':
+      return 'high';
+    default:
+      throw new Error(`Unknown thinking effort: ${String(effort)}`);
+  }
+}
+
+function defaultReasoningEffortForModel(model: string): string {
+  return isDeepSeekModel(model) ? 'high' : 'medium';
 }
 
 function convertMessage(
@@ -394,8 +426,12 @@ export class OpenAILegacyChatProvider implements ChatProvider {
         ? normalizedReasoningKey
         : undefined;
     this._reasoningEffort = undefined;
-    this._generationKwargs =
-      options.maxTokens !== undefined ? completionTokenKwargs(this._model, options.maxTokens) : {};
+    this._generationKwargs = {
+      ...options.generationKwargs,
+      ...(options.maxTokens !== undefined
+        ? completionTokenKwargs(this._model, options.maxTokens)
+        : {}),
+    };
     this._toolMessageConversion = options.toolMessageConversion ?? null;
     this._httpClient = options.httpClient;
     this._clientFactory = options.clientFactory;
@@ -460,15 +496,17 @@ export class OpenAILegacyChatProvider implements ChatProvider {
         message.content.some((part) => part.type === 'think'),
       );
       if (hasThinkPart) {
-        reasoningEffort = 'medium';
+        reasoningEffort = defaultReasoningEffortForModel(this._model);
       }
     }
 
+    const { extra_body: extraBody, ...requestKwargs } = kwargs;
+
     // Remove undefined values from kwargs
-    for (const key of Object.keys(kwargs)) {
-      if (kwargs[key] === undefined) {
+    for (const key of Object.keys(requestKwargs)) {
+      if (requestKwargs[key] === undefined) {
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete kwargs[key];
+        delete requestKwargs[key];
       }
     }
 
@@ -477,7 +515,8 @@ export class OpenAILegacyChatProvider implements ChatProvider {
       model: this._model,
       messages,
       stream: this._stream,
-      ...kwargs,
+      ...requestKwargs,
+      ...(extraBody as Record<string, unknown> | undefined),
     };
 
     if (tools.length > 0) {
@@ -505,9 +544,22 @@ export class OpenAILegacyChatProvider implements ChatProvider {
   }
 
   withThinking(effort: ThinkingEffort): OpenAILegacyChatProvider {
-    const reasoningEffort = thinkingEffortToReasoningEffort(effort);
+    const reasoningEffort = reasoningEffortForModel(this._model, effort);
     const clone = this._clone();
     clone._reasoningEffort = reasoningEffort;
+    const extraBody = clone._generationKwargs.extra_body as OpenAICompatibleExtraBody | undefined;
+    if (extraBody?.thinking !== undefined) {
+      clone._generationKwargs = {
+        ...clone._generationKwargs,
+        extra_body: {
+          ...extraBody,
+          thinking: {
+            ...extraBody.thinking,
+            type: effort === 'off' ? 'disabled' : 'enabled',
+          },
+        },
+      };
+    }
     return clone;
   }
 

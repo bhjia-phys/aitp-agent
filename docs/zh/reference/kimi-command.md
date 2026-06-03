@@ -180,7 +180,7 @@ kimi upgrade
 kimi provider <action> [options]
 ```
 
-包含三个动作：
+包含五个动作：
 
 #### `kimi provider add <url>`
 
@@ -216,6 +216,26 @@ kimi provider remove kohub
 ```sh
 kimi provider list
 kimi provider list --json | jq '.providers | keys'
+```
+
+#### `kimi provider deepseek`
+
+把 DeepSeek 配置为原生 OpenAI 兼容供应商。在 Hakimi 包里，这个命令以 `hakimi provider deepseek` 暴露；它会向 `~/.kimi-code/config.toml` 写入 `[providers.deepseek]` 和一个 DeepSeek 模型 alias，并在默认情况下把该 alias 设为 `default_model`。
+
+| 参数 / 选项 | 说明 |
+| --- | --- |
+| `--api-key <key>` | DeepSeek API key。未传时回退到 `DEEPSEEK_API_KEY` 环境变量。必填。 |
+| `--model-id <model>` | DeepSeek 模型 id。默认 `deepseek-v4-pro`；需要 flash 模型时使用 `deepseek-v4-flash`。 |
+| `--alias <alias>` | 写入的模型 alias。默认 `deepseek/<model>`。 |
+| `--base-url <url>` | 覆盖 DeepSeek base URL。默认 `https://api.deepseek.com`。 |
+| `--context-size <tokens>` | 模型上下文窗口。默认 `1000000`。 |
+| `--max-output-size <tokens>` | 模型输出上限。默认 `384000`。 |
+| `--no-default` | 只添加供应商，不修改 `default_model`。 |
+| `--no-thinking` | 写入模型 alias 时默认关闭 thinking。 |
+
+```sh
+DEEPSEEK_API_KEY=sk-... hakimi provider deepseek
+hakimi provider deepseek --api-key sk-... --model-id deepseek-v4-flash --no-thinking
 ```
 
 #### `kimi provider catalog list [providerId]`

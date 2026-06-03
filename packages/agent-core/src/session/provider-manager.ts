@@ -236,6 +236,7 @@ function toKosongProviderConfig(
         baseUrl: providerValue(provider.baseUrl, provider.env, 'OPENAI_BASE_URL'),
         apiKey: providerApiKey(provider),
         reasoningKey,
+        ...generationKwargsField(provider.generationKwargs),
         ...defaultHeadersField(provider.customHeaders),
       };
     case 'kimi':
@@ -259,6 +260,7 @@ function toKosongProviderConfig(
         model,
         baseUrl: providerValue(provider.baseUrl, provider.env, 'OPENAI_BASE_URL'),
         apiKey: providerApiKey(provider),
+        ...generationKwargsField(provider.generationKwargs),
         ...defaultHeadersField(provider.customHeaders),
       };
     case 'vertexai': {
@@ -290,6 +292,13 @@ function defaultHeadersField(
 ): { defaultHeaders?: Record<string, string> } {
   if (headers === undefined || Object.keys(headers).length === 0) return {};
   return { defaultHeaders: { ...headers } };
+}
+
+function generationKwargsField(
+  generationKwargs: Record<string, unknown> | undefined,
+): { generationKwargs?: Record<string, unknown> } {
+  if (generationKwargs === undefined || Object.keys(generationKwargs).length === 0) return {};
+  return { generationKwargs: structuredClone(generationKwargs) };
 }
 
 function providerForCapabilityProbe(provider: KosongProviderConfig): KosongProviderConfig {
