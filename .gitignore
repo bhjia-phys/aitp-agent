@@ -1,6 +1,8 @@
 node_modules/
 dist/
+dist-pack/
 dist-native/
+.sisyphus/
 .tmp-api-extractor/
 coverage/
 *.tsbuildinfo
