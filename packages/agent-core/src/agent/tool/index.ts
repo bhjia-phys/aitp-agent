@@ -31,6 +31,15 @@ interface McpToolEntry {
   readonly serverName: string;
 }
 
+interface LoopToolState {
+  readonly enabledTools: ReadonlySet<string>;
+  readonly mcpAccessPatterns: readonly string[];
+  readonly builtinTools: ReadonlyMap<string, BuiltinTool>;
+  readonly userTools: ReadonlyMap<string, ExecutableTool>;
+  readonly mcpTools: ReadonlyMap<string, McpToolEntry>;
+  readonly runtimeExposure: RuntimeToolExposure | null;
+}
+
 export class ToolManager {
   protected builtinTools: Map<string, BuiltinTool> = new Map();
   protected readonly userTools: Map<string, ExecutableTool> = new Map();
@@ -332,11 +341,11 @@ export class ToolManager {
   }
 
   private isMcpToolEnabled(name: string): boolean {
-    return this.mcpAccessPatterns.some((pattern) => picomatch.isMatch(name, pattern));
+    return isMcpToolEnabledByPatterns(name, this.mcpAccessPatterns);
   }
 
   *toolInfos(): Iterable<ToolInfo> {
-    const activeToolNames = this.effectiveEnabledTools();
+    const activeToolNames = this.effectiveEnabledTools(this.enabledTools, this.runtimeExposure);
     for (const tool of this.builtinTools.values()) {
       yield {
         name: tool.name,
@@ -451,27 +460,63 @@ export class ToolManager {
   }
 
   get loopTools(): readonly ExecutableTool[] {
-    const mcpNames = [...this.mcpTools.keys()].filter((name) => this.isMcpToolEnabled(name));
-    return uniq([...this.effectiveEnabledTools(), ...mcpNames])
+    return this.buildLoopTools({
+      enabledTools: this.enabledTools,
+      mcpAccessPatterns: this.mcpAccessPatterns,
+      builtinTools: this.builtinTools,
+      userTools: this.userTools,
+      mcpTools: this.mcpTools,
+      runtimeExposure: this.runtimeExposure,
+    });
+  }
+
+  createTurnLoopToolBuilder(): () => readonly ExecutableTool[] {
+    const snapshot: Omit<LoopToolState, 'runtimeExposure'> = {
+      enabledTools: new Set(this.enabledTools),
+      mcpAccessPatterns: [...this.mcpAccessPatterns],
+      builtinTools: new Map(this.builtinTools),
+      userTools: new Map(this.userTools),
+      mcpTools: new Map(this.mcpTools),
+    };
+    return () =>
+      this.buildLoopTools({
+        ...snapshot,
+        runtimeExposure: this.runtimeExposure,
+      });
+  }
+
+  private buildLoopTools(state: LoopToolState): readonly ExecutableTool[] {
+    const mcpNames = [...state.mcpTools.keys()].filter((name) =>
+      isMcpToolEnabledByPatterns(name, state.mcpAccessPatterns),
+    );
+    const activeNames = this.effectiveEnabledTools(state.enabledTools, state.runtimeExposure);
+    return uniq([...activeNames, ...mcpNames])
       .toSorted((a, b) => a.localeCompare(b))
       .map(
         (name) =>
-          this.userTools.get(name) ??
-          this.mcpTools.get(name)?.tool ??
-          this.builtinTools.get(name),
+          state.userTools.get(name) ??
+          state.mcpTools.get(name)?.tool ??
+          state.builtinTools.get(name),
       )
       .filter((tool) => !!tool);
   }
 
-  private effectiveEnabledTools(): Set<string> {
-    if (this.runtimeExposure === null) return new Set(this.enabledTools);
-    const effective = new Set(this.enabledTools);
-    for (const name of this.runtimeExposure.managedToolNames) {
+  private effectiveEnabledTools(
+    enabledTools: ReadonlySet<string>,
+    runtimeExposure: RuntimeToolExposure | null,
+  ): Set<string> {
+    if (runtimeExposure === null) return new Set(enabledTools);
+    const effective = new Set(enabledTools);
+    for (const name of runtimeExposure.managedToolNames) {
       effective.delete(name);
     }
-    for (const name of this.runtimeExposure.activeToolNames) {
+    for (const name of runtimeExposure.activeToolNames) {
       effective.add(name);
     }
     return effective;
   }
+}
+
+function isMcpToolEnabledByPatterns(name: string, patterns: readonly string[]): boolean {
+  return patterns.some((pattern) => picomatch.isMatch(name, pattern));
 }

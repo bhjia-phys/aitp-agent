@@ -23,6 +23,7 @@ import type {
   ExecutableTool,
   LoopHooks,
   LoopMessageBuilder,
+  LoopToolBuilder,
   LoopTerminalStepStopReason,
   LoopTurnStopReason,
   TurnResult,
@@ -33,6 +34,7 @@ export interface RunTurnInput {
   readonly signal: AbortSignal;
   readonly llm: LLM;
   readonly buildMessages: LoopMessageBuilder;
+  readonly buildTools?: LoopToolBuilder | undefined;
   readonly dispatchEvent: LoopEventDispatcher;
   readonly tools?: readonly ExecutableTool[] | undefined;
   readonly hooks?: LoopHooks | undefined;
@@ -47,6 +49,7 @@ export async function runTurn(input: RunTurnInput): Promise<TurnResult> {
     signal,
     llm,
     buildMessages,
+    buildTools,
     dispatchEvent,
     tools,
     hooks,
@@ -77,6 +80,7 @@ export async function runTurn(input: RunTurnInput): Promise<TurnResult> {
         turnId,
         signal,
         buildMessages,
+        buildTools,
         dispatchEvent,
         llm,
         tools,

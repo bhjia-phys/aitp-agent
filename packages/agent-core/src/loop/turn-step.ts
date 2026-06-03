@@ -16,7 +16,13 @@ import type { LoopEventDispatcher } from './events';
 import type { LLM, LLMChatParams, LLMChatResponse } from './llm';
 import { chatWithRetry } from './retry';
 import { runToolCallBatch, type ToolCallStepContext } from './tool-call';
-import type { ExecutableTool, LoopHooks, LoopMessageBuilder, LoopStepStopReason } from './types';
+import type {
+  ExecutableTool,
+  LoopHooks,
+  LoopMessageBuilder,
+  LoopStepStopReason,
+  LoopToolBuilder,
+} from './types';
 
 type ChatStreamingCallbacks = Pick<
   LLMChatParams,
@@ -29,6 +35,7 @@ export interface ExecuteLoopStepDeps {
   readonly buildMessages: LoopMessageBuilder;
   readonly dispatchEvent: LoopEventDispatcher;
   readonly llm: LLM;
+  readonly buildTools?: LoopToolBuilder | undefined;
   readonly tools?: readonly ExecutableTool[] | undefined;
   readonly hooks?: LoopHooks | undefined;
   readonly log?: Logger | undefined;
@@ -47,6 +54,7 @@ export async function executeLoopStep(deps: ExecuteLoopStepDeps): Promise<{
     buildMessages,
     dispatchEvent,
     llm,
+    buildTools,
     tools,
     hooks,
     log,
@@ -69,13 +77,16 @@ export async function executeLoopStep(deps: ExecuteLoopStepDeps): Promise<{
 
   signal.throwIfAborted();
 
+  const stepTools = buildTools === undefined ? tools : await buildTools();
+  signal.throwIfAborted();
+
   const messages = await buildMessages();
   signal.throwIfAborted();
 
   const stepUuid = randomUUID();
 
   const step: ToolCallStepContext = {
-    tools,
+    tools: stepTools,
     hooks,
     log,
     dispatchEvent,
@@ -95,7 +106,7 @@ export async function executeLoopStep(deps: ExecuteLoopStepDeps): Promise<{
 
   const chatParams: LLMChatParams = {
     messages,
-    tools: tools ?? [],
+    tools: stepTools ?? [],
     signal,
     ...createChatStreamingCallbacks({
       dispatchEvent,

@@ -375,6 +375,7 @@ export class TurnFlow {
     let finalGateContinuationUsed = false;
     const deduper = new ToolCallDeduplicator();
     await this.agent.mcp?.waitForInitialLoad(signal);
+    const buildTurnTools = this.agent.tools.createTurnLoopToolBuilder();
     while (true) {
       signal.throwIfAborted();
       const model = this.agent.config.model;
@@ -385,8 +386,8 @@ export class TurnFlow {
           signal,
           llm: this.agent.llm,
           buildMessages: () => this.agent.context.messages,
+          buildTools: buildTurnTools,
           dispatchEvent: this.buildDispatchEvent(turnId),
-          tools: this.agent.tools.loopTools,
           log: this.agent.log,
           maxSteps: loopControl?.maxStepsPerTurn,
           maxRetryAttempts: loopControl?.maxRetriesPerStep,

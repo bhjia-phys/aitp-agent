@@ -20,6 +20,7 @@ export type {
   ShouldContinueAfterStopHook,
   ShouldContinueAfterStopResult,
   LoopMessageBuilder,
+  LoopToolBuilder,
   ExecutableTool,
   ToolExecution,
   ToolCall,
