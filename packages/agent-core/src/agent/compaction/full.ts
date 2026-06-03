@@ -38,6 +38,10 @@ import {
   DefaultCompactionStrategy,
   type CompactionStrategy,
 } from './strategy';
+import {
+  mergeResearchCompactionSnapshot,
+  renderResearchCompactionSnapshot,
+} from './research-snapshot';
 
 type CompactionTelemetryTrigger = CompactionBeginData['source'] | 'manual-with-prompt' | 'unknown';
 
@@ -252,6 +256,7 @@ export class FullCompaction {
       const delays = retryBackoffDelays(MAX_COMPACTION_RETRY_ATTEMPTS);
       let usage: TokenUsage | null;
       let summary: string;
+      const researchSnapshot = renderResearchCompactionSnapshot(this.agent);
       while (true) {
         const messagesToCompact = originalHistory.slice(0, compactedCount);
         const messages = [
@@ -261,7 +266,7 @@ export class FullCompaction {
             content: [
               {
                 type: 'text',
-                text: COMPACTION_INSTRUCTION(data.instruction),
+                text: COMPACTION_INSTRUCTION(data.instruction, researchSnapshot),
               },
             ],
             toolCalls: [],
@@ -310,6 +315,7 @@ export class FullCompaction {
         }
       }
 
+      summary = mergeResearchCompactionSnapshot(summary, researchSnapshot);
       summary = this.postProcessSummary(summary);
 
       const recent = originalHistory.slice(compactedCount);
@@ -429,8 +435,27 @@ function extractCompactionSummary(response: GenerateResult): string {
   return summary;
 }
 
-export const COMPACTION_INSTRUCTION = (customInstruction = ''): string =>
-  renderPrompt(compactionInstructionTemplate, { customInstruction });
+export const COMPACTION_INSTRUCTION = (
+  customInstruction = '',
+  researchSnapshot = '',
+): string => {
+  const base = renderPrompt(compactionInstructionTemplate, { customInstruction });
+  if (researchSnapshot.trim().length === 0) return base;
+  return `${base.trim()}\n\n${RESEARCH_COMPACTION_INSTRUCTION(researchSnapshot)}`;
+};
+
+const RESEARCH_COMPACTION_INSTRUCTION = (researchSnapshot: string): string =>
+  [
+    '<!-- Runtime Research State -->',
+    '',
+    'The following Hakimi research state was generated from the native runtime, not inferred from the conversation. Treat it as authoritative when summarizing active research topics. Preserve its meaning in the compacted summary, including each WorkFrame\'s research question, domain/topic, active physics memory, ContextPack/domain pack ids, evidence refs, action attempts and outcomes, primitive tool attribution, failed or raw tool escapes, open obligations, and next suggested actions. Keep WorkFrames separate; never merge evidence or progress across unrelated topics.',
+    '',
+    researchSnapshot.trim(),
+    '',
+    '<!-- Additional Research Output Requirement -->',
+    '',
+    'Also include a "## Hakimi Research State" section for each active/open WorkFrame: research question, domain/topic, context pack/domain pack, physics memory ids, ledger/evidence refs, action trace, primitive tool attribution, open obligations, and next steps.',
+  ].join('\n');
 
 function compactionTelemetryTrigger(
   trigger: CompactionBeginData['source'] | undefined,
