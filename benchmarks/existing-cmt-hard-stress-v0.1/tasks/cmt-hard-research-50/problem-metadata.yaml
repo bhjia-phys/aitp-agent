@@ -1,0 +1,80 @@
+task_id: cmt-hard-research-50
+benchmark_id: existing-cmt-hard-stress-v0.1
+problem_count: 50
+answer_field_count: 50
+sources:
+  - source: CMT-Benchmark
+    source_url: https://huggingface.co/datasets/JVRoggeveen/cmt_benchmark
+    source_file: ../../source-cmt_data.jsonl
+    license: MIT
+    local_items:
+      - cmt_index_00_hf
+      - cmt_index_01_hf
+      - cmt_index_02_hf
+      - cmt_index_03_hf
+      - cmt_index_04_hf
+      - cmt_index_05_ed
+      - cmt_index_06_vmc
+      - cmt_index_07_dmrg
+      - cmt_index_08_qmc
+      - cmt_index_09_qmc
+      - cmt_index_10_qmc
+      - cmt_index_11_dmrg
+      - cmt_index_12_dmrg
+      - cmt_index_13_vmc
+      - cmt_index_14_ed
+      - cmt_index_15_ed
+      - cmt_index_16_ed
+      - cmt_index_17_other
+      - cmt_index_18_qmc
+      - cmt_index_19_ed
+      - cmt_index_20_ed
+      - cmt_index_21_peps
+      - cmt_index_22_ed
+      - cmt_index_23_other
+      - cmt_index_24_qmc
+      - cmt_index_25_ed
+      - cmt_index_26_other
+      - cmt_index_27_qmc
+      - cmt_index_28_dmrg
+      - cmt_index_29_other
+      - cmt_index_30_other
+      - cmt_index_31_other
+      - cmt_index_32_other
+      - cmt_index_33_other
+      - cmt_index_34_other
+      - cmt_index_35_other
+      - cmt_index_36_peps
+      - cmt_index_37_other
+      - cmt_index_38_other
+      - cmt_index_39_other
+      - cmt_index_40_other
+      - cmt_index_41_other
+      - cmt_index_42_sm
+      - cmt_index_43_sm
+      - cmt_index_44_sm
+      - cmt_index_45_sm
+      - cmt_index_46_sm
+      - cmt_index_47_other
+      - cmt_index_48_peps
+      - cmt_index_49_sm
+    benchmark_type: expert_research_level_condensed_matter_theory
+domains:
+  - dmrg
+  - ed
+  - hf
+  - other
+  - peps
+  - qmc
+  - sm
+  - vmc
+difficulties:
+  - research
+grading:
+  mode: mixed_local_verifier
+  choice_matching: exact_set
+  numeric_vector_tolerance: per_field
+  symbolic_matching: normalized_boxed_content
+notes:
+  - Full 50-row public CMT-Benchmark JSONL converted into a local hard stress task.
+  - Grading is deterministic and local; no model judge is used.

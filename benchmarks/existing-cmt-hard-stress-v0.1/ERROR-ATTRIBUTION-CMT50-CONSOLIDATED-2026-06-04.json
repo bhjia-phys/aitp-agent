@@ -1,0 +1,2996 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "existing-cmt-hard-stress-v0.1",
+  "task_id": "cmt-hard-research-50",
+  "run_id": "cmt50_consolidated_latest_audit_2026-06-04",
+  "created_at": "2026-06-04T13:38:30",
+  "score": {
+    "passed": 12,
+    "total": 50,
+    "hard_score": 0.24
+  },
+  "summary": {
+    "conclusion": "Latest per-item CMT50 evidence was consolidated after env reruns; failures were attributed and passing items were reviewed for capability evidence versus lucky/hallucinated hits.",
+    "failure_category_counts": {
+      "data_source": 2,
+      "answer_accuracy": 35,
+      "model_behavior": 1
+    },
+    "success_category_counts": {
+      "capability_supported": 11,
+      "leakage_suspect": 1
+    },
+    "success_risk_counts": {
+      "medium": 7,
+      "low": 4,
+      "high": 1
+    },
+    "json_emission_rate": 0.98,
+    "notes": [
+      "Problems 1,14,37 use the initial no-timeout deep-dive runs.",
+      "Problems 24,25,26,38,39,40,48,49,50 use the serial env-rerun-9 results.",
+      "All other problems use the remaining-batch final runs.",
+      "Passing items are not automatically treated as strong capability evidence; stderr reasoning and source quality are checked."
+    ]
+  },
+  "run_summaries": [
+    {
+      "label": "initial_no_timeout_item_1",
+      "run_id": "20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "path": "runs/20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": 0,
+      "total": 1,
+      "runtime_seconds": 420.44,
+      "problem_numbers": [
+        1
+      ]
+    },
+    {
+      "label": "initial_no_timeout_item_14",
+      "run_id": "20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "path": "runs/20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": 0,
+      "total": 1,
+      "runtime_seconds": 420.445,
+      "problem_numbers": [
+        14
+      ]
+    },
+    {
+      "label": "initial_no_timeout_item_37",
+      "run_id": "20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "path": "runs/20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": 0,
+      "total": 1,
+      "runtime_seconds": 120.328,
+      "problem_numbers": [
+        37
+      ]
+    },
+    {
+      "label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": 3,
+      "total": 12,
+      "runtime_seconds": 7654.557,
+      "problem_numbers": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    {
+      "label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": 3,
+      "total": 12,
+      "runtime_seconds": 8495.088,
+      "problem_numbers": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    },
+    {
+      "label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": 2,
+      "total": 12,
+      "runtime_seconds": 8584.913,
+      "problem_numbers": [
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        38,
+        39
+      ]
+    },
+    {
+      "label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": 1,
+      "total": 11,
+      "runtime_seconds": 7744.523,
+      "problem_numbers": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50
+      ]
+    },
+    {
+      "label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": 3,
+      "total": 9,
+      "runtime_seconds": 9695.064,
+      "problem_numbers": [
+        24,
+        25,
+        26,
+        38,
+        39,
+        40,
+        48,
+        49,
+        50
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "problem_number": 1,
+      "field": "cmt_index_00_answer",
+      "source_index": 0,
+      "cmt_type": "HF",
+      "run_label": "initial_no_timeout_item_1",
+      "run_id": "20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.267,
+      "stdout_bytes": 42,
+      "stderr_bytes": 55962,
+      "actual": "u_0/3+2u_1",
+      "expected": "U_1/2",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-01-cmt_index_00_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-01-cmt_index_00_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-01-cmt_index_00_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 0,
+            "type": "HF",
+            "solution": "$\\boxed{U_1/2}$"
+          }
+        }
+      ],
+      "primary_category": "data_source",
+      "secondary_categories": [
+        "answer_accuracy"
+      ],
+      "root_cause_hypothesis": "The source prompt/gold boundary is suspect: the spinful triangular-lattice CDW prompt admits a plausible standard interpretation different from the gold U_1/2.",
+      "confidence": "medium",
+      "observed_failure": "actual='u_0/3+2u_1', expected='U_1/2', json_emitted=True",
+      "recommended_action": "Audit or quarantine this source row before using it as clean model-failure evidence.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 2,
+      "field": "cmt_index_01_answer",
+      "source_index": 1,
+      "cmt_type": "HF",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 300.317,
+      "stdout_bytes": 139,
+      "stderr_bytes": 37571,
+      "actual": "c_↑dagger(k)c_↑(k);c_↓dagger(k)c_↓(k);c_↑dagger(k)c_↓(k);c_↓dagger(k)c_↑(k)",
+      "expected": "\\langle c_\\uparrow^\\dagger(k) c_\\uparrow(k) \\rangle; \\langle c_\\downarrow^\\dagger(k) c_\\downarrow(k) \\rangle",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-02-cmt_index_01_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-02-cmt_index_01_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-02-cmt_index_01_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 1,
+            "type": "HF",
+            "solution": "$\\boxed{\\langle c_\\uparrow^\\dagger(k) c_\\uparrow(k) \\rangle; \\langle c_\\downarrow^\\dagger(k) c_\\downarrow(k) \\rangle}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='c_↑dagger(k)c_↑(k);c_↓dagger(k)c_↓(k);c_↑dagger(k)c_↓(k);c_↓dagger(k)c_↑(k)', expected='\\\\langle c_\\\\uparrow^\\\\dagger(k) c_\\\\uparrow(k) \\\\rangle; \\\\langle c_\\\\downarrow^\\\\dagger(k) c_\\\\downarrow(k) \\\\rangle', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 3,
+      "field": "cmt_index_02_answer",
+      "source_index": 2,
+      "cmt_type": "HF",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1650.793,
+      "stdout_bytes": 154,
+      "stderr_bytes": 146589,
+      "actual": [
+        2.09,
+        0.56,
+        0.56,
+        2.09,
+        -1.53,
+        1.53,
+        -2.09,
+        -0.56,
+        -0.56,
+        -2.09,
+        1.53,
+        -1.53
+      ],
+      "expected": [
+        2.09,
+        1.21,
+        0.0,
+        2.41,
+        -2.09,
+        1.21,
+        -2.09,
+        -1.21,
+        0.0,
+        -2.41,
+        2.09,
+        -1.21
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-03-cmt_index_02_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-03-cmt_index_02_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-03-cmt_index_02_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 2,
+            "type": "HF",
+            "solution": "$\\boxed{(2.09, 1.21); (0., 2.41); (-2.09, 1.21); (-2.09, -1.21); (0., -2.41); (2.09, -1.21)}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=[2.09, 0.56, 0.56, 2.09, -1.53, 1.53, -2.09, -0.56, -0.56, -2.09, 1.53, -1.53], expected=[2.09, 1.21, 0.0, 2.41, -2.09, 1.21, -2.09, -1.21, 0.0, -2.41, 2.09, -1.21], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 4,
+      "field": "cmt_index_03_answer",
+      "source_index": 3,
+      "cmt_type": "HF",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 150.156,
+      "stdout_bytes": 49,
+      "stderr_bytes": 40089,
+      "actual": "o(n_q^2)",
+      "expected": "16N_q^2",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-04-cmt_index_03_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-04-cmt_index_03_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-04-cmt_index_03_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 3,
+            "type": "HF",
+            "solution": "$\\boxed{16N_q^2}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='o(n_q^2)', expected='16N_q^2', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 7,
+      "field": "cmt_index_06_answer",
+      "source_index": 6,
+      "cmt_type": "VMC",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 210.159,
+      "stdout_bytes": 33,
+      "stderr_bytes": 25500,
+      "actual": [
+        "a"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "d"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-07-cmt_index_06_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-07-cmt_index_06_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-07-cmt_index_06_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 6,
+            "type": "VMC",
+            "solution": "$\\boxed{a; b; d}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a'], expected=['a', 'b', 'd'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 8,
+      "field": "cmt_index_07_answer",
+      "source_index": 7,
+      "cmt_type": "DMRG",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 150.128,
+      "stdout_bytes": 33,
+      "stderr_bytes": 18826,
+      "actual": [
+        "a"
+      ],
+      "expected": [
+        "d"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-08-cmt_index_07_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-08-cmt_index_07_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-08-cmt_index_07_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 7,
+            "type": "DMRG",
+            "solution": "$\\boxed{d}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a'], expected=['d'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 9,
+      "field": "cmt_index_08_answer",
+      "source_index": 8,
+      "cmt_type": "QMC",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1110.52,
+      "stdout_bytes": 34,
+      "stderr_bytes": 179439,
+      "actual": [
+        "f"
+      ],
+      "expected": [
+        "b",
+        "f",
+        "i"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-09-cmt_index_08_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-09-cmt_index_08_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-09-cmt_index_08_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 8,
+            "type": "QMC",
+            "solution": "$\\boxed{b;f;i}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['f'], expected=['b', 'f', 'i'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 10,
+      "field": "cmt_index_09_answer",
+      "source_index": 9,
+      "cmt_type": "QMC",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 330.189,
+      "stdout_bytes": 35,
+      "stderr_bytes": 38206,
+      "actual": [
+        "b",
+        "c"
+      ],
+      "expected": [
+        "b",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-10-cmt_index_09_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-10-cmt_index_09_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-10-cmt_index_09_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 9,
+            "type": "QMC",
+            "solution": "$\\boxed{b;e}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['b', 'c'], expected=['b', 'e'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 12,
+      "field": "cmt_index_11_answer",
+      "source_index": 11,
+      "cmt_type": "DMRG",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1320.623,
+      "stdout_bytes": 50,
+      "stderr_bytes": 146441,
+      "actual": "2^cn",
+      "expected": "2^{N/2-1}; c=1/2",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-12-cmt_index_11_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-12-cmt_index_11_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-12-cmt_index_11_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 11,
+            "type": "DMRG",
+            "solution": "$\\boxed{2^{N/2-1}; c=1/2}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='2^cn', expected='2^{N/2-1}; c=1/2', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 13,
+      "field": "cmt_index_12_answer",
+      "source_index": 12,
+      "cmt_type": "DMRG",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 120.107,
+      "stdout_bytes": 33,
+      "stderr_bytes": 33251,
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-13-cmt_index_12_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-13-cmt_index_12_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-13-cmt_index_12_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 12,
+            "type": "DMRG",
+            "solution": "$\\boxed{c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['b'], expected=['c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 14,
+      "field": "cmt_index_13_answer",
+      "source_index": 13,
+      "cmt_type": "VMC",
+      "run_label": "initial_no_timeout_item_14",
+      "run_id": "20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.271,
+      "stdout_bytes": 34,
+      "stderr_bytes": 47220,
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "d",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-14-cmt_index_13_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-14-cmt_index_13_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-14-cmt_index_13_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 13,
+            "type": "VMC",
+            "solution": "$\\boxed{d;e}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [
+        "data_source"
+      ],
+      "root_cause_hypothesis": "The model selected the missing-baseline VMC explanation while the benchmark expects support mismatch and high variance; this is best treated as a domain-reasoning miss with a source caveat.",
+      "confidence": "high",
+      "observed_failure": "actual=['b'], expected=['d', 'e'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 16,
+      "field": "cmt_index_15_answer",
+      "source_index": 15,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1650.898,
+      "stdout_bytes": 51,
+      "stderr_bytes": 208764,
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "d"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-16-cmt_index_15_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-16-cmt_index_15_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-16-cmt_index_15_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 15,
+            "type": "ED",
+            "solution": "$\\boxed{a; d}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'c'], expected=['a', 'd'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 17,
+      "field": "cmt_index_16_answer",
+      "source_index": 16,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1020.523,
+      "stdout_bytes": 44,
+      "stderr_bytes": 124338,
+      "actual": [
+        5.0
+      ],
+      "expected": [
+        7.0
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-17-cmt_index_16_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-17-cmt_index_16_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-17-cmt_index_16_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 16,
+            "type": "ED",
+            "solution": "$\\boxed{7}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=[5.0], expected=[7.0], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 18,
+      "field": "cmt_index_17_answer",
+      "source_index": 17,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 720.395,
+      "stdout_bytes": 276,
+      "stderr_bytes": 78213,
+      "actual": "-t(p^dagger_i,sigmap_j,sigma+p^dagger_j,sigmap_i,sigma)-u(m_i,uparrow-(1)/(2))(m_i,downarrow-(1)/(2))-mu(m_i,uparrow-m_i,downarrow)",
+      "expected": "-t (p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U (m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarrow}-\\frac{1}{2})-\\mu (m_{i,\\uparrow}-m_{i,\\downarrow}) -\\mu",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-18-cmt_index_17_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-18-cmt_index_17_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-18-cmt_index_17_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 17,
+            "type": "Other",
+            "solution": "$\\boxed{-t (p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U (m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarrow}-\\frac{1}{2})-\\mu (m_{i,\\uparrow}-m_{i,\\downarrow}) -\\mu}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='-t(p^dagger_i,sigmap_j,sigma+p^dagger_j,sigmap_i,sigma)-u(m_i,uparrow-(1)/(2))(m_i,downarrow-(1)/(2))-mu(m_i,uparrow-m_i,downarrow)', expected='-t (p^{\\\\dagger}_{i,\\\\sigma}p_{j,\\\\sigma}+p^{\\\\dagger}_{j,\\\\sigma}p_{i,\\\\sigma})-U (m_{i,\\\\uparrow}-\\\\frac{1}{2})(m_{i,\\\\downarrow}-\\\\frac{1}{2})-\\\\mu (m_{i,\\\\uparrow}-m_{i,\\\\downarrow}) -\\\\mu', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 19,
+      "field": "cmt_index_18_answer",
+      "source_index": 18,
+      "cmt_type": "QMC",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 600.33,
+      "stdout_bytes": 52,
+      "stderr_bytes": 140999,
+      "actual": [
+        "b",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "b"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-19-cmt_index_18_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-19-cmt_index_18_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-19-cmt_index_18_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 18,
+            "type": "QMC",
+            "solution": "$\\boxed{a;b}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['b', 'c'], expected=['a', 'b'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 20,
+      "field": "cmt_index_19_answer",
+      "source_index": 19,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 870.478,
+      "stdout_bytes": 39,
+      "stderr_bytes": 111202,
+      "actual": [
+        "a",
+        "c",
+        "e",
+        "g"
+      ],
+      "expected": [
+        "a"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-20-cmt_index_19_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-20-cmt_index_19_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-20-cmt_index_19_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 19,
+            "type": "ED",
+            "solution": "$\\boxed{a}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'c', 'e', 'g'], expected=['a'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 22,
+      "field": "cmt_index_21_answer",
+      "source_index": 21,
+      "cmt_type": "PEPS",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 240.16,
+      "stdout_bytes": 106,
+      "stderr_bytes": 30229,
+      "actual": "f=(partialn_k)/(partialb^)",
+      "expected": "N_k B",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-22-cmt_index_21_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-22-cmt_index_21_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-22-cmt_index_21_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 21,
+            "type": "PEPS",
+            "solution": "$\\boxed{N_k B}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='f=(partialn_k)/(partialb^)', expected='N_k B', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 24,
+      "field": "cmt_index_23_answer",
+      "source_index": 23,
+      "cmt_type": "Other",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1050.589,
+      "stdout_bytes": 83,
+      "stderr_bytes": 102629,
+      "actual": [
+        0.2,
+        0.0769,
+        0.0629,
+        0.0527,
+        0.0422
+      ],
+      "expected": [
+        0.2,
+        0.003,
+        0.017,
+        0.027,
+        0.038
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-24-cmt_index_23_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-24-cmt_index_23_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-24-cmt_index_23_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 23,
+            "type": "Other",
+            "solution": "$\\boxed{(0.200,0.003,0.017,0.027,0.038)}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=[0.2, 0.0769, 0.0629, 0.0527, 0.0422], expected=[0.2, 0.003, 0.017, 0.027, 0.038], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 26,
+      "field": "cmt_index_25_answer",
+      "source_index": 25,
+      "cmt_type": "ED",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": false,
+      "runtime_seconds": 2401.086,
+      "stdout_bytes": 0,
+      "stderr_bytes": 244413,
+      "actual": [],
+      "expected": [
+        "b",
+        "c",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-26-cmt_index_25_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-26-cmt_index_25_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-26-cmt_index_25_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 25,
+            "type": "ED",
+            "solution": "$\\boxed{b; c; e}$"
+          }
+        }
+      ],
+      "primary_category": "model_behavior",
+      "secondary_categories": [
+        "harness"
+      ],
+      "root_cause_hypothesis": "The model produced extensive reasoning but never finalized stdout JSON for this item.",
+      "confidence": "high",
+      "observed_failure": "actual=[], expected=['b', 'c', 'e'], json_emitted=False",
+      "recommended_action": "Add answer-finalization/self-stop policy and rerun this item.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 28,
+      "field": "cmt_index_27_answer",
+      "source_index": 27,
+      "cmt_type": "QMC",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 930.477,
+      "stdout_bytes": 49,
+      "stderr_bytes": 106368,
+      "actual": [
+        "g"
+      ],
+      "expected": [
+        "d",
+        "g"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-28-cmt_index_27_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-28-cmt_index_27_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-28-cmt_index_27_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 27,
+            "type": "QMC",
+            "solution": "$\\boxed{d; g}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['g'], expected=['d', 'g'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 29,
+      "field": "cmt_index_28_answer",
+      "source_index": 28,
+      "cmt_type": "DMRG",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 300.195,
+      "stdout_bytes": 33,
+      "stderr_bytes": 34789,
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "a"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-29-cmt_index_28_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-29-cmt_index_28_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-29-cmt_index_28_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 28,
+            "type": "DMRG",
+            "solution": "$\\boxed{a}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['b'], expected=['a'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 30,
+      "field": "cmt_index_29_answer",
+      "source_index": 29,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1260.629,
+      "stdout_bytes": 46,
+      "stderr_bytes": 163016,
+      "actual": [
+        "b",
+        "d",
+        "e"
+      ],
+      "expected": [
+        "b",
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-30-cmt_index_29_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-30-cmt_index_29_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-30-cmt_index_29_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 29,
+            "type": "Other",
+            "solution": "$\\boxed{b;c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['b', 'd', 'e'], expected=['b', 'c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 31,
+      "field": "cmt_index_30_answer",
+      "source_index": 30,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1770.878,
+      "stdout_bytes": 35,
+      "stderr_bytes": 233568,
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-31-cmt_index_30_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-31-cmt_index_30_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-31-cmt_index_30_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 30,
+            "type": "Other",
+            "solution": "$\\boxed{a;b;c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'c'], expected=['a', 'b', 'c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 32,
+      "field": "cmt_index_31_answer",
+      "source_index": 31,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 360.22,
+      "stdout_bytes": 38,
+      "stderr_bytes": 43903,
+      "actual": [
+        "a",
+        "b",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-32-cmt_index_31_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-32-cmt_index_31_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-32-cmt_index_31_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 31,
+            "type": "Other",
+            "solution": "$\\boxed{a;c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'b', 'c'], expected=['a', 'c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 33,
+      "field": "cmt_index_32_answer",
+      "source_index": 32,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 900.484,
+      "stdout_bytes": 42,
+      "stderr_bytes": 107025,
+      "actual": "1",
+      "expected": "\\mu-tq^2B/4",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-33-cmt_index_32_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-33-cmt_index_32_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-33-cmt_index_32_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 32,
+            "type": "Other",
+            "solution": "$\\boxed{\\mu-tq^2B/4}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='1', expected='\\\\mu-tq^2B/4', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 34,
+      "field": "cmt_index_33_answer",
+      "source_index": 33,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 210.138,
+      "stdout_bytes": 35,
+      "stderr_bytes": 25955,
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-34-cmt_index_33_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-34-cmt_index_33_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-34-cmt_index_33_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 33,
+            "type": "Other",
+            "solution": "$\\boxed{c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'c'], expected=['c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 35,
+      "field": "cmt_index_34_answer",
+      "source_index": 34,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 450.265,
+      "stdout_bytes": 37,
+      "stderr_bytes": 65559,
+      "actual": [
+        "a",
+        "c",
+        "d"
+      ],
+      "expected": [
+        "a",
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-35-cmt_index_34_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-35-cmt_index_34_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-35-cmt_index_34_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 34,
+            "type": "Other",
+            "solution": "$\\boxed{a;c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'c', 'd'], expected=['a', 'c'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 37,
+      "field": "cmt_index_36_answer",
+      "source_index": 36,
+      "cmt_type": "PEPS",
+      "run_label": "initial_no_timeout_item_37",
+      "run_id": "20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 120.134,
+      "stdout_bytes": 54,
+      "stderr_bytes": 14400,
+      "actual": [
+        "b",
+        "c",
+        "d"
+      ],
+      "expected": [
+        "g"
+      ],
+      "source_flags": [
+        {
+          "kind": "duplicate_option_labels",
+          "value": [
+            "g"
+          ],
+          "severity": "high"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-37-cmt_index_36_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-37-cmt_index_36_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50/logs/item-37-cmt_index_36_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 36,
+            "type": "PEPS",
+            "solution": "$\\boxed{g}$"
+          }
+        }
+      ],
+      "primary_category": "data_source",
+      "secondary_categories": [
+        "answer_accuracy",
+        "verifier"
+      ],
+      "root_cause_hypothesis": "The source prompt has duplicated option label g, and the gold g is ambiguous relative to the written PEPS/CFT procedure.",
+      "confidence": "high",
+      "observed_failure": "actual=['b', 'c', 'd'], expected=['g'], json_emitted=True",
+      "recommended_action": "Audit or quarantine this source row before using it as clean model-failure evidence.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 38,
+      "field": "cmt_index_37_answer",
+      "source_index": 37,
+      "cmt_type": "Other",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 960.413,
+      "stdout_bytes": 60,
+      "stderr_bytes": 109294,
+      "actual": [
+        2.0,
+        3.0
+      ],
+      "expected": [
+        1.0,
+        3.0
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-38-cmt_index_37_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-38-cmt_index_37_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-38-cmt_index_37_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 37,
+            "type": "Other",
+            "solution": "$\\boxed{1; 3}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=[2.0, 3.0], expected=[1.0, 3.0], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 39,
+      "field": "cmt_index_38_answer",
+      "source_index": 38,
+      "cmt_type": "Other",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 630.372,
+      "stdout_bytes": 38,
+      "stderr_bytes": 73426,
+      "actual": [
+        "a",
+        "d",
+        "g"
+      ],
+      "expected": [
+        "a",
+        "d",
+        "i"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-39-cmt_index_38_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-39-cmt_index_38_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-39-cmt_index_38_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 38,
+            "type": "Other",
+            "solution": "$\\boxed{a;d;i}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'd', 'g'], expected=['a', 'd', 'i'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 40,
+      "field": "cmt_index_39_answer",
+      "source_index": 39,
+      "cmt_type": "Other",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.225,
+      "stdout_bytes": 101,
+      "stderr_bytes": 48278,
+      "actual": "(2(t_2^2-t_1^2))/(t_2)((t_1)/(t_2))^n",
+      "expected": "2t_1(t_1/t_2)^n",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-40-cmt_index_39_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-40-cmt_index_39_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-40-cmt_index_39_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 39,
+            "type": "Other",
+            "solution": "$\\boxed{2t_1(t_1/t_2)^n}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='(2(t_2^2-t_1^2))/(t_2)((t_1)/(t_2))^n', expected='2t_1(t_1/t_2)^n', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 41,
+      "field": "cmt_index_40_answer",
+      "source_index": 40,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1380.73,
+      "stdout_bytes": 36,
+      "stderr_bytes": 129306,
+      "actual": [
+        "a",
+        "e"
+      ],
+      "expected": [
+        "a",
+        "d",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-41-cmt_index_40_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-41-cmt_index_40_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-41-cmt_index_40_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 40,
+            "type": "Other",
+            "solution": "$\\boxed{a;d;e}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=['a', 'e'], expected=['a', 'd', 'e'], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 42,
+      "field": "cmt_index_41_answer",
+      "source_index": 41,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1320.675,
+      "stdout_bytes": 109,
+      "stderr_bytes": 121141,
+      "actual": "frac2tanh((betahbaromega)/(2))hbaromegav",
+      "expected": "\\frac{2\\tanh(\\frac{\\beta \\omega}{2})}{\\omega}",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-42-cmt_index_41_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-42-cmt_index_41_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-42-cmt_index_41_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 41,
+            "type": "Other",
+            "solution": "$\\boxed{\\frac{2\\tanh(\\frac{\\beta \\omega}{2})}{\\omega}}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='frac2tanh((betahbaromega)/(2))hbaromegav', expected='\\\\frac{2\\\\tanh(\\\\frac{\\\\beta \\\\omega}{2})}{\\\\omega}', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 43,
+      "field": "cmt_index_42_answer",
+      "source_index": 42,
+      "cmt_type": "SM",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1140.595,
+      "stdout_bytes": 214,
+      "stderr_bytes": 103368,
+      "actual": "-dfracgammatau^3v_0^2omega(gammatau+2m)(1+tau^2omega^2)[(gammatau+m)^2+m^2tau^2omega^2]",
+      "expected": "D_o = \\frac{\\tau^2 \\rho v_0^2 \\Omega (2+\\rho)}{[(1+\\rho)^2 + (\\Omega \\tau)^2][1+(\\Omega \\tau)^2]}",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-43-cmt_index_42_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-43-cmt_index_42_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-43-cmt_index_42_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 42,
+            "type": "SM",
+            "solution": "$\\boxed{D_o = \\frac{\\tau^2 \\rho v_0^2 \\Omega (2+\\rho)}{[(1+\\rho)^2 + (\\Omega \\tau)^2][1+(\\Omega \\tau)^2]}}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='-dfracgammatau^3v_0^2omega(gammatau+2m)(1+tau^2omega^2)[(gammatau+m)^2+m^2tau^2omega^2]', expected='D_o = \\\\frac{\\\\tau^2 \\\\rho v_0^2 \\\\Omega (2+\\\\rho)}{[(1+\\\\rho)^2 + (\\\\Omega \\\\tau)^2][1+(\\\\Omega \\\\tau)^2]}', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 44,
+      "field": "cmt_index_43_answer",
+      "source_index": 43,
+      "cmt_type": "SM",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 690.366,
+      "stdout_bytes": 61,
+      "stderr_bytes": 96176,
+      "actual": "a",
+      "expected": "c",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-44-cmt_index_43_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-44-cmt_index_43_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-44-cmt_index_43_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 43,
+            "type": "SM",
+            "solution": "$\\boxed{c}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='a', expected='c', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 45,
+      "field": "cmt_index_44_answer",
+      "source_index": 44,
+      "cmt_type": "SM",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 630.325,
+      "stdout_bytes": 63,
+      "stderr_bytes": 74632,
+      "actual": "sigmasqrtgamma",
+      "expected": "K_c = \\sigma [1 - \\frac{1}{\\sqrt{3}}]\\sqrt{\\gamma + \\frac{2\\sigma^2}{3}(1 + \\sqrt{1 + \\frac{3\\gamma}{\\sigma^2}})}",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-45-cmt_index_44_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-45-cmt_index_44_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-45-cmt_index_44_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 44,
+            "type": "SM",
+            "solution": "$\\boxed{K_c = \\sigma [1 - \\frac{1}{\\sqrt{3}}]\\sqrt{\\gamma + \\frac{2\\sigma^2}{3}(1 + \\sqrt{1 + \\frac{3\\gamma}{\\sigma^2}})}}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='sigmasqrtgamma', expected='K_c = \\\\sigma [1 - \\\\frac{1}{\\\\sqrt{3}}]\\\\sqrt{\\\\gamma + \\\\frac{2\\\\sigma^2}{3}(1 + \\\\sqrt{1 + \\\\frac{3\\\\gamma}{\\\\sigma^2}})}', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 47,
+      "field": "cmt_index_46_answer",
+      "source_index": 46,
+      "cmt_type": "SM",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 2070.922,
+      "stdout_bytes": 85,
+      "stderr_bytes": 237218,
+      "actual": "((p+x^3)^2)/(4x^4)-(x^2)/(2)",
+      "expected": "\\frac{(p + x^3)^2}{4 x^4} + 4 x^2",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-47-cmt_index_46_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-47-cmt_index_46_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-47-cmt_index_46_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 46,
+            "type": "SM",
+            "solution": "$\\boxed{\\frac{(p + x^3)^2}{4 x^4} + 4 x^2}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual='((p+x^3)^2)/(4x^4)-(x^2)/(2)', expected='\\\\frac{(p + x^3)^2}{4 x^4} + 4 x^2', json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    },
+    {
+      "problem_number": 50,
+      "field": "cmt_index_49_answer",
+      "source_index": 49,
+      "cmt_type": "SM",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 1200.547,
+      "stdout_bytes": 51,
+      "stderr_bytes": 275586,
+      "actual": [
+        0.5,
+        0.36
+      ],
+      "expected": [
+        0.33,
+        0.27
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-50-cmt_index_49_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-50-cmt_index_49_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-50-cmt_index_49_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 49,
+            "type": "SM",
+            "solution": "$\\boxed{0.33, 0.27}$"
+          }
+        }
+      ],
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [],
+      "root_cause_hypothesis": "The model emitted parseable JSON, but the parsed answer did not match the verifier gold.",
+      "confidence": "high",
+      "observed_failure": "actual=[0.5, 0.36], expected=[0.33, 0.27], json_emitted=True",
+      "recommended_action": "Use as model/domain-reasoning feedback; inspect stderr and cluster with similar CMT type.",
+      "retest_plan": "Rerun this item after the corresponding intervention and compare JSON emission plus verifier result."
+    }
+  ],
+  "passed_item_reviews": [
+    {
+      "problem_number": 5,
+      "field": "cmt_index_04_answer",
+      "source_index": 4,
+      "cmt_type": "HF",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 1140.564,
+      "stdout_bytes": 33,
+      "stderr_bytes": 123830,
+      "actual": "c",
+      "expected": "c",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-05-cmt_index_04_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-05-cmt_index_04_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-05-cmt_index_04_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 4,
+            "type": "HF",
+            "solution": "$\\boxed{c}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "single-letter symbolic pass has option-like lucky-hit risk"
+      ],
+      "stderr_stats": {
+        "bytes": 123830,
+        "lines": 1018,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 6,
+      "field": "cmt_index_05_answer",
+      "source_index": 5,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 750.427,
+      "stdout_bytes": 37,
+      "stderr_bytes": 69965,
+      "actual": [
+        "a",
+        "b",
+        "d"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "d"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-06-cmt_index_05_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-06-cmt_index_05_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-06-cmt_index_05_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 5,
+            "type": "ED",
+            "solution": "$\\boxed{a; b; d}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 69965,
+        "lines": 650,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 11,
+      "field": "cmt_index_10_answer",
+      "source_index": 10,
+      "cmt_type": "QMC",
+      "run_label": "remaining_batch_a",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 420.234,
+      "stdout_bytes": 34,
+      "stderr_bytes": 63076,
+      "actual": [
+        "g"
+      ],
+      "expected": [
+        "g"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-11-cmt_index_10_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-11-cmt_index_10_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_a/logs/item-11-cmt_index_10_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 10,
+            "type": "QMC",
+            "solution": "$\\boxed{g}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 63076,
+        "lines": 704,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 15,
+      "field": "cmt_index_14_answer",
+      "source_index": 14,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 1320.798,
+      "stdout_bytes": 36,
+      "stderr_bytes": 154060,
+      "actual": [
+        "b",
+        "e"
+      ],
+      "expected": [
+        "b",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-15-cmt_index_14_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-15-cmt_index_14_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-15-cmt_index_14_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 14,
+            "type": "ED",
+            "solution": "$\\boxed{b; e}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 154060,
+        "lines": 1655,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 21,
+      "field": "cmt_index_20_answer",
+      "source_index": 20,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 300.204,
+      "stdout_bytes": 35,
+      "stderr_bytes": 42694,
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "c"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-21-cmt_index_20_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-21-cmt_index_20_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-21-cmt_index_20_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 20,
+            "type": "ED",
+            "solution": "$\\boxed{a; c}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 42694,
+        "lines": 287,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 23,
+      "field": "cmt_index_22_answer",
+      "source_index": 22,
+      "cmt_type": "ED",
+      "run_label": "remaining_batch_b",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 1680.791,
+      "stdout_bytes": 42,
+      "stderr_bytes": 248570,
+      "actual": [
+        4.0
+      ],
+      "expected": [
+        4.0
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-23-cmt_index_22_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-23-cmt_index_22_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_b/logs/item-23-cmt_index_22_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 22,
+            "type": "ED",
+            "solution": "$\\boxed{4}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "low",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON"
+      ],
+      "stderr_stats": {
+        "bytes": 248570,
+        "lines": 1358,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Count as capability-supported pass"
+    },
+    {
+      "problem_number": 25,
+      "field": "cmt_index_24_answer",
+      "source_index": 24,
+      "cmt_type": "QMC",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 750.411,
+      "stdout_bytes": 38,
+      "stderr_bytes": 88982,
+      "actual": [
+        "c",
+        "d",
+        "e"
+      ],
+      "expected": [
+        "c",
+        "d",
+        "e"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-25-cmt_index_24_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-25-cmt_index_24_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-25-cmt_index_24_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 24,
+            "type": "QMC",
+            "solution": "$\\boxed{c; d; e}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 88982,
+        "lines": 1228,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 27,
+      "field": "cmt_index_26_answer",
+      "source_index": 26,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 420.324,
+      "stdout_bytes": 76,
+      "stderr_bytes": 35318,
+      "actual": "o_n=e_n-e_n-1",
+      "expected": "O_n=E_n-E_{n-1}",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-27-cmt_index_26_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-27-cmt_index_26_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-27-cmt_index_26_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 26,
+            "type": "Other",
+            "solution": "$\\boxed{O_n=E_n-E_{n-1}}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "low",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON"
+      ],
+      "stderr_stats": {
+        "bytes": 35318,
+        "lines": 593,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Count as capability-supported pass"
+    },
+    {
+      "problem_number": 36,
+      "field": "cmt_index_35_answer",
+      "source_index": 35,
+      "cmt_type": "Other",
+      "run_label": "remaining_batch_c",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 1920.848,
+      "stdout_bytes": 36,
+      "stderr_bytes": 258910,
+      "actual": [
+        "a",
+        "b"
+      ],
+      "expected": [
+        "a",
+        "b"
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-36-cmt_index_35_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-36-cmt_index_35_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_c/logs/item-36-cmt_index_35_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 35,
+            "type": "Other",
+            "solution": "$\\boxed{a;b}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "medium",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON",
+        "choice-set pass still has lucky-hit risk unless validated by paraphrase rerun"
+      ],
+      "stderr_stats": {
+        "bytes": 258910,
+        "lines": 2919,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 46,
+      "field": "cmt_index_45_answer",
+      "source_index": 45,
+      "cmt_type": "SM",
+      "run_label": "remaining_batch_d",
+      "run_id": "20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 390.246,
+      "stdout_bytes": 33,
+      "stderr_bytes": 58232,
+      "actual": "d",
+      "expected": "d",
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-46-cmt_index_45_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-46-cmt_index_45_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260603-233544__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__remaining_batch_d/logs/item-46-cmt_index_45_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 45,
+            "type": "SM",
+            "solution": "$\\boxed{d}$"
+          }
+        }
+      ],
+      "success_category": "leakage_suspect",
+      "capability_confidence": "low",
+      "hallucination_or_lucky_hit_risk": "high",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "output/reasoning mentions gold or answer key"
+      ],
+      "stderr_stats": {
+        "bytes": 58232,
+        "lines": 196,
+        "mentions_gold": true,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Keep pass but review before using as strong capability evidence"
+    },
+    {
+      "problem_number": 48,
+      "field": "cmt_index_47_answer",
+      "source_index": 47,
+      "cmt_type": "Other",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 1440.686,
+      "stdout_bytes": 46,
+      "stderr_bytes": 169870,
+      "actual": [
+        2.0,
+        2.0,
+        1.0
+      ],
+      "expected": [
+        2.0,
+        2.0,
+        1.0
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-48-cmt_index_47_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-48-cmt_index_47_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-48-cmt_index_47_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 47,
+            "type": "Other",
+            "solution": "$\\boxed{2,2,1}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "low",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON"
+      ],
+      "stderr_stats": {
+        "bytes": 169870,
+        "lines": 1173,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Count as capability-supported pass"
+    },
+    {
+      "problem_number": 49,
+      "field": "cmt_index_48_answer",
+      "source_index": 48,
+      "cmt_type": "PEPS",
+      "run_label": "env_rerun_9",
+      "run_id": "20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9",
+      "passed": true,
+      "json_emitted": true,
+      "runtime_seconds": 840.435,
+      "stdout_bytes": 32,
+      "stderr_bytes": 125250,
+      "actual": [
+        6.0
+      ],
+      "expected": [
+        6.0
+      ],
+      "source_flags": [],
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-49-cmt_index_48_answer.prompt.md",
+          "note": "single-item prompt"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-49-cmt_index_48_answer.stdout.txt",
+          "note": "model stdout"
+        },
+        {
+          "kind": "file",
+          "path": "runs/20260604-095602__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__env_rerun_9/logs/item-49-cmt_index_48_answer.stderr.txt",
+          "note": "model stderr/reasoning"
+        },
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "index": 48,
+            "type": "PEPS",
+            "solution": "$\\boxed{6}$"
+          }
+        }
+      ],
+      "success_category": "capability_supported",
+      "capability_confidence": "high",
+      "hallucination_or_lucky_hit_risk": "low",
+      "reasoning_evidence_summary": [
+        "reasoning contains uncertainty language",
+        "substantial item-specific reasoning before correct JSON"
+      ],
+      "stderr_stats": {
+        "bytes": 125250,
+        "lines": 2061,
+        "mentions_gold": false,
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "review_decision": "Count as capability-supported pass"
+    }
+  ],
+  "recommended_iterations": [
+    {
+      "target": "answer_accuracy",
+      "action": "Cluster failed items by CMT type and build focused probes for each cluster.",
+      "why": "Most latest failures are wrong-but-parseable answers, not JSON emission failures.",
+      "retest": "Rerun one representative per cluster before rerunning CMT50."
+    },
+    {
+      "target": "model_behavior",
+      "action": "Add final-answer forcing/self-stop after a bounded reasoning budget.",
+      "why": "Item 26 showed continuous reasoning for about 2401 s without stdout JSON.",
+      "retest": "Rerun item 26 and compare time-to-JSON."
+    },
+    {
+      "target": "success_review",
+      "action": "Treat low-risk capability-supported passes as positive exemplars; manually review medium-risk passes before using them as capability claims.",
+      "why": "A passed verifier result alone can hide lucky option hits or source artifacts.",
+      "retest": "Rerun medium-risk passes with paraphrased prompts or stricter derivation requirements."
+    }
+  ]
+}

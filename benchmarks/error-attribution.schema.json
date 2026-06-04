@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hakimi.local/schemas/error-attribution.schema.json",
+  "title": "Agent Test Error Attribution",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "benchmark_id",
+    "task_id",
+    "run_id",
+    "created_at",
+    "summary",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "benchmark_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "score": {
+      "type": "object",
+      "properties": {
+        "passed": { "type": "number" },
+        "total": { "type": "number" },
+        "hard_score": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": "object",
+      "required": ["dominant_failure_modes", "conclusion"],
+      "properties": {
+        "conclusion": { "type": "string" },
+        "dominant_failure_modes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/failure_category" }
+        },
+        "json_emission_rate": { "type": "number" },
+        "answer_accuracy_rate": { "type": "number" },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidence_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "probes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/probe" }
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/item_attribution" }
+    },
+    "recommended_iterations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recommended_iteration" }
+    }
+  },
+  "$defs": {
+    "failure_category": {
+      "type": "string",
+      "enum": [
+        "harness",
+        "model_behavior",
+        "answer_accuracy",
+        "verifier",
+        "data_source",
+        "environment",
+        "leakage_or_policy",
+        "unknown"
+      ]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "item_attribution": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "observed_failure",
+        "primary_category",
+        "root_cause_hypothesis",
+        "confidence",
+        "evidence",
+        "recommended_action",
+        "retest_plan"
+      ],
+      "properties": {
+        "item_id": { "type": "string" },
+        "field": { "type": "string" },
+        "source_index": { "type": ["integer", "string"] },
+        "observed_failure": { "type": "string" },
+        "primary_category": { "$ref": "#/$defs/failure_category" },
+        "secondary_categories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/failure_category" }
+        },
+        "root_cause_hypothesis": { "type": "string" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "actual": {},
+        "expected": {},
+        "passed": { "type": "boolean" },
+        "json_emitted": { "type": "boolean" },
+        "runtime_seconds": { "type": "number" },
+        "stdout_bytes": { "type": "integer" },
+        "stderr_bytes": { "type": "integer" },
+        "recommended_action": { "type": "string" },
+        "retest_plan": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "examples": ["file", "metric", "stdout", "stderr", "score", "prompt", "probe"]
+        },
+        "value": {},
+        "path": { "type": "string" },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "probe": {
+      "type": "object",
+      "required": ["name", "changed_variable", "result", "interpretation"],
+      "properties": {
+        "name": { "type": "string" },
+        "changed_variable": { "type": "string" },
+        "result": { "type": "string" },
+        "interpretation": { "type": "string" },
+        "evidence_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "recommended_iteration": {
+      "type": "object",
+      "required": ["target", "action", "why", "retest"],
+      "properties": {
+        "target": { "$ref": "#/$defs/failure_category" },
+        "action": { "type": "string" },
+        "why": { "type": "string" },
+        "retest": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

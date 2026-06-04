@@ -1,0 +1,241 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "existing-cmt-hard-stress-v0.1",
+  "task_id": "cmt-hard-research-50",
+  "run_id": "cmt50_no_timeout_3item_deepdive_2026-06-03",
+  "created_at": "2026-06-03",
+  "score": {
+    "passed": 0,
+    "total": 3,
+    "hard_score": 0.0
+  },
+  "summary": {
+    "conclusion": "The three no-timeout failures split into source/gold-boundary issues for items 1 and 37, and a cleaner VMC answer-accuracy failure for item 14.",
+    "dominant_failure_modes": [
+      "data_source",
+      "answer_accuracy"
+    ],
+    "json_emission_rate": 1.0,
+    "answer_accuracy_rate": 0.0,
+    "notes": [
+      "All three no-timeout probes emitted parseable JSON.",
+      "Item 37 has duplicated option label g in the source prompt.",
+      "Item 1 expected answer appears physically inconsistent with a standard spinful triangular-lattice CDW interpretation.",
+      "Item 14 is the cleanest model/domain failure among the three."
+    ]
+  },
+  "evidence_files": [
+    "source-cmt_data.jsonl",
+    "tasks/cmt-hard-research-50/private/gold.json",
+    "runs/20260603-224928__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+    "runs/20260603-224153__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50",
+    "runs/20260603-225658__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50"
+  ],
+  "probes": [
+    {
+      "name": "no_timeout_item_1",
+      "changed_variable": "removed fixed answer timeout",
+      "result": "JSON emitted after 420.267 s with actual U_0/3+2U_1",
+      "interpretation": "timeout was not the final failure; answer/gold interpretation dominates"
+    },
+    {
+      "name": "no_timeout_item_14",
+      "changed_variable": "removed fixed answer timeout",
+      "result": "JSON emitted after 420.271 s with actual b",
+      "interpretation": "model selected a plausible baseline-bias explanation but missed benchmark key d;e"
+    },
+    {
+      "name": "no_timeout_item_37",
+      "changed_variable": "removed fixed answer timeout",
+      "result": "JSON emitted after 120.134 s with actual b;c;d",
+      "interpretation": "model selected standard tensor-network sequence; source option labels are inconsistent"
+    }
+  ],
+  "items": [
+    {
+      "item_id": "cmt_index_00",
+      "field": "cmt_index_00_answer",
+      "source_index": 0,
+      "observed_failure": "Kimi emitted U_0/3+2U_1 while the source key expects U_1/2.",
+      "primary_category": "data_source",
+      "secondary_categories": [
+        "answer_accuracy",
+        "model_behavior"
+      ],
+      "root_cause_hypothesis": "The prompt suggests spinful triangular-lattice CDW physics, for which Kimi's U_0/3+2U_1 interpretation is plausible; the source key U_1/2 may correspond to a different hard-core/spinless or occupancy-counting formulation.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "solution": "U_1/2",
+            "type": "HF"
+          }
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "U_0/3+2U_1",
+            "expected": "U_1/2",
+            "passed": false
+          }
+        },
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 420.267,
+            "stdout_bytes": 42,
+            "stderr_bytes": 55962
+          }
+        },
+        {
+          "kind": "stderr",
+          "value": "Kimi reasoned about three-sublattice CDW energy U0/3+2U1, uniform energy 3U1, and boundary U0=3U1."
+        }
+      ],
+      "actual": "U_0/3+2U_1",
+      "expected": "U_1/2",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.267,
+      "stdout_bytes": 42,
+      "stderr_bytes": 55962,
+      "recommended_action": "Audit original item 0 source/gold rationale before counting this as model error.",
+      "retest_plan": "After audit, rerun item 1 with clarified spinful/CDW/hard-core assumptions."
+    },
+    {
+      "item_id": "cmt_index_13",
+      "field": "cmt_index_13_answer",
+      "source_index": 13,
+      "observed_failure": "Kimi emitted b while the source key expects d;e.",
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [
+        "data_source"
+      ],
+      "root_cause_hypothesis": "Kimi focused on the standard VMC missing-baseline covariance term and rejected support mismatch; the benchmark expects support mismatch and high variance.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "solution": "d;e",
+            "type": "VMC"
+          }
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "b",
+            "expected": [
+              "d",
+              "e"
+            ],
+            "passed": false
+          }
+        },
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 420.271,
+            "stdout_bytes": 34,
+            "stderr_bytes": 47220
+          }
+        },
+        {
+          "kind": "stderr",
+          "value": "Kimi derived dE/dalpha = 2[<O E_L> - <O><E_L>] and selected option b."
+        }
+      ],
+      "actual": "b",
+      "expected": [
+        "d",
+        "e"
+      ],
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.271,
+      "stdout_bytes": 34,
+      "stderr_bytes": 47220,
+      "recommended_action": "Use this as a focused model/domain failure and build VMC support-mismatch probes.",
+      "retest_plan": "Run simplified VMC baseline/support probes, then rerun item 14."
+    },
+    {
+      "item_id": "cmt_index_36",
+      "field": "cmt_index_36_answer",
+      "source_index": 36,
+      "observed_failure": "Kimi emitted b;c;d while the source key expects g, and the source prompt repeats option label g.",
+      "primary_category": "data_source",
+      "secondary_categories": [
+        "answer_accuracy",
+        "verifier"
+      ],
+      "root_cause_hypothesis": "The written physics task asks for the standard tensor-network sequence, while the gold key selects an ambiguous duplicated g option.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "source-cmt_data.jsonl",
+          "value": {
+            "solution": "g",
+            "duplicated_option_label": "g"
+          }
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "b;c;d",
+            "expected": [
+              "g"
+            ],
+            "passed": false
+          }
+        },
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 120.134,
+            "stdout_bytes": 54,
+            "stderr_bytes": 14400
+          }
+        },
+        {
+          "kind": "stderr",
+          "value": "Kimi explicitly noticed the duplicated g option and selected coarse-grain, transfer matrix, eigenvalue spectrum."
+        }
+      ],
+      "actual": "b;c;d",
+      "expected": [
+        "g"
+      ],
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 120.134,
+      "stdout_bytes": 54,
+      "stderr_bytes": 14400,
+      "recommended_action": "Quarantine or repair item 36 before using it in agent-iteration scoring.",
+      "retest_plan": "Inspect original source generation and relabel options before rerun."
+    }
+  ],
+  "recommended_iterations": [
+    {
+      "target": "data_source",
+      "action": "Audit CMT source rows 0 and 36 before treating them as model failures.",
+      "why": "Both show strong signs of prompt/gold or option-label mismatch.",
+      "retest": "Rerun audited items with unchanged verifier or exclude them if ambiguous."
+    },
+    {
+      "target": "answer_accuracy",
+      "action": "Build simplified VMC/RNN probes around item 14.",
+      "why": "Item 14 is the cleanest model reasoning miss in the no-timeout slice.",
+      "retest": "Run baseline/support/suppport-plus-variance VMC probes and compare choices."
+    },
+    {
+      "target": "verifier",
+      "action": "Add an ambiguous-item flag to the CMT50 index and score reports.",
+      "why": "Data-quality failures should not be aggregated as ordinary model failures.",
+      "retest": "Regenerate score summaries with clean vs quarantined subsets."
+    }
+  ]
+}

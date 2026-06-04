@@ -1,0 +1,242 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "existing-cmt-hard-stress-v0.1",
+  "task_id": "cmt-hard-research-50",
+  "run_id": "20260603-204342__kimi26_code_allowed_itemwise__cmt_hard_research_50",
+  "created_at": "2026-06-03",
+  "score": {
+    "passed": 0,
+    "total": 50,
+    "hard_score": 0.0
+  },
+  "summary": {
+    "conclusion": "Fixed-time CMT50 failures were dominated by timeout-before-final-answer behavior, while no-answer-timeout probes show JSON emission can recover but answer accuracy remains poor.",
+    "dominant_failure_modes": [
+      "model_behavior",
+      "answer_accuracy",
+      "harness"
+    ],
+    "json_emission_rate": 0.02,
+    "answer_accuracy_rate": 0.0,
+    "notes": [
+      "Original fixed-time run emitted parseable JSON for 1 of 50 items.",
+      "No-answer-timeout probes emitted parseable JSON for 3 of 3 tested items.",
+      "No-answer-timeout probes passed 0 of 3 tested items."
+    ]
+  },
+  "evidence_files": [
+    "runs/20260603-204342__kimi26_code_allowed_itemwise__cmt_hard_research_50/run-metadata.json",
+    "runs/20260603-204342__kimi26_code_allowed_itemwise__cmt_hard_research_50/scores/cmt-hard-research-50.itemwise.score.json",
+    "KIMI-NO-JSON-INVESTIGATION-2026-06-03.md",
+    "NO-TIMEOUT-SLICE-2026-06-03.md"
+  ],
+  "probes": [
+    {
+      "name": "json_smoke_test",
+      "changed_variable": "simple output-only prompt",
+      "result": "stdout emitted JSON immediately",
+      "interpretation": "Kimi CLI stdout path works for final answers"
+    },
+    {
+      "name": "item_1_120s",
+      "changed_variable": "timeout raised from 45 s to 120 s",
+      "result": "stdout remained empty while stderr grew",
+      "interpretation": "item 1 was not just a short-timeout artifact"
+    },
+    {
+      "name": "300s_slice",
+      "changed_variable": "timeout raised to 300 s",
+      "result": "some items emitted JSON, some still did not, emitted answers were wrong",
+      "interpretation": "longer time improves emission but not correctness"
+    },
+    {
+      "name": "no_answer_timeout_slice",
+      "changed_variable": "fixed answer timeout removed; idle-output guard retained",
+      "result": "items 1, 14, and 37 emitted JSON but all failed",
+      "interpretation": "answer accuracy must be tracked separately from JSON emission"
+    }
+  ],
+  "items": [
+    {
+      "item_id": "cmt_index_00",
+      "field": "cmt_index_00_answer",
+      "source_index": 0,
+      "observed_failure": "Fixed-time runs failed to emit stdout JSON; no-answer-timeout run emitted JSON but answer was wrong.",
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [
+        "model_behavior",
+        "harness"
+      ],
+      "root_cause_hypothesis": "Kimi eventually converges to a plausible CDW energy expression, but not the benchmark key.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 420.267,
+            "stdout_bytes": 42,
+            "stderr_bytes": 55962
+          },
+          "note": "no-answer-timeout item 1 run"
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "U_0/3+2U_1",
+            "expected": "U_1/2",
+            "passed": false
+          }
+        }
+      ],
+      "actual": "U_0/3+2U_1",
+      "expected": "U_1/2",
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.267,
+      "stdout_bytes": 42,
+      "stderr_bytes": 55962,
+      "recommended_action": "Inspect source row and gold rationale before using this item for agent-design conclusions.",
+      "retest_plan": "Rerun after source/gold inspection with a rationale-constrained prompt."
+    },
+    {
+      "item_id": "cmt_index_13",
+      "field": "cmt_index_13_answer",
+      "source_index": 13,
+      "observed_failure": "No-answer-timeout run emitted parseable JSON but selected only b instead of d;e.",
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [
+        "model_behavior"
+      ],
+      "root_cause_hypothesis": "Kimi focused on the missing baseline argument and missed the support-mismatch choices expected by the benchmark.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 420.271,
+            "stdout_bytes": 34,
+            "stderr_bytes": 47220
+          },
+          "note": "no-answer-timeout item 14 run"
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "b",
+            "expected": [
+              "d",
+              "e"
+            ],
+            "passed": false
+          }
+        }
+      ],
+      "actual": "b",
+      "expected": [
+        "d",
+        "e"
+      ],
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 420.271,
+      "stdout_bytes": 34,
+      "stderr_bytes": 47220,
+      "recommended_action": "Add a method-specific VMC support-condition probe.",
+      "retest_plan": "Run item 14 plus a simplified VMC estimator probe after prompt changes."
+    },
+    {
+      "item_id": "cmt_index_36",
+      "field": "cmt_index_36_answer",
+      "source_index": 36,
+      "observed_failure": "Kimi emitted b;c;d, while local gold expects g.",
+      "primary_category": "answer_accuracy",
+      "secondary_categories": [
+        "data_source"
+      ],
+      "root_cause_hypothesis": "Kimi follows a standard PEPS/CFT transfer-matrix procedure; source option text may be noisy and needs inspection.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 120.134,
+            "stdout_bytes": 54,
+            "stderr_bytes": 14400
+          },
+          "note": "no-answer-timeout item 37 run"
+        },
+        {
+          "kind": "score",
+          "value": {
+            "actual": "b;c;d",
+            "expected": [
+              "g"
+            ],
+            "passed": false
+          }
+        }
+      ],
+      "actual": "b;c;d",
+      "expected": [
+        "g"
+      ],
+      "passed": false,
+      "json_emitted": true,
+      "runtime_seconds": 120.134,
+      "stdout_bytes": 54,
+      "stderr_bytes": 14400,
+      "recommended_action": "Inspect original item options and mark ambiguous if the source label is inconsistent.",
+      "retest_plan": "Rerun after source option audit."
+    },
+    {
+      "item_id": "cmt_index_49",
+      "field": "cmt_index_49_answer",
+      "source_index": 49,
+      "observed_failure": "300 s diagnostic run did not emit stdout JSON.",
+      "primary_category": "model_behavior",
+      "secondary_categories": [
+        "harness"
+      ],
+      "root_cause_hypothesis": "ASCII/graph reasoning triggered prolonged unresolved deliberation.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "kind": "metric",
+          "value": {
+            "runtime_seconds": 300.92,
+            "stdout_bytes": 0,
+            "stderr_bytes": 55939
+          },
+          "note": "300 s diagnostic item 50 run"
+        }
+      ],
+      "passed": false,
+      "json_emitted": false,
+      "runtime_seconds": 300.92,
+      "stdout_bytes": 0,
+      "stderr_bytes": 55939,
+      "recommended_action": "Run item 50 with the no-answer-timeout harness only if needed; otherwise keep it as a nontermination probe.",
+      "retest_plan": "Use idle-output guard and compare JSON emission with an answer-forcing prompt."
+    }
+  ],
+  "recommended_iterations": [
+    {
+      "target": "harness",
+      "action": "Record stdout bytes, stderr bytes, captured_json, runtime, and idle timing in every benchmark run.",
+      "why": "Aggregate scores hide whether failures are empty-output, malformed-output, or wrong-answer failures.",
+      "retest": "Run a 3-item slice and confirm attribution fields are populated."
+    },
+    {
+      "target": "model_behavior",
+      "action": "Compare fixed-time, no-answer-timeout, and answer-forcing prompts on the same small slice.",
+      "why": "Kimi can eventually emit JSON on some items, but the convergence time is long.",
+      "retest": "Use items 1, 14, 37, and 50 as the diagnostic slice."
+    },
+    {
+      "target": "answer_accuracy",
+      "action": "Add method-specific probes and source/gold audits before changing agent reasoning policy.",
+      "why": "No-answer-timeout recovered JSON emission but still scored 0/3.",
+      "retest": "Rerun audited items with unchanged verifier."
+    }
+  ]
+}

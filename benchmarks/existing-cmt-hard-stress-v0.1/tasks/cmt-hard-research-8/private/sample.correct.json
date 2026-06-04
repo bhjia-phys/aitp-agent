@@ -1,0 +1,10 @@
+{
+  "cmt_vmc_rnn_gradient_choices": "d;e",
+  "cmt_lll_quarter_spectrum_scaling": "b;e",
+  "cmt_four_site_hubbard_adiabatic": "a;d",
+  "cmt_particle_hole_transformed_terms": "-t(p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U(m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarrow}-\\frac{1}{2})-\\mu(m_{i,\\uparrow}-m_{i,\\downarrow})-\\mu",
+  "cmt_dimer_chain_density_vector": [0.200, 0.003, 0.017, 0.027, 0.038],
+  "cmt_two_band_dqmc_sign_free": "c;d;e",
+  "cmt_long_range_dqmc_sign_free": "d;g",
+  "cmt_triangular_boson_transport": "a;b;c"
+}

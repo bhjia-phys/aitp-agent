@@ -1,0 +1,87 @@
+{
+  "cmt_index_00_answer": "U_1/2",
+  "cmt_index_01_answer": "\\langle c_\\uparrow^\\dagger(k) c_\\uparrow(k) \\rangle; \\langle c_\\downarrow^\\dagger(k) c_\\downarrow(k) \\rangle",
+  "cmt_index_02_answer": [
+    2.09,
+    1.21,
+    0.0,
+    2.41,
+    -2.09,
+    1.21,
+    -2.09,
+    -1.21,
+    0.0,
+    -2.41,
+    2.09,
+    -1.21
+  ],
+  "cmt_index_03_answer": "16N_q^2",
+  "cmt_index_04_answer": "c",
+  "cmt_index_05_answer": "a; b; d",
+  "cmt_index_06_answer": "a; b; d",
+  "cmt_index_07_answer": "d",
+  "cmt_index_08_answer": "b;f;i",
+  "cmt_index_09_answer": "b;e",
+  "cmt_index_10_answer": "g",
+  "cmt_index_11_answer": "2^{N/2-1}; c=1/2",
+  "cmt_index_12_answer": "c",
+  "cmt_index_13_answer": "d;e",
+  "cmt_index_14_answer": "b; e",
+  "cmt_index_15_answer": "a; d",
+  "cmt_index_16_answer": [
+    7.0
+  ],
+  "cmt_index_17_answer": "-t (p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U (m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarrow}-\\frac{1}{2})-\\mu (m_{i,\\uparrow}-m_{i,\\downarrow}) -\\mu",
+  "cmt_index_18_answer": "a;b",
+  "cmt_index_19_answer": "a",
+  "cmt_index_20_answer": "a; c",
+  "cmt_index_21_answer": "N_k B",
+  "cmt_index_22_answer": [
+    4.0
+  ],
+  "cmt_index_23_answer": [
+    0.2,
+    0.003,
+    0.017,
+    0.027,
+    0.038
+  ],
+  "cmt_index_24_answer": "c; d; e",
+  "cmt_index_25_answer": "b; c; e",
+  "cmt_index_26_answer": "O_n=E_n-E_{n-1}",
+  "cmt_index_27_answer": "d; g",
+  "cmt_index_28_answer": "a",
+  "cmt_index_29_answer": "b;c",
+  "cmt_index_30_answer": "a;b;c",
+  "cmt_index_31_answer": "a;c",
+  "cmt_index_32_answer": "\\mu-tq^2B/4",
+  "cmt_index_33_answer": "c",
+  "cmt_index_34_answer": "a;c",
+  "cmt_index_35_answer": "a;b",
+  "cmt_index_36_answer": "g",
+  "cmt_index_37_answer": [
+    1.0,
+    3.0
+  ],
+  "cmt_index_38_answer": "a;d;i",
+  "cmt_index_39_answer": "2t_1(t_1/t_2)^n",
+  "cmt_index_40_answer": "a;d;e",
+  "cmt_index_41_answer": "\\frac{2\\tanh(\\frac{\\beta \\omega}{2})}{\\omega}",
+  "cmt_index_42_answer": "D_o = \\frac{\\tau^2 \\rho v_0^2 \\Omega (2+\\rho)}{[(1+\\rho)^2 + (\\Omega \\tau)^2][1+(\\Omega \\tau)^2]}",
+  "cmt_index_43_answer": "c",
+  "cmt_index_44_answer": "K_c = \\sigma [1 - \\frac{1}{\\sqrt{3}}]\\sqrt{\\gamma + \\frac{2\\sigma^2}{3}(1 + \\sqrt{1 + \\frac{3\\gamma}{\\sigma^2}})}",
+  "cmt_index_45_answer": "d",
+  "cmt_index_46_answer": "\\frac{(p + x^3)^2}{4 x^4} + 4 x^2",
+  "cmt_index_47_answer": [
+    2.0,
+    2.0,
+    1.0
+  ],
+  "cmt_index_48_answer": [
+    6.0
+  ],
+  "cmt_index_49_answer": [
+    0.33,
+    0.27
+  ]
+}

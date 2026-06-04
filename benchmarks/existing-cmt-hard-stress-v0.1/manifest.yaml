@@ -1,0 +1,20 @@
+benchmark_id: existing-cmt-hard-stress-v0.1
+version: 0.1
+created_at: 2026-06-03
+status: runnable_local_hard_stress_suite
+task_ids:
+  - cmt-hard-research-8
+  - cmt-hard-research-50
+default_task_id: cmt-hard-research-50
+sources:
+  - CMT-Benchmark
+source_files:
+  - source-cmt_data.jsonl
+local_grading:
+  - exact_choice_set
+  - numeric_vector_tolerance
+  - symbolic_normalized_string
+notes:
+  - Same 8-problem count as open-physics-diverse-mini-8, but all problems are research-level CMT items.
+  - Full 50-row CMT-Benchmark task is now materialized as cmt-hard-research-50.
+  - Target acceptance is a useful failure rate, not a high score.

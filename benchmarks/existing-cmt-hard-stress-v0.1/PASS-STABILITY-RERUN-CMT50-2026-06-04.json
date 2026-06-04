@@ -1,0 +1,417 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "existing-cmt-hard-stress-v0.1",
+  "task_id": "cmt-hard-research-50",
+  "run_id": "cmt50_pass_stability_rerun_audit_2026-06-04",
+  "created_at": "2026-06-04T15:49:08",
+  "source_report": "ERROR-ATTRIBUTION-CMT50-CONSOLIDATED-2026-06-04.json",
+  "rerun": {
+    "label": "pass-review-rerun-7",
+    "path": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7",
+    "completed": true,
+    "prompt_variant": "pass-review",
+    "passed": 4,
+    "total": 7,
+    "problem_numbers": [
+      5,
+      6,
+      11,
+      15,
+      21,
+      25,
+      36
+    ]
+  },
+  "summary": {
+    "target_problems": [
+      5,
+      6,
+      11,
+      15,
+      21,
+      25,
+      36
+    ],
+    "decision_counts": {
+      "stable_capability_supported": 3,
+      "unstable_and_benchmark_context_suspect": 2,
+      "answer_key_or_gold_leakage_suspect": 2
+    },
+    "stable_clean_passes": [
+      5,
+      6,
+      21
+    ],
+    "unstable_or_suspect": [
+      11,
+      15,
+      25,
+      36
+    ],
+    "rerun_passed_but_not_clean": [
+      25
+    ],
+    "rerun_failed_after_original_pass": [
+      11,
+      15,
+      36
+    ]
+  },
+  "items": [
+    {
+      "problem_number": 5,
+      "field": "cmt_index_04_answer",
+      "cmt_type": "HF",
+      "original_actual": "c",
+      "original_expected": "c",
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": true,
+      "rerun_actual": "c",
+      "rerun_expected": "c",
+      "rerun_runtime_seconds": 870.588,
+      "rerun_stderr_bytes": 94637,
+      "rerun_stdout_bytes": 34,
+      "rerun_stderr_flags": {
+        "bytes": 94637,
+        "lines": 1233,
+        "key_or_gold_phrases": [],
+        "benchmark_context_phrases": [],
+        "memory_language_phrases": [
+          "i recall",
+          "i remember"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "stable_capability_supported",
+      "decision_rationale": "The item passed again under anti-memory prompt with item-specific reasoning evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-05-cmt_index_04_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-05-cmt_index_04_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-05-cmt_index_04_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 6,
+      "field": "cmt_index_05_answer",
+      "cmt_type": "ED",
+      "original_actual": [
+        "a",
+        "b",
+        "d"
+      ],
+      "original_expected": [
+        "a",
+        "b",
+        "d"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": true,
+      "rerun_actual": [
+        "a",
+        "b",
+        "d"
+      ],
+      "rerun_expected": [
+        "a",
+        "b",
+        "d"
+      ],
+      "rerun_runtime_seconds": 1230.654,
+      "rerun_stderr_bytes": 129796,
+      "rerun_stdout_bytes": 37,
+      "rerun_stderr_flags": {
+        "bytes": 129796,
+        "lines": 763,
+        "key_or_gold_phrases": [],
+        "benchmark_context_phrases": [],
+        "memory_language_phrases": [
+          "i recall",
+          "recall now"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "stable_capability_supported",
+      "decision_rationale": "The item passed again under anti-memory prompt with item-specific reasoning evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-06-cmt_index_05_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-06-cmt_index_05_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-06-cmt_index_05_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 11,
+      "field": "cmt_index_10_answer",
+      "cmt_type": "QMC",
+      "original_actual": [
+        "g"
+      ],
+      "original_expected": [
+        "g"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": false,
+      "rerun_actual": [
+        "c"
+      ],
+      "rerun_expected": [
+        "g"
+      ],
+      "rerun_runtime_seconds": 660.418,
+      "rerun_stderr_bytes": 86363,
+      "rerun_stdout_bytes": 34,
+      "rerun_stderr_flags": {
+        "bytes": 86363,
+        "lines": 945,
+        "key_or_gold_phrases": [],
+        "benchmark_context_phrases": [
+          "cmt-benchmark"
+        ],
+        "memory_language_phrases": [
+          "i recall"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "unstable_and_benchmark_context_suspect",
+      "decision_rationale": "The rerun answer failed and reasoning references benchmark/source context, so the original pass is unstable and not clean capability evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-11-cmt_index_10_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-11-cmt_index_10_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-11-cmt_index_10_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 15,
+      "field": "cmt_index_14_answer",
+      "cmt_type": "ED",
+      "original_actual": [
+        "b",
+        "e"
+      ],
+      "original_expected": [
+        "b",
+        "e"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": false,
+      "rerun_actual": [
+        "b",
+        "c"
+      ],
+      "rerun_expected": [
+        "b",
+        "e"
+      ],
+      "rerun_runtime_seconds": 810.361,
+      "rerun_stderr_bytes": 100180,
+      "rerun_stdout_bytes": 36,
+      "rerun_stderr_flags": {
+        "bytes": 100180,
+        "lines": 961,
+        "key_or_gold_phrases": [],
+        "benchmark_context_phrases": [
+          "cmt benchmark",
+          "cmt-benchmark"
+        ],
+        "memory_language_phrases": [
+          "i recall",
+          "i remember",
+          "recall a result"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "unstable_and_benchmark_context_suspect",
+      "decision_rationale": "The rerun answer failed and reasoning references benchmark/source context, so the original pass is unstable and not clean capability evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-15-cmt_index_14_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-15-cmt_index_14_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-15-cmt_index_14_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 21,
+      "field": "cmt_index_20_answer",
+      "cmt_type": "ED",
+      "original_actual": [
+        "a",
+        "c"
+      ],
+      "original_expected": [
+        "a",
+        "c"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": true,
+      "rerun_actual": [
+        "a",
+        "c"
+      ],
+      "rerun_expected": [
+        "a",
+        "c"
+      ],
+      "rerun_runtime_seconds": 450.25,
+      "rerun_stderr_bytes": 63380,
+      "rerun_stdout_bytes": 52,
+      "rerun_stderr_flags": {
+        "bytes": 63380,
+        "lines": 342,
+        "key_or_gold_phrases": [],
+        "benchmark_context_phrases": [],
+        "memory_language_phrases": [
+          "i recall",
+          "recall now"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "stable_capability_supported",
+      "decision_rationale": "The item passed again under anti-memory prompt with item-specific reasoning evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-21-cmt_index_20_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-21-cmt_index_20_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-21-cmt_index_20_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 25,
+      "field": "cmt_index_24_answer",
+      "cmt_type": "QMC",
+      "original_actual": [
+        "c",
+        "d",
+        "e"
+      ],
+      "original_expected": [
+        "c",
+        "d",
+        "e"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": true,
+      "rerun_actual": [
+        "c",
+        "d",
+        "e"
+      ],
+      "rerun_expected": [
+        "c",
+        "d",
+        "e"
+      ],
+      "rerun_runtime_seconds": 1680.901,
+      "rerun_stderr_bytes": 180405,
+      "rerun_stdout_bytes": 37,
+      "rerun_stderr_flags": {
+        "bytes": 180405,
+        "lines": 1265,
+        "key_or_gold_phrases": [
+          "answer key",
+          "solution key"
+        ],
+        "benchmark_context_phrases": [
+          "cmt-benchmark",
+          "known benchmark",
+          "looks familiar",
+          "previous run",
+          "public benchmark"
+        ],
+        "memory_language_phrases": [
+          "i recall",
+          "recall a result",
+          "recall now"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "answer_key_or_gold_leakage_suspect",
+      "decision_rationale": "Rerun reasoning mentions answer-key or gold-like phrases, so the pass is not clean capability evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-25-cmt_index_24_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-25-cmt_index_24_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-25-cmt_index_24_answer.stderr.txt"
+      }
+    },
+    {
+      "problem_number": 36,
+      "field": "cmt_index_35_answer",
+      "cmt_type": "Other",
+      "original_actual": [
+        "a",
+        "b"
+      ],
+      "original_expected": [
+        "a",
+        "b"
+      ],
+      "original_risk": "medium",
+      "original_confidence": "high",
+      "rerun_status": "completed",
+      "rerun_json_emitted": true,
+      "rerun_passed": false,
+      "rerun_actual": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "rerun_expected": [
+        "a",
+        "b"
+      ],
+      "rerun_runtime_seconds": 960.501,
+      "rerun_stderr_bytes": 112689,
+      "rerun_stdout_bytes": 40,
+      "rerun_stderr_flags": {
+        "bytes": 112689,
+        "lines": 645,
+        "key_or_gold_phrases": [
+          "answer key",
+          "benchmark key",
+          "expected answer",
+          "solution key"
+        ],
+        "benchmark_context_phrases": [
+          "cmt-benchmark",
+          "looks familiar",
+          "previous run",
+          "public benchmark"
+        ],
+        "memory_language_phrases": [
+          "i recall",
+          "i remember"
+        ],
+        "mentions_uncertainty": true,
+        "mentions_computation": true
+      },
+      "stability_decision": "answer_key_or_gold_leakage_suspect",
+      "decision_rationale": "Rerun reasoning mentions answer-key or gold-like phrases, so the pass is not clean capability evidence.",
+      "evidence": {
+        "prompt": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-36-cmt_index_35_answer.prompt.md",
+        "stdout": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-36-cmt_index_35_answer.stdout.txt",
+        "stderr": "runs/20260604-135159__kimi26_code_allowed_no_answer_timeout_slice__cmt_hard_research_50__pass_review_rerun_7/logs/item-36-cmt_index_35_answer.stderr.txt"
+      }
+    }
+  ]
+}

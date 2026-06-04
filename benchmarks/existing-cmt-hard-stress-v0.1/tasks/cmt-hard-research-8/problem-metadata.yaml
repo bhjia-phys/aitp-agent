@@ -1,0 +1,35 @@
+task_id: cmt-hard-research-8
+benchmark_id: existing-cmt-hard-stress-v0.1
+problem_count: 8
+answer_field_count: 8
+sources:
+  - source: CMT-Benchmark
+    source_url: https://huggingface.co/datasets/JVRoggeveen/cmt_benchmark/blob/main/cmt_data.jsonl
+    license: MIT
+    local_items:
+      - cmt_index_13_vmc_rnn_gradient_estimator
+      - cmt_index_14_lll_quarter_spectrum_scaling
+      - cmt_index_15_four_site_hubbard_adiabatic
+      - cmt_index_17_particle_hole_transformed_hamiltonian
+      - cmt_index_23_dimer_chain_density_correlation
+      - cmt_index_24_two_band_dqmc_sign_problem
+      - cmt_index_27_long_range_dqmc_sign_problem
+      - cmt_index_30_triangular_hardcore_boson_transport
+    benchmark_type: expert_research_level_condensed_matter_theory
+domains:
+  - variational_monte_carlo
+  - exact_diagonalization
+  - fractional_quantum_hall
+  - hubbard_model
+  - determinant_quantum_monte_carlo
+  - strongly_correlated_bosons
+difficulties:
+  - research
+grading:
+  mode: mixed_local_verifier
+  choice_matching: exact_set
+  numeric_vector_tolerance: per_field
+  symbolic_matching: normalized_string_with_alternatives
+notes:
+  - Same 8-problem count as open-physics-diverse-mini-8, but all items are research-level CMT.
+  - Selected to raise the expected failure rate for Kimi relative to the previous diverse core.

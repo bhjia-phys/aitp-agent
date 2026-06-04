@@ -1,0 +1,1381 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "existing-cmt-hard-stress-v0.1",
+  "task_id": "cmt-hard-research-50",
+  "run_id": "cmt50_answer_accuracy_cluster_audit_2026-06-04",
+  "created_at": "2026-06-04T13:51:15",
+  "source_report": "ERROR-ATTRIBUTION-CMT50-CONSOLIDATED-2026-06-04.json",
+  "summary": {
+    "total_failures": 38,
+    "answer_accuracy_failures": 35,
+    "failure_category_counts": {
+      "data_source": 2,
+      "answer_accuracy": 35,
+      "model_behavior": 1
+    },
+    "answer_accuracy_by_cmt_type": {
+      "Other": 13,
+      "SM": 5,
+      "DMRG": 4,
+      "QMC": 4,
+      "ED": 3,
+      "HF": 3,
+      "VMC": 2,
+      "PEPS": 1
+    },
+    "answer_accuracy_by_check_type": {
+      "choice_set": 18,
+      "symbolic": 12,
+      "numeric_vector": 5
+    },
+    "answer_accuracy_by_failure_mode": {
+      "symbolic_formula_derivation_mismatch": 8,
+      "choice_set_mixed_substitution": 5,
+      "choice_set_under_selection": 5,
+      "choice_set_no_overlap": 4,
+      "choice_set_over_selection": 4,
+      "numeric_vector_partial_components_wrong": 3,
+      "symbolic_missing_physical_terms": 3,
+      "numeric_vector_all_components_wrong": 2,
+      "symbolic_option_like_mismatch": 1
+    }
+  },
+  "failure_rows": [
+    {
+      "problem_number": 1,
+      "field": "cmt_index_00_answer",
+      "source_index": 0,
+      "cmt_type": "HF",
+      "check_type": "symbolic",
+      "primary_category": "data_source",
+      "failure_mode": "data_source_ambiguous_or_defective",
+      "failure_mode_label": "data-source or gold-boundary issue",
+      "actual": "u_0/3+2u_1",
+      "expected": "U_1/2",
+      "json_emitted": true,
+      "runtime_seconds": 420.267,
+      "stderr_bytes": 55962,
+      "run_label": "initial_no_timeout_item_1",
+      "detail": {}
+    },
+    {
+      "problem_number": 2,
+      "field": "cmt_index_01_answer",
+      "source_index": 1,
+      "cmt_type": "HF",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "c_↑dagger(k)c_↑(k);c_↓dagger(k)c_↓(k);c_↑dagger(k)c_↓(k);c_↓dagger(k)c_↑(k)",
+      "expected": "\\langle c_\\uparrow^\\dagger(k) c_\\uparrow(k) \\rangle; \\langle c_\\downarrow^\\dagger(k) c_\\downarrow(k) \\rangle",
+      "json_emitted": true,
+      "runtime_seconds": 300.317,
+      "stderr_bytes": 37571,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_preview": "c_↑dagger(k)c_↑(k);c_↓dagger(k)c_↓(k);c_↑dagger(k)c_↓(k);c_↓dagger(k)c_↑(k)",
+        "expected_preview": "\\langle c_\\uparrow^\\dagger(k) c_\\uparrow(k) \\rangle; \\langle c_\\downarrow^\\dagger(k) c_\\downarrow(k) \\rangle"
+      }
+    },
+    {
+      "problem_number": 3,
+      "field": "cmt_index_02_answer",
+      "source_index": 2,
+      "cmt_type": "HF",
+      "check_type": "numeric_vector",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "numeric_vector_partial_components_wrong",
+      "failure_mode_label": "numeric vector partial component errors",
+      "actual": [
+        2.09,
+        0.56,
+        0.56,
+        2.09,
+        -1.53,
+        1.53,
+        -2.09,
+        -0.56,
+        -0.56,
+        -2.09,
+        1.53,
+        -1.53
+      ],
+      "expected": [
+        2.09,
+        1.21,
+        0.0,
+        2.41,
+        -2.09,
+        1.21,
+        -2.09,
+        -1.21,
+        0.0,
+        -2.41,
+        2.09,
+        -1.21
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1650.793,
+      "stderr_bytes": 146589,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_length": 12,
+        "expected_length": 12,
+        "max_abs_error": 0.65,
+        "mean_abs_error": 0.401667,
+        "close_component_count_abs_tol_0_01": 2,
+        "component_count": 12,
+        "diffs": [
+          0.0,
+          -0.65,
+          0.56,
+          -0.32,
+          0.56,
+          0.32,
+          0.0,
+          0.65,
+          -0.56,
+          0.32,
+          -0.56,
+          -0.32
+        ]
+      }
+    },
+    {
+      "problem_number": 4,
+      "field": "cmt_index_03_answer",
+      "source_index": 3,
+      "cmt_type": "HF",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "o(n_q^2)",
+      "expected": "16N_q^2",
+      "json_emitted": true,
+      "runtime_seconds": 150.156,
+      "stderr_bytes": 40089,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_preview": "o(n_q^2)",
+        "expected_preview": "16N_q^2"
+      }
+    },
+    {
+      "problem_number": 7,
+      "field": "cmt_index_06_answer",
+      "source_index": 6,
+      "cmt_type": "VMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_under_selection",
+      "failure_mode_label": "choice-set under-selection",
+      "actual": [
+        "a"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "d"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 210.159,
+      "stderr_bytes": 25500,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_labels": [
+          "a"
+        ],
+        "expected_labels": [
+          "a",
+          "b",
+          "d"
+        ],
+        "missing_labels": [
+          "b",
+          "d"
+        ],
+        "extra_labels": [],
+        "overlap_labels": [
+          "a"
+        ]
+      }
+    },
+    {
+      "problem_number": 8,
+      "field": "cmt_index_07_answer",
+      "source_index": 7,
+      "cmt_type": "DMRG",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_no_overlap",
+      "failure_mode_label": "choice-set no overlap",
+      "actual": [
+        "a"
+      ],
+      "expected": [
+        "d"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 150.128,
+      "stderr_bytes": 18826,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_labels": [
+          "a"
+        ],
+        "expected_labels": [
+          "d"
+        ],
+        "missing_labels": [
+          "d"
+        ],
+        "extra_labels": [
+          "a"
+        ],
+        "overlap_labels": []
+      }
+    },
+    {
+      "problem_number": 9,
+      "field": "cmt_index_08_answer",
+      "source_index": 8,
+      "cmt_type": "QMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_under_selection",
+      "failure_mode_label": "choice-set under-selection",
+      "actual": [
+        "f"
+      ],
+      "expected": [
+        "b",
+        "f",
+        "i"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1110.52,
+      "stderr_bytes": 179439,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_labels": [
+          "f"
+        ],
+        "expected_labels": [
+          "b",
+          "f",
+          "i"
+        ],
+        "missing_labels": [
+          "b",
+          "i"
+        ],
+        "extra_labels": [],
+        "overlap_labels": [
+          "f"
+        ]
+      }
+    },
+    {
+      "problem_number": 10,
+      "field": "cmt_index_09_answer",
+      "source_index": 9,
+      "cmt_type": "QMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_mixed_substitution",
+      "failure_mode_label": "choice-set mixed substitution",
+      "actual": [
+        "b",
+        "c"
+      ],
+      "expected": [
+        "b",
+        "e"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 330.189,
+      "stderr_bytes": 38206,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_labels": [
+          "b",
+          "c"
+        ],
+        "expected_labels": [
+          "b",
+          "e"
+        ],
+        "missing_labels": [
+          "e"
+        ],
+        "extra_labels": [
+          "c"
+        ],
+        "overlap_labels": [
+          "b"
+        ]
+      }
+    },
+    {
+      "problem_number": 12,
+      "field": "cmt_index_11_answer",
+      "source_index": 11,
+      "cmt_type": "DMRG",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_missing_physical_terms",
+      "failure_mode_label": "symbolic expression missing physical terms",
+      "actual": "2^cn",
+      "expected": "2^{N/2-1}; c=1/2",
+      "json_emitted": true,
+      "runtime_seconds": 1320.623,
+      "stderr_bytes": 146441,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_preview": "2^cn",
+        "expected_preview": "2^{N/2-1}; c=1/2"
+      }
+    },
+    {
+      "problem_number": 13,
+      "field": "cmt_index_12_answer",
+      "source_index": 12,
+      "cmt_type": "DMRG",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_no_overlap",
+      "failure_mode_label": "choice-set no overlap",
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 120.107,
+      "stderr_bytes": 33251,
+      "run_label": "remaining_batch_a",
+      "detail": {
+        "actual_labels": [
+          "b"
+        ],
+        "expected_labels": [
+          "c"
+        ],
+        "missing_labels": [
+          "c"
+        ],
+        "extra_labels": [
+          "b"
+        ],
+        "overlap_labels": []
+      }
+    },
+    {
+      "problem_number": 14,
+      "field": "cmt_index_13_answer",
+      "source_index": 13,
+      "cmt_type": "VMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_no_overlap",
+      "failure_mode_label": "choice-set no overlap",
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "d",
+        "e"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 420.271,
+      "stderr_bytes": 47220,
+      "run_label": "initial_no_timeout_item_14",
+      "detail": {
+        "actual_labels": [
+          "b"
+        ],
+        "expected_labels": [
+          "d",
+          "e"
+        ],
+        "missing_labels": [
+          "d",
+          "e"
+        ],
+        "extra_labels": [
+          "b"
+        ],
+        "overlap_labels": []
+      }
+    },
+    {
+      "problem_number": 16,
+      "field": "cmt_index_15_answer",
+      "source_index": 15,
+      "cmt_type": "ED",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_mixed_substitution",
+      "failure_mode_label": "choice-set mixed substitution",
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "d"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1650.898,
+      "stderr_bytes": 208764,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "c"
+        ],
+        "expected_labels": [
+          "a",
+          "d"
+        ],
+        "missing_labels": [
+          "d"
+        ],
+        "extra_labels": [
+          "c"
+        ],
+        "overlap_labels": [
+          "a"
+        ]
+      }
+    },
+    {
+      "problem_number": 17,
+      "field": "cmt_index_16_answer",
+      "source_index": 16,
+      "cmt_type": "ED",
+      "check_type": "numeric_vector",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "numeric_vector_all_components_wrong",
+      "failure_mode_label": "numeric vector all components wrong",
+      "actual": [
+        5.0
+      ],
+      "expected": [
+        7.0
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1020.523,
+      "stderr_bytes": 124338,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_length": 1,
+        "expected_length": 1,
+        "max_abs_error": 2.0,
+        "mean_abs_error": 2.0,
+        "close_component_count_abs_tol_0_01": 0,
+        "component_count": 1,
+        "diffs": [
+          -2.0
+        ]
+      }
+    },
+    {
+      "problem_number": 18,
+      "field": "cmt_index_17_answer",
+      "source_index": 17,
+      "cmt_type": "Other",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "-t(p^dagger_i,sigmap_j,sigma+p^dagger_j,sigmap_i,sigma)-u(m_i,uparrow-(1)/(2))(m_i,downarrow-(1)/(2))-mu(m_i,uparrow-m_i,downarrow)",
+      "expected": "-t (p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U (m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarrow}-\\frac{1}{2})-\\mu (m_{i,\\uparrow}-m_{i,\\downarrow}) -\\mu",
+      "json_emitted": true,
+      "runtime_seconds": 720.395,
+      "stderr_bytes": 78213,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_preview": "-t(p^dagger_i,sigmap_j,sigma+p^dagger_j,sigmap_i,sigma)-u(m_i,uparrow-(1)/(2))(m_i,downarrow-(1)/(2))-mu(m_i,uparrow-m_i",
+        "expected_preview": "-t (p^{\\dagger}_{i,\\sigma}p_{j,\\sigma}+p^{\\dagger}_{j,\\sigma}p_{i,\\sigma})-U (m_{i,\\uparrow}-\\frac{1}{2})(m_{i,\\downarro"
+      }
+    },
+    {
+      "problem_number": 19,
+      "field": "cmt_index_18_answer",
+      "source_index": 18,
+      "cmt_type": "QMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_mixed_substitution",
+      "failure_mode_label": "choice-set mixed substitution",
+      "actual": [
+        "b",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "b"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 600.33,
+      "stderr_bytes": 140999,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_labels": [
+          "b",
+          "c"
+        ],
+        "expected_labels": [
+          "a",
+          "b"
+        ],
+        "missing_labels": [
+          "a"
+        ],
+        "extra_labels": [
+          "c"
+        ],
+        "overlap_labels": [
+          "b"
+        ]
+      }
+    },
+    {
+      "problem_number": 20,
+      "field": "cmt_index_19_answer",
+      "source_index": 19,
+      "cmt_type": "ED",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_over_selection",
+      "failure_mode_label": "choice-set over-selection",
+      "actual": [
+        "a",
+        "c",
+        "e",
+        "g"
+      ],
+      "expected": [
+        "a"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 870.478,
+      "stderr_bytes": 111202,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "c",
+          "e",
+          "g"
+        ],
+        "expected_labels": [
+          "a"
+        ],
+        "missing_labels": [],
+        "extra_labels": [
+          "c",
+          "e",
+          "g"
+        ],
+        "overlap_labels": [
+          "a"
+        ]
+      }
+    },
+    {
+      "problem_number": 22,
+      "field": "cmt_index_21_answer",
+      "source_index": 21,
+      "cmt_type": "PEPS",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "f=(partialn_k)/(partialb^)",
+      "expected": "N_k B",
+      "json_emitted": true,
+      "runtime_seconds": 240.16,
+      "stderr_bytes": 30229,
+      "run_label": "remaining_batch_b",
+      "detail": {
+        "actual_preview": "f=(partialn_k)/(partialb^)",
+        "expected_preview": "N_k B"
+      }
+    },
+    {
+      "problem_number": 24,
+      "field": "cmt_index_23_answer",
+      "source_index": 23,
+      "cmt_type": "Other",
+      "check_type": "numeric_vector",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "numeric_vector_partial_components_wrong",
+      "failure_mode_label": "numeric vector partial component errors",
+      "actual": [
+        0.2,
+        0.0769,
+        0.0629,
+        0.0527,
+        0.0422
+      ],
+      "expected": [
+        0.2,
+        0.003,
+        0.017,
+        0.027,
+        0.038
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1050.589,
+      "stderr_bytes": 102629,
+      "run_label": "env_rerun_9",
+      "detail": {
+        "actual_length": 5,
+        "expected_length": 5,
+        "max_abs_error": 0.0739,
+        "mean_abs_error": 0.02994,
+        "close_component_count_abs_tol_0_01": 2,
+        "component_count": 5,
+        "diffs": [
+          0.0,
+          0.0739,
+          0.0459,
+          0.0257,
+          0.0042
+        ]
+      }
+    },
+    {
+      "problem_number": 26,
+      "field": "cmt_index_25_answer",
+      "source_index": 25,
+      "cmt_type": "ED",
+      "check_type": "choice_set",
+      "primary_category": "model_behavior",
+      "failure_mode": "model_behavior_no_final_json",
+      "failure_mode_label": "model behavior: no final JSON",
+      "actual": [],
+      "expected": [
+        "b",
+        "c",
+        "e"
+      ],
+      "json_emitted": false,
+      "runtime_seconds": 2401.086,
+      "stderr_bytes": 244413,
+      "run_label": "env_rerun_9",
+      "detail": {}
+    },
+    {
+      "problem_number": 28,
+      "field": "cmt_index_27_answer",
+      "source_index": 27,
+      "cmt_type": "QMC",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_under_selection",
+      "failure_mode_label": "choice-set under-selection",
+      "actual": [
+        "g"
+      ],
+      "expected": [
+        "d",
+        "g"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 930.477,
+      "stderr_bytes": 106368,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "g"
+        ],
+        "expected_labels": [
+          "d",
+          "g"
+        ],
+        "missing_labels": [
+          "d"
+        ],
+        "extra_labels": [],
+        "overlap_labels": [
+          "g"
+        ]
+      }
+    },
+    {
+      "problem_number": 29,
+      "field": "cmt_index_28_answer",
+      "source_index": 28,
+      "cmt_type": "DMRG",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_no_overlap",
+      "failure_mode_label": "choice-set no overlap",
+      "actual": [
+        "b"
+      ],
+      "expected": [
+        "a"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 300.195,
+      "stderr_bytes": 34789,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "b"
+        ],
+        "expected_labels": [
+          "a"
+        ],
+        "missing_labels": [
+          "a"
+        ],
+        "extra_labels": [
+          "b"
+        ],
+        "overlap_labels": []
+      }
+    },
+    {
+      "problem_number": 30,
+      "field": "cmt_index_29_answer",
+      "source_index": 29,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_mixed_substitution",
+      "failure_mode_label": "choice-set mixed substitution",
+      "actual": [
+        "b",
+        "d",
+        "e"
+      ],
+      "expected": [
+        "b",
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1260.629,
+      "stderr_bytes": 163016,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "b",
+          "d",
+          "e"
+        ],
+        "expected_labels": [
+          "b",
+          "c"
+        ],
+        "missing_labels": [
+          "c"
+        ],
+        "extra_labels": [
+          "d",
+          "e"
+        ],
+        "overlap_labels": [
+          "b"
+        ]
+      }
+    },
+    {
+      "problem_number": 31,
+      "field": "cmt_index_30_answer",
+      "source_index": 30,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_under_selection",
+      "failure_mode_label": "choice-set under-selection",
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1770.878,
+      "stderr_bytes": 233568,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "c"
+        ],
+        "expected_labels": [
+          "a",
+          "b",
+          "c"
+        ],
+        "missing_labels": [
+          "b"
+        ],
+        "extra_labels": [],
+        "overlap_labels": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    {
+      "problem_number": 32,
+      "field": "cmt_index_31_answer",
+      "source_index": 31,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_over_selection",
+      "failure_mode_label": "choice-set over-selection",
+      "actual": [
+        "a",
+        "b",
+        "c"
+      ],
+      "expected": [
+        "a",
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 360.22,
+      "stderr_bytes": 43903,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "b",
+          "c"
+        ],
+        "expected_labels": [
+          "a",
+          "c"
+        ],
+        "missing_labels": [],
+        "extra_labels": [
+          "b"
+        ],
+        "overlap_labels": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    {
+      "problem_number": 33,
+      "field": "cmt_index_32_answer",
+      "source_index": 32,
+      "cmt_type": "Other",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_missing_physical_terms",
+      "failure_mode_label": "symbolic expression missing physical terms",
+      "actual": "1",
+      "expected": "\\mu-tq^2B/4",
+      "json_emitted": true,
+      "runtime_seconds": 900.484,
+      "stderr_bytes": 107025,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_preview": "1",
+        "expected_preview": "\\mu-tq^2B/4"
+      }
+    },
+    {
+      "problem_number": 34,
+      "field": "cmt_index_33_answer",
+      "source_index": 33,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_over_selection",
+      "failure_mode_label": "choice-set over-selection",
+      "actual": [
+        "a",
+        "c"
+      ],
+      "expected": [
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 210.138,
+      "stderr_bytes": 25955,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "c"
+        ],
+        "expected_labels": [
+          "c"
+        ],
+        "missing_labels": [],
+        "extra_labels": [
+          "a"
+        ],
+        "overlap_labels": [
+          "c"
+        ]
+      }
+    },
+    {
+      "problem_number": 35,
+      "field": "cmt_index_34_answer",
+      "source_index": 34,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_over_selection",
+      "failure_mode_label": "choice-set over-selection",
+      "actual": [
+        "a",
+        "c",
+        "d"
+      ],
+      "expected": [
+        "a",
+        "c"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 450.265,
+      "stderr_bytes": 65559,
+      "run_label": "remaining_batch_c",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "c",
+          "d"
+        ],
+        "expected_labels": [
+          "a",
+          "c"
+        ],
+        "missing_labels": [],
+        "extra_labels": [
+          "d"
+        ],
+        "overlap_labels": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    {
+      "problem_number": 37,
+      "field": "cmt_index_36_answer",
+      "source_index": 36,
+      "cmt_type": "PEPS",
+      "check_type": "choice_set",
+      "primary_category": "data_source",
+      "failure_mode": "data_source_ambiguous_or_defective",
+      "failure_mode_label": "data-source or gold-boundary issue",
+      "actual": [
+        "b",
+        "c",
+        "d"
+      ],
+      "expected": [
+        "g"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 120.134,
+      "stderr_bytes": 14400,
+      "run_label": "initial_no_timeout_item_37",
+      "detail": {}
+    },
+    {
+      "problem_number": 38,
+      "field": "cmt_index_37_answer",
+      "source_index": 37,
+      "cmt_type": "Other",
+      "check_type": "numeric_vector",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "numeric_vector_partial_components_wrong",
+      "failure_mode_label": "numeric vector partial component errors",
+      "actual": [
+        2.0,
+        3.0
+      ],
+      "expected": [
+        1.0,
+        3.0
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 960.413,
+      "stderr_bytes": 109294,
+      "run_label": "env_rerun_9",
+      "detail": {
+        "actual_length": 2,
+        "expected_length": 2,
+        "max_abs_error": 1.0,
+        "mean_abs_error": 0.5,
+        "close_component_count_abs_tol_0_01": 1,
+        "component_count": 2,
+        "diffs": [
+          1.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "problem_number": 39,
+      "field": "cmt_index_38_answer",
+      "source_index": 38,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_mixed_substitution",
+      "failure_mode_label": "choice-set mixed substitution",
+      "actual": [
+        "a",
+        "d",
+        "g"
+      ],
+      "expected": [
+        "a",
+        "d",
+        "i"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 630.372,
+      "stderr_bytes": 73426,
+      "run_label": "env_rerun_9",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "d",
+          "g"
+        ],
+        "expected_labels": [
+          "a",
+          "d",
+          "i"
+        ],
+        "missing_labels": [
+          "i"
+        ],
+        "extra_labels": [
+          "g"
+        ],
+        "overlap_labels": [
+          "a",
+          "d"
+        ]
+      }
+    },
+    {
+      "problem_number": 40,
+      "field": "cmt_index_39_answer",
+      "source_index": 39,
+      "cmt_type": "Other",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "(2(t_2^2-t_1^2))/(t_2)((t_1)/(t_2))^n",
+      "expected": "2t_1(t_1/t_2)^n",
+      "json_emitted": true,
+      "runtime_seconds": 420.225,
+      "stderr_bytes": 48278,
+      "run_label": "env_rerun_9",
+      "detail": {
+        "actual_preview": "(2(t_2^2-t_1^2))/(t_2)((t_1)/(t_2))^n",
+        "expected_preview": "2t_1(t_1/t_2)^n"
+      }
+    },
+    {
+      "problem_number": 41,
+      "field": "cmt_index_40_answer",
+      "source_index": 40,
+      "cmt_type": "Other",
+      "check_type": "choice_set",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "choice_set_under_selection",
+      "failure_mode_label": "choice-set under-selection",
+      "actual": [
+        "a",
+        "e"
+      ],
+      "expected": [
+        "a",
+        "d",
+        "e"
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1380.73,
+      "stderr_bytes": 129306,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_labels": [
+          "a",
+          "e"
+        ],
+        "expected_labels": [
+          "a",
+          "d",
+          "e"
+        ],
+        "missing_labels": [
+          "d"
+        ],
+        "extra_labels": [],
+        "overlap_labels": [
+          "a",
+          "e"
+        ]
+      }
+    },
+    {
+      "problem_number": 42,
+      "field": "cmt_index_41_answer",
+      "source_index": 41,
+      "cmt_type": "Other",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "frac2tanh((betahbaromega)/(2))hbaromegav",
+      "expected": "\\frac{2\\tanh(\\frac{\\beta \\omega}{2})}{\\omega}",
+      "json_emitted": true,
+      "runtime_seconds": 1320.675,
+      "stderr_bytes": 121141,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_preview": "frac2tanh((betahbaromega)/(2))hbaromegav",
+        "expected_preview": "\\frac{2\\tanh(\\frac{\\beta \\omega}{2})}{\\omega}"
+      }
+    },
+    {
+      "problem_number": 43,
+      "field": "cmt_index_42_answer",
+      "source_index": 42,
+      "cmt_type": "SM",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "-dfracgammatau^3v_0^2omega(gammatau+2m)(1+tau^2omega^2)[(gammatau+m)^2+m^2tau^2omega^2]",
+      "expected": "D_o = \\frac{\\tau^2 \\rho v_0^2 \\Omega (2+\\rho)}{[(1+\\rho)^2 + (\\Omega \\tau)^2][1+(\\Omega \\tau)^2]}",
+      "json_emitted": true,
+      "runtime_seconds": 1140.595,
+      "stderr_bytes": 103368,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_preview": "-dfracgammatau^3v_0^2omega(gammatau+2m)(1+tau^2omega^2)[(gammatau+m)^2+m^2tau^2omega^2]",
+        "expected_preview": "D_o = \\frac{\\tau^2 \\rho v_0^2 \\Omega (2+\\rho)}{[(1+\\rho)^2 + (\\Omega \\tau)^2][1+(\\Omega \\tau)^2]}"
+      }
+    },
+    {
+      "problem_number": 44,
+      "field": "cmt_index_43_answer",
+      "source_index": 43,
+      "cmt_type": "SM",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_option_like_mismatch",
+      "failure_mode_label": "option-like symbolic mismatch",
+      "actual": "a",
+      "expected": "c",
+      "json_emitted": true,
+      "runtime_seconds": 690.366,
+      "stderr_bytes": 96176,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_preview": "a",
+        "expected_preview": "c"
+      }
+    },
+    {
+      "problem_number": 45,
+      "field": "cmt_index_44_answer",
+      "source_index": 44,
+      "cmt_type": "SM",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_missing_physical_terms",
+      "failure_mode_label": "symbolic expression missing physical terms",
+      "actual": "sigmasqrtgamma",
+      "expected": "K_c = \\sigma [1 - \\frac{1}{\\sqrt{3}}]\\sqrt{\\gamma + \\frac{2\\sigma^2}{3}(1 + \\sqrt{1 + \\frac{3\\gamma}{\\sigma^2}})}",
+      "json_emitted": true,
+      "runtime_seconds": 630.325,
+      "stderr_bytes": 74632,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_preview": "sigmasqrtgamma",
+        "expected_preview": "K_c = \\sigma [1 - \\frac{1}{\\sqrt{3}}]\\sqrt{\\gamma + \\frac{2\\sigma^2}{3}(1 + \\sqrt{1 + \\frac{3\\gamma}{\\sigma^2}})}"
+      }
+    },
+    {
+      "problem_number": 47,
+      "field": "cmt_index_46_answer",
+      "source_index": 46,
+      "cmt_type": "SM",
+      "check_type": "symbolic",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "symbolic_formula_derivation_mismatch",
+      "failure_mode_label": "symbolic formula or normalization mismatch",
+      "actual": "((p+x^3)^2)/(4x^4)-(x^2)/(2)",
+      "expected": "\\frac{(p + x^3)^2}{4 x^4} + 4 x^2",
+      "json_emitted": true,
+      "runtime_seconds": 2070.922,
+      "stderr_bytes": 237218,
+      "run_label": "remaining_batch_d",
+      "detail": {
+        "actual_preview": "((p+x^3)^2)/(4x^4)-(x^2)/(2)",
+        "expected_preview": "\\frac{(p + x^3)^2}{4 x^4} + 4 x^2"
+      }
+    },
+    {
+      "problem_number": 50,
+      "field": "cmt_index_49_answer",
+      "source_index": 49,
+      "cmt_type": "SM",
+      "check_type": "numeric_vector",
+      "primary_category": "answer_accuracy",
+      "failure_mode": "numeric_vector_all_components_wrong",
+      "failure_mode_label": "numeric vector all components wrong",
+      "actual": [
+        0.5,
+        0.36
+      ],
+      "expected": [
+        0.33,
+        0.27
+      ],
+      "json_emitted": true,
+      "runtime_seconds": 1200.547,
+      "stderr_bytes": 275586,
+      "run_label": "env_rerun_9",
+      "detail": {
+        "actual_length": 2,
+        "expected_length": 2,
+        "max_abs_error": 0.17,
+        "mean_abs_error": 0.13,
+        "close_component_count_abs_tol_0_01": 0,
+        "component_count": 2,
+        "diffs": [
+          0.17,
+          0.09
+        ]
+      }
+    }
+  ],
+  "clusters_by_cmt_type": {
+    "Other": [
+      18,
+      24,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "SM": [
+      43,
+      44,
+      45,
+      47,
+      50
+    ],
+    "DMRG": [
+      8,
+      12,
+      13,
+      29
+    ],
+    "QMC": [
+      9,
+      10,
+      19,
+      28
+    ],
+    "ED": [
+      16,
+      17,
+      20
+    ],
+    "HF": [
+      2,
+      3,
+      4
+    ],
+    "VMC": [
+      7,
+      14
+    ],
+    "PEPS": [
+      22
+    ]
+  },
+  "clusters_by_failure_mode": {
+    "symbolic_formula_derivation_mismatch": [
+      2,
+      4,
+      18,
+      22,
+      40,
+      42,
+      43,
+      47
+    ],
+    "choice_set_mixed_substitution": [
+      10,
+      16,
+      19,
+      30,
+      39
+    ],
+    "choice_set_under_selection": [
+      7,
+      9,
+      28,
+      31,
+      41
+    ],
+    "choice_set_no_overlap": [
+      8,
+      13,
+      14,
+      29
+    ],
+    "choice_set_over_selection": [
+      20,
+      32,
+      34,
+      35
+    ],
+    "numeric_vector_partial_components_wrong": [
+      3,
+      24,
+      38
+    ],
+    "symbolic_missing_physical_terms": [
+      12,
+      33,
+      45
+    ],
+    "numeric_vector_all_components_wrong": [
+      17,
+      50
+    ],
+    "symbolic_option_like_mismatch": [
+      44
+    ]
+  }
+}
