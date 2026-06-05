@@ -79,11 +79,14 @@ export async function runShell(
     workDir,
   });
   await harness.ensureConfigFile();
-  const migrationPlan = await detectPendingMigration({
-    sourceHome: join(homedir(), '.kimi'),
-    targetHome: harness.homeDir,
-    ignoreMarker: runOptions.migrateOnly,
-  });
+  const migrationPlan =
+    runOptions.migrateOnly === true
+      ? await detectPendingMigration({
+          sourceHome: join(homedir(), '.kimi'),
+          targetHome: harness.homeDir,
+          ignoreMarker: true,
+        })
+      : null;
   if (runOptions.migrateOnly === true && migrationPlan === null) {
     process.stdout.write('  Nothing to migrate from ~/.kimi/.\n');
     await harness.close();
@@ -136,7 +139,7 @@ export async function runShell(
     const gutter = ' '.repeat(CHROME_GUTTER);
     process.stdout.write(`${gutter}Bye!\n`);
     if (sessionId !== '' && hasContent) {
-      process.stderr.write(`\n${gutter}To resume this session: kimi -r ${sessionId}\n`);
+      process.stderr.write(`\n${gutter}To resume this session: hakimi --session ${sessionId}\n`);
     }
     process.exit(exitCode);
   };

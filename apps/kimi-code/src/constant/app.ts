@@ -14,8 +14,9 @@ export const CLI_SHUTDOWN_TIMEOUT_MS = 3000;
 export const NPM_PACKAGE_NAME = '@bhjia-phys/hakimi';
 
 // App-owned data paths. SDK/core runtime config is intentionally not routed here.
+export const HAKIMI_HOME_ENV = 'HAKIMI_HOME';
 export const KIMI_CODE_HOME_ENV = 'KIMI_CODE_HOME';
-export const KIMI_CODE_DATA_DIR_NAME = '.kimi-code';
+export const KIMI_CODE_DATA_DIR_NAME = '.hakimi';
 export const KIMI_CODE_LOG_DIR_NAME = 'logs';
 export const KIMI_CODE_UPDATE_DIR_NAME = 'updates';
 export const KIMI_CODE_UPDATE_STATE_FILE_NAME = 'latest.json';

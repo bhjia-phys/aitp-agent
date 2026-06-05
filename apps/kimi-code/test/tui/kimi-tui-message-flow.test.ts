@@ -394,7 +394,7 @@ describe('KimiTUI message flow', () => {
       expect.objectContaining({
         content: 'useful feedback',
         sessionId: 'ses-1',
-        version: 'kimi-code-0.0.0-test',
+        version: 'hakimi-0.0.0-test',
         model: 'k2',
       }),
     );
@@ -2220,7 +2220,7 @@ describe('KimiTUI message flow', () => {
       expect(getStatus).toHaveBeenCalledTimes(previousStatusCalls + 1);
       const output = stripSgr(driver.state.transcriptContainer.render(120).join('\n'));
       expect(output).toContain(' Status ');
-      expect(output).toContain('>_ Kimi Code');
+      expect(output).toContain('>_ Hakimi');
       expect(output).toContain('Model');
       expect(output).toContain('thinking on');
       expect(output).toContain('Permissions  auto');
@@ -2353,7 +2353,9 @@ describe('KimiTUI message flow', () => {
     driver.handleUserInput('/plugins install ./plugins/kimi-datasource');
 
     await vi.waitFor(() => {
-      expect(session.installPlugin).toHaveBeenCalledWith('/tmp/proj-a/plugins/kimi-datasource');
+      expect(session.installPlugin).toHaveBeenCalledWith(
+        expect.stringMatching(/[\\/]tmp[\\/]proj-a[\\/]plugins[\\/]kimi-datasource$/),
+      );
     });
   });
 
@@ -2427,7 +2429,7 @@ describe('KimiTUI message flow', () => {
 
       await vi.waitFor(() => {
         expect(session.installPlugin).toHaveBeenCalledWith(
-          'https://code.kimi.com/kimi-code/plugins/official/kimi-datasource.zip',
+          new URL('./official/kimi-datasource.zip', KIMI_CODE_PLUGIN_MARKETPLACE_URL).toString(),
         );
       });
       expect(globalThis.fetch).toHaveBeenCalledWith(KIMI_CODE_PLUGIN_MARKETPLACE_URL);
@@ -2656,14 +2658,14 @@ describe('KimiTUI message flow', () => {
     const picker = driver.state.editorContainer.children[0];
     expect(picker).toBeInstanceOf(TabbedModelSelectorComponent);
     const pickerOutput = stripSgr((picker as TabbedModelSelectorComponent).render(120).join('\n'));
-    expect(pickerOutput).toContain('Kimi K2 (Kimi Code) ← current');
-    expect(pickerOutput).toContain('❯ Kimi Turbo (Kimi Code)');
+    expect(pickerOutput).toContain('Kimi K2 (Hakimi) ← current');
+    expect(pickerOutput).toContain('❯ Kimi Turbo (Hakimi)');
     (picker as TabbedModelSelectorComponent).handleInput('t');
     (picker as TabbedModelSelectorComponent).handleInput('u');
     const filteredOutput = stripSgr((picker as TabbedModelSelectorComponent).render(120).join('\n'));
     expect(filteredOutput).toContain('Search: tu');
-    expect(filteredOutput).toContain('Kimi Turbo (Kimi Code)');
-    expect(filteredOutput).not.toContain('Kimi K2 (Kimi Code)');
+    expect(filteredOutput).toContain('Kimi Turbo (Hakimi)');
+    expect(filteredOutput).not.toContain('Kimi K2 (Hakimi)');
     (picker as TabbedModelSelectorComponent).handleInput('/');
     (picker as TabbedModelSelectorComponent).handleInput('\r');
 
@@ -2741,8 +2743,8 @@ describe('KimiTUI message flow', () => {
 
     const output = stripSgr((picker as ModelSelectorComponent).render(120).join('\n'));
     expect(output).toContain('Search: tu');
-    expect(output).toContain('Kimi Turbo (Kimi Code)');
-    expect(output).not.toContain('Kimi Alpha (Kimi Code)');
+    expect(output).toContain('Kimi Turbo (Hakimi)');
+    expect(output).not.toContain('Kimi Alpha (Hakimi)');
 
     (picker as ModelSelectorComponent).handleInput('\u001B');
     (picker as ModelSelectorComponent).handleInput('\u001B');
@@ -2793,7 +2795,7 @@ describe('KimiTUI message flow', () => {
       expect(forked.onEvent).toHaveBeenCalledOnce();
       expect(harness.resumeSession).not.toHaveBeenCalled();
       expect(driver.state.transcriptContainer.render(120).join('\n')).toContain(
-        'Session forked (ses-fork). To return to the original session: kimi -r ses-source',
+        'Session forked (ses-fork). To return to the original session: hakimi --session ses-source',
       );
     } finally {
       process.title = originalTitle;

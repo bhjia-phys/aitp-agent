@@ -1,8 +1,9 @@
 import { createKimiDeviceId, KIMI_CODE_PROVIDER_NAME } from '@moonshot-ai/kimi-code-oauth';
 import { initializeTelemetry } from '@moonshot-ai/kimi-telemetry';
-import { resolveKimiHome, type KimiConfig, type KimiHarness } from '@moonshot-ai/kimi-code-sdk';
+import type { KimiConfig, KimiHarness } from '@moonshot-ai/kimi-code-sdk';
 
 import { CLI_USER_AGENT_PRODUCT } from '#/constant/app';
+import { getDataDir } from '#/utils/paths';
 
 export interface CliTelemetryBootstrap {
   readonly homeDir: string;
@@ -21,7 +22,7 @@ export interface InitializeCliTelemetryOptions {
 
 export function createCliTelemetryBootstrap(): CliTelemetryBootstrap {
   let firstLaunch = false;
-  const homeDir = resolveKimiHome();
+  const homeDir = getDataDir();
   const deviceId = createKimiDeviceId(homeDir, {
     onFirstLaunch: () => {
       firstLaunch = true;

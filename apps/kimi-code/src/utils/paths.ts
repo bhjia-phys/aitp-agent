@@ -10,6 +10,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  HAKIMI_HOME_ENV,
   KIMI_CODE_DATA_DIR_NAME,
   KIMI_CODE_HOME_ENV,
   KIMI_CODE_INPUT_HISTORY_DIR_NAME,
@@ -23,9 +24,13 @@ import {
 /**
  * Return the root data directory for Hakimi.
  *
- * Priority: `KIMI_CODE_HOME` env var > `~/.kimi-code`.
+ * Priority: `HAKIMI_HOME` env var > `KIMI_CODE_HOME` env var > `~/.hakimi`.
  */
 export function getDataDir(): string {
+  const hakimiHome = process.env[HAKIMI_HOME_ENV];
+  if (hakimiHome) {
+    return hakimiHome;
+  }
   const envDir = process.env[KIMI_CODE_HOME_ENV];
   if (envDir) {
     return envDir;

@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 
 import type { createKimiDeviceId as createKimiDeviceIdFn } from '@moonshot-ai/kimi-code-oauth';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { runShell } from '#/cli/run-shell';
 
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => {
     readonly fallback: TuiConfigFallback;
 
     constructor(fallback: TuiConfigFallback) {
-      super('Invalid TUI config in ~/.kimi-code/tui.toml; using defaults.');
+      super('Invalid TUI config in ~/.hakimi/tui.toml; using defaults.');
       this.fallback = fallback;
     }
   }
@@ -142,7 +142,12 @@ vi.mock('node:child_process', () => ({
 }));
 
 describe('runShell', () => {
+  beforeEach(() => {
+    process.env['HAKIMI_HOME'] = '/tmp/kimi-code-test-home';
+  });
+
   afterEach(() => {
+    delete process.env['HAKIMI_HOME'];
     vi.clearAllMocks();
     mocks.harnessGetConfig.mockResolvedValue({
       providers: {},
@@ -475,7 +480,7 @@ describe('runShell', () => {
     expect(mocks.detectTerminalTheme).toHaveBeenCalledOnce();
     const [, , startupInput] = mocks.kimiTuiConstructor.mock.calls[0]!;
     expect(startupInput).toMatchObject({
-      startupNotice: 'Invalid TUI config in ~/.kimi-code/tui.toml; using defaults.',
+      startupNotice: 'Invalid TUI config in ~/.hakimi/tui.toml; using defaults.',
       resolvedTheme: 'light',
       tuiConfig: {
         theme: 'auto',
@@ -562,7 +567,7 @@ describe('runShell', () => {
       expect(mocks.harnessTrack).not.toHaveBeenCalledWith('exit', expect.anything());
       expect(mocks.shutdownTelemetry).toHaveBeenCalledOnce();
       expect(stdout.text()).toBe(' Bye!\n');
-      expect(stderr.text()).toContain(' To resume this session: kimi -r ses-1');
+      expect(stderr.text()).toContain(' To resume this session: hakimi --session ses-1');
     } finally {
       exitSpy.mockRestore();
       stdout.restore();
@@ -578,7 +583,7 @@ describe('runShell', () => {
     });
     mocks.detectPendingMigration.mockResolvedValue({ totalSessions: 1 });
     mocks.harnessGetConfig.mockRejectedValue(
-      new Error('Invalid configuration in ~/.kimi-code/config.toml'),
+      new Error('Invalid configuration in ~/.hakimi/config.toml'),
     );
 
     // A broken config.toml must fail loudly — `kimi migrate` must not swallow

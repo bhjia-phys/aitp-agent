@@ -29,9 +29,9 @@ async function writeJson(path: string, value: unknown): Promise<void> {
 
 describe('resolveMcpJsonPaths', () => {
   it('returns the canonical user and project paths', () => {
-    const paths = resolveMcpJsonPaths({ cwd: '/work/proj', homeDir: '/home/user/.kimi-code' });
-    expect(paths.user).toBe('/home/user/.kimi-code/mcp.json');
-    expect(paths.project).toBe('/work/proj/.kimi-code/mcp.json');
+    const paths = resolveMcpJsonPaths({ cwd: '/work/proj', homeDir: '/home/user/.hakimi' });
+    expect(paths.user).toBe('/home/user/.hakimi/mcp.json');
+    expect(paths.project).toBe('/work/proj/.hakimi/mcp.json');
   });
 });
 
@@ -61,7 +61,7 @@ describe('loadMcpServers', () => {
         userOnly: { transport: 'stdio', command: 'user-only' },
       },
     });
-    await writeJson(join(cwd, '.kimi-code', 'mcp.json'), {
+    await writeJson(join(cwd, '.hakimi', 'mcp.json'), {
       mcpServers: {
         shared: { transport: 'stdio', command: 'shared-project' },
         local: { transport: 'http', url: 'http://localhost:8080/mcp' },

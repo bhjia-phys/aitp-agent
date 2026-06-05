@@ -512,7 +512,7 @@ export class KimiTUI {
             process.stderr.write(
               `${chalk.hex(this.state.theme.colors.warning)(
                 `Session "${startup.sessionFlag}" was created under a different directory.\n` +
-                  `  cd "${target.workDir}" && kimi -r ${startup.sessionFlag}`,
+                  `  cd "${target.workDir}" && hakimi --session ${startup.sessionFlag}`,
               )}\n\n`,
             );
             throw new Error(

@@ -10,7 +10,6 @@ import {
   flushDiagnosticLogs,
   log,
   resolveGlobalLogPath,
-  resolveKimiHome,
   type TelemetryClient,
 } from '@moonshot-ai/kimi-code-sdk';
 import {
@@ -36,6 +35,7 @@ import { CLI_SHUTDOWN_TIMEOUT_MS, CLI_UI_MODE } from './constant/app';
 import { cleanupStaleNativeCacheForCurrent } from './native/native-assets';
 import { installNativeModuleHook } from './native/module-hook';
 import { runNativeAssetSmokeIfRequested } from './native/smoke';
+import { getDataDir } from './utils/paths';
 import { initProcessName } from './utils/process/proctitle';
 
 export async function handleMainCommand(opts: CLIOptions, version: string): Promise<void> {
@@ -143,7 +143,7 @@ export function main(): void {
             operation,
           }),
         );
-        process.stderr.write(`See log: ${resolveGlobalLogPath(resolveKimiHome())}\n`);
+        process.stderr.write(`See log: ${resolveGlobalLogPath(getDataDir())}\n`);
         process.exit(1);
       });
     },
@@ -151,7 +151,7 @@ export function main(): void {
       void handleMigrateCommand(version).catch(async (error: unknown) => {
         await logStartupFailure('run migration', error);
         process.stderr.write(formatStartupError(error, { operation: 'run migration' }));
-        process.stderr.write(`See log: ${resolveGlobalLogPath(resolveKimiHome())}\n`);
+        process.stderr.write(`See log: ${resolveGlobalLogPath(getDataDir())}\n`);
         process.exit(1);
       });
     },
@@ -166,7 +166,7 @@ export function main(): void {
       void handleUpgradeCommand(version).catch(async (error: unknown) => {
         await logStartupFailure('upgrade', error);
         process.stderr.write(formatStartupError(error, { operation: 'upgrade' }));
-        process.stderr.write(`See log: ${resolveGlobalLogPath(resolveKimiHome())}\n`);
+        process.stderr.write(`See log: ${resolveGlobalLogPath(getDataDir())}\n`);
         process.exit(1);
       });
     },

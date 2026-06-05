@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { getDataDir } from '#/utils/paths';
 
 export const INVALID_TUI_CONFIG_MESSAGE =
-  'Invalid TUI config in ~/.kimi-code/tui.toml; using defaults.';
+  'Invalid TUI config in ~/.hakimi/tui.toml; using defaults.';
 
 export const TuiThemeSchema = z.enum(['dark', 'light', 'auto']);
 
@@ -145,9 +145,9 @@ export function normalizeTuiConfig(config: TuiConfigFileShape): TuiConfig {
 }
 
 export function renderTuiConfig(config: TuiConfig): string {
-  return `# ~/.kimi-code/tui.toml
+  return `# ~/.hakimi/tui.toml
 # Client preferences for Hakimi.
-# Agent/runtime settings stay in ~/.kimi-code/config.toml.
+# Agent/runtime settings stay in ~/.hakimi/config.toml.
 
 theme = "${config.theme}" # "auto" | "dark" | "light"
 
