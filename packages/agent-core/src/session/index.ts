@@ -12,6 +12,13 @@ import { Agent, type AgentOptions, type AgentType } from '../agent';
 import { SessionGoalStore, type SessionGoalState } from './goal';
 import { HookEngine, type HookDef } from './hooks';
 import type { PermissionManagerOptions, PermissionRule } from '../agent/permission';
+import {
+  createDynamicAitpCliProcessGraphSliceProvider,
+  createDynamicAitpCliWriteBridgeExecutor,
+  type AitpCommandRunner,
+  type AitpProcessGraphSliceProvider,
+  type AitpWriteBridgeExecutor,
+} from '../aitp';
 import { parseBooleanEnv, resolveConfigValue, type BackgroundConfig } from '../config';
 import {
   createDefaultBenchmarkAdapterRegistry,
@@ -72,6 +79,9 @@ export interface SessionOptions {
   readonly researchHarness?: SessionResearchHarnessConfig;
   readonly workflowRecipes?: SessionWorkflowRecipeConfig;
   readonly benchmarkAdapters?: BenchmarkAdapterRegistry;
+  readonly aitp?: SessionAitpBridgeConfig;
+  readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider | undefined;
+  readonly aitpWriteBridge?: AitpWriteBridgeExecutor | undefined;
   readonly mcpConfig?: SessionMcpConfig;
   readonly telemetry?: TelemetryClient | undefined;
   readonly pluginSessionStarts?: readonly EnabledPluginSessionStart[];
@@ -115,6 +125,14 @@ export interface SessionWorkflowRecipeConfig {
   readonly userHomeDir?: string;
   readonly explicitDirs?: readonly string[];
   readonly extraDirs?: readonly string[];
+}
+
+export interface SessionAitpBridgeConfig {
+  readonly enabled?: boolean | undefined;
+  readonly command?: string | undefined;
+  readonly timeoutMs?: number | undefined;
+  readonly graphSliceLimit?: number | undefined;
+  readonly runner?: AitpCommandRunner | undefined;
 }
 
 export interface AgentMeta {
@@ -676,7 +694,10 @@ export class Session {
   ): Agent {
     const parentAgent = parentAgentId !== null ? this.agents.get(parentAgentId) : undefined;
     const cwd = parentAgent?.config.cwd ?? this.options.kaos.getcwd();
-    return new Agent({
+    let agent: Agent | undefined;
+    const basePath = () => agent?.config.cwd ?? cwd;
+    const aitpBridges = this.createAitpBridges(basePath);
+    agent = new Agent({
       ...config,
       type,
       kaos: this.options.kaos.withCwd(cwd),
@@ -690,6 +711,12 @@ export class Session {
       benchmarkAdapters: this.benchmarkAdapters,
       researchHarness: this.researchHarness ?? undefined,
       workflowRecipes: this.workflowRecipes ?? undefined,
+      aitpProcessGraphProvider:
+        config.aitpProcessGraphProvider ??
+        this.options.aitpProcessGraphProvider ??
+        aitpBridges?.processGraphProvider,
+      aitpWriteBridge:
+        config.aitpWriteBridge ?? this.options.aitpWriteBridge ?? aitpBridges?.writeBridge,
       rpc: proxyWithExtraPayload(this.rpc, { agentId: id }),
       modelProvider: this.options.providerManager,
       hookEngine: config.hookEngine ?? this.hookEngine,
@@ -703,6 +730,30 @@ export class Session {
       pluginSessionStarts: type === 'main' ? this.options.pluginSessionStarts : undefined,
       appVersion: this.options.appVersion,
     });
+    return agent;
+  }
+
+  private createAitpBridges(basePath: () => string):
+    | {
+        readonly processGraphProvider: AitpProcessGraphSliceProvider;
+        readonly writeBridge: AitpWriteBridgeExecutor;
+      }
+    | undefined {
+    const config = this.options.aitp;
+    if (config?.enabled === false) return undefined;
+    const bridgeOptions = {
+      basePath,
+      command: config?.command,
+      timeoutMs: config?.timeoutMs,
+      runner: config?.runner,
+    };
+    return {
+      processGraphProvider: createDynamicAitpCliProcessGraphSliceProvider({
+        ...bridgeOptions,
+        limit: config?.graphSliceLimit,
+      }),
+      writeBridge: createDynamicAitpCliWriteBridgeExecutor(bridgeOptions),
+    };
   }
 
   private permissionOptions(
