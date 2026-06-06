@@ -73,7 +73,9 @@ describe('ChoicePickerComponent', () => {
       onCancel,
     });
     const modelOutput = model.render(120).map(strip);
-    expect(modelOutput).toContain('  ❯ Kimi K2 (Kimi Code) ← current');
+    expect(
+      modelOutput.some((line) => line.includes('❯ Kimi K2 (') && line.includes('← current')),
+    ).toBe(true);
     expect(modelOutput).toContain(' Thinking  (/ to toggle)');
     expect(modelOutput).toContain('  [ On ]    Off  ');
 

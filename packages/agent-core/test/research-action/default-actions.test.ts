@@ -25,6 +25,7 @@ describe('default research actions', () => {
       'aitp.record_reference_location',
       'aitp.record_research_state',
       'aitp.record_route_choice',
+      'aitp.record_source_reconstruction_review_result',
       'aitp.record_tool_run',
       'aitp.record_validation_result',
       'aitp.register_source_asset',

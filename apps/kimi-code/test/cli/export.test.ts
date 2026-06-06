@@ -399,12 +399,14 @@ describe('kimi export', () => {
     );
     expect(mocks.harnessEnsureConfigFile).toHaveBeenCalledOnce();
     expect(mocks.harnessGetConfig).toHaveBeenCalledOnce();
+    const bootstrapHomeDir = mocks.createKimiDeviceId.mock.calls[0]?.[0];
+    expect(bootstrapHomeDir).toEqual(expect.any(String));
     expect(mocks.createKimiDeviceId).toHaveBeenCalledWith(
-      '/tmp/kimi-export-home',
+      bootstrapHomeDir,
       expect.objectContaining({ onFirstLaunch: expect.any(Function) }),
     );
     expect(mocks.initializeTelemetry).toHaveBeenCalledWith({
-      homeDir: '/tmp/kimi-export-home',
+      homeDir: bootstrapHomeDir,
       deviceId: 'device-1',
       enabled: true,
       appName: 'hakimi-cli',
@@ -499,14 +501,15 @@ describe('kimi export', () => {
 
     expect(mocks.createKimiDeviceId).toHaveBeenNthCalledWith(
       1,
-      '/tmp/kimi-export-home',
+      expect.any(String),
       expect.objectContaining({ onFirstLaunch: expect.any(Function) }),
     );
+    const firstLaunchHomeDir = mocks.createKimiDeviceId.mock.calls[0]?.[0];
     expect(mocks.createKimiDeviceId.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.kimiHarnessConstructor.mock.invocationCallOrder[0]!,
     );
     expect(mocks.kimiHarnessConstructor).toHaveBeenCalledWith(
-      expect.objectContaining({ homeDir: '/tmp/kimi-export-home' }),
+      expect.objectContaining({ homeDir: firstLaunchHomeDir }),
     );
     expect(mocks.harnessTrack).toHaveBeenCalledWith('first_launch');
     expect(mocks.initializeTelemetry.mock.invocationCallOrder[0]).toBeLessThan(

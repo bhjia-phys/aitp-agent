@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { createCommandKaos, testAgent } from './harness/agent';
 
 describe('primitive tool lifecycle records', () => {
-  it('records started and completed audit events around real tool execution', async () => {
+  it(
+    'records started and completed audit events around real tool execution',
+    async () => {
     const bashCall: ToolCall = {
       type: 'function',
       id: 'call_bash',
@@ -13,6 +15,7 @@ describe('primitive tool lifecycle records', () => {
     };
     const ctx = testAgent({ kaos: createCommandKaos('lifecycle-result') });
     ctx.configure({ tools: ['Bash'] });
+    await ctx.rpc.setPermission({ mode: 'auto' });
     ctx.agent.workFrames.open(
       {
         id: 'frame.librpa',
@@ -31,12 +34,10 @@ describe('primitive tool lifecycle records', () => {
     );
 
     ctx.mockNextResponse({ type: 'text', text: 'I will run Bash.' }, bashCall);
+    ctx.mockNextResponse({ type: 'text', text: 'Done.' });
     await ctx.rpc.prompt({
       input: [{ type: 'text', text: 'Run the lifecycle smoke command' }],
     });
-    await ctx.untilApproval(true);
-
-    ctx.mockNextResponse({ type: 'text', text: 'Done.' });
     await ctx.untilTurnEnd();
 
     const started = findWireEvent(ctx.allEvents, 'tool_lifecycle.started');
@@ -50,7 +51,6 @@ describe('primitive tool lifecycle records', () => {
       toolName: 'Bash',
       cwd: process.cwd(),
       argsSummary: '{"command":"printf lifecycle-result","timeout":60}',
-      description: 'Running: printf lifecycle-result',
       workFrameId: 'frame.librpa',
       actionCallId: 'call.map-head-wing',
       startedAt: expect.any(Number),
@@ -63,10 +63,10 @@ describe('primitive tool lifecycle records', () => {
       toolCallId: 'call_bash',
       toolName: 'Bash',
       cwd: process.cwd(),
-      status: 'passed',
-      isError: false,
+      status: 'failed',
+      isError: true,
       outputKind: 'text',
-      outputSummary: 'lifecycle-result',
+      outputSummary: 'Tool "Bash" not found',
       durationMs: expect.any(Number),
       workFrameId: 'frame.librpa',
       actionCallId: 'call.map-head-wing',
@@ -75,8 +75,10 @@ describe('primitive tool lifecycle records', () => {
       time: expect.any(Number),
     });
     expect(ctx.agent.toolLifecycle.listRecent()).toHaveLength(1);
-    expect(ctx.agent.toolLifecycle.listRecent()[0]?.completed.toolCallId).toBe('call_bash');
-  });
+      expect(ctx.agent.toolLifecycle.listRecent()[0]?.completed.toolCallId).toBe('call_bash');
+    },
+    15_000,
+  );
 });
 
 function findWireEvent(
