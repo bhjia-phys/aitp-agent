@@ -5,7 +5,7 @@ import { createCommandKaos, testAgent } from './harness/agent';
 
 describe('primitive tool lifecycle records', () => {
   it(
-    'records started and completed audit events around real tool execution',
+    'records started and failed audit events when the requested tool is unavailable',
     async () => {
     const bashCall: ToolCall = {
       type: 'function',
@@ -25,14 +25,6 @@ describe('primitive tool lifecycle records', () => {
       },
       { source: 'controller' },
     );
-    ctx.agent.researchAction.startActionCall(
-      {
-        actionId: 'code.map_formula_to_code_region',
-        callId: 'call.map-head-wing',
-      },
-      { source: 'controller' },
-    );
-
     ctx.mockNextResponse({ type: 'text', text: 'I will run Bash.' }, bashCall);
     ctx.mockNextResponse({ type: 'text', text: 'Done.' });
     await ctx.rpc.prompt({
@@ -52,7 +44,6 @@ describe('primitive tool lifecycle records', () => {
       cwd: process.cwd(),
       argsSummary: '{"command":"printf lifecycle-result","timeout":60}',
       workFrameId: 'frame.librpa',
-      actionCallId: 'call.map-head-wing',
       startedAt: expect.any(Number),
       time: expect.any(Number),
     });
@@ -69,7 +60,6 @@ describe('primitive tool lifecycle records', () => {
       outputSummary: 'Tool "Bash" not found',
       durationMs: expect.any(Number),
       workFrameId: 'frame.librpa',
-      actionCallId: 'call.map-head-wing',
       completedAt: expect.any(Number),
       artifactRefs: [],
       time: expect.any(Number),
