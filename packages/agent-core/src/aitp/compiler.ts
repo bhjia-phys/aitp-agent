@@ -46,7 +46,7 @@ export interface CompileAitpProcessGraphSliceOptions extends ResearchMomentDetec
 }
 
 export function compileAitpProcessGraphSlice(
-  input: AitpProcessGraphSlice | unknown,
+  input: unknown,
   options: CompileAitpProcessGraphSliceOptions = {},
 ): CompiledAitpProcessGraphSlice {
   const slice = withSliceDefaults(
