@@ -18,6 +18,13 @@ import { executeTool } from './fixtures/execute-tool';
 
 const signal = new AbortController().signal;
 
+function requestTarget(input: RequestInfo | URL | undefined): string | undefined {
+  if (typeof input === 'string') return input;
+  if (input instanceof URL) return input.toString();
+  if (input instanceof Request) return input.url;
+  return undefined;
+}
+
 function fakeProvider(
   results: Awaited<ReturnType<WebSearchProvider['search']>> = [],
 ): WebSearchProvider {
@@ -354,9 +361,9 @@ describe('LocalWebSearchProvider', () => {
       },
     ]);
 
-    const requested = fetchImpl.mock.calls[0]?.[0];
-    expect(String(requested)).toContain('https://search.local/html/');
-    expect(String(requested)).toContain('q=quantum+gravity+algebra');
+    const requested = requestTarget(fetchImpl.mock.calls[0]?.[0]);
+    expect(requested).toContain('https://search.local/html/');
+    expect(requested).toContain('q=quantum+gravity+algebra');
   });
 
   it('falls back to Bing HTML results when the first local search endpoint fails', async () => {
@@ -394,6 +401,6 @@ describe('LocalWebSearchProvider', () => {
     ]);
 
     expect(fetchImpl).toHaveBeenCalledTimes(2);
-    expect(String(fetchImpl.mock.calls[1]?.[0])).toContain('https://bing.local/search');
+    expect(requestTarget(fetchImpl.mock.calls[1]?.[0])).toContain('https://bing.local/search');
   });
 });
