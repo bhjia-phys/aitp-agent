@@ -14,10 +14,12 @@ import { HookEngine, type HookDef } from './hooks';
 import type { PermissionManagerOptions, PermissionRule } from '../agent/permission';
 import {
   createDynamicAitpMcpFirstProcessGraphSliceProvider,
+  createDynamicAitpMcpFirstRuntimePayloadProfilesProvider,
   createDynamicAitpMcpFirstWriteBridgeExecutor,
   type AitpCommandRunner,
   type AitpMcpWriteBridgeTransport,
   type AitpProcessGraphSliceProvider,
+  type AitpRuntimePayloadProfilesProvider,
   type AitpWriteBridgeExecutor,
 } from '../aitp';
 import { parseBooleanEnv, resolveConfigValue, type BackgroundConfig } from '../config';
@@ -82,6 +84,7 @@ export interface SessionOptions {
   readonly benchmarkAdapters?: BenchmarkAdapterRegistry;
   readonly aitp?: SessionAitpBridgeConfig;
   readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider | undefined;
+  readonly aitpRuntimePayloadProfilesProvider?: AitpRuntimePayloadProfilesProvider | undefined;
   readonly aitpWriteBridge?: AitpWriteBridgeExecutor | undefined;
   readonly mcpConfig?: SessionMcpConfig;
   readonly telemetry?: TelemetryClient | undefined;
@@ -718,6 +721,10 @@ export class Session {
         config.aitpProcessGraphProvider ??
         this.options.aitpProcessGraphProvider ??
         aitpBridges?.processGraphProvider,
+      aitpRuntimePayloadProfilesProvider:
+        config.aitpRuntimePayloadProfilesProvider ??
+        this.options.aitpRuntimePayloadProfilesProvider ??
+        aitpBridges?.runtimePayloadProfilesProvider,
       aitpWriteBridge:
         config.aitpWriteBridge ?? this.options.aitpWriteBridge ?? aitpBridges?.writeBridge,
       rpc: proxyWithExtraPayload(this.rpc, { agentId: id }),
@@ -739,6 +746,7 @@ export class Session {
   private createAitpBridges(basePath: () => string):
     | {
         readonly processGraphProvider: AitpProcessGraphSliceProvider;
+        readonly runtimePayloadProfilesProvider: AitpRuntimePayloadProfilesProvider;
         readonly writeBridge: AitpWriteBridgeExecutor;
       }
     | undefined {
@@ -754,6 +762,11 @@ export class Session {
       processGraphProvider: createDynamicAitpMcpFirstProcessGraphSliceProvider({
         ...bridgeOptions,
         limit: config?.graphSliceLimit,
+        mcpTransport: this.createAitpMcpTransport(config?.mcpServerName ?? 'aitp'),
+        fallbackOnMcpError: config?.fallbackOnMcpError,
+      }),
+      runtimePayloadProfilesProvider: createDynamicAitpMcpFirstRuntimePayloadProfilesProvider({
+        ...bridgeOptions,
         mcpTransport: this.createAitpMcpTransport(config?.mcpServerName ?? 'aitp'),
         fallbackOnMcpError: config?.fallbackOnMcpError,
       }),

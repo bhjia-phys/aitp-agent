@@ -15,7 +15,11 @@ import {
 import type { EnabledPluginSessionStart } from '#/plugin';
 
 import type { DomainProfileRegistry } from '../domain-profile';
-import type { AitpProcessGraphSliceProvider, AitpWriteBridgeExecutor } from '../aitp';
+import type {
+  AitpProcessGraphSliceProvider,
+  AitpRuntimePayloadProfilesProvider,
+  AitpWriteBridgeExecutor,
+} from '../aitp';
 import type { McpConnectionManager } from '../mcp';
 import type { PhysicsMemoryRegistry } from '../physics-memory';
 import type { ResearchLedgerRegistry } from '../research-ledger';
@@ -105,6 +109,7 @@ export interface AgentOptions {
   readonly researchHarness?: ResearchEvalCaseRegistry;
   readonly workflowRecipes?: WorkflowRecipeRegistry;
   readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider | undefined;
+  readonly aitpRuntimePayloadProfilesProvider?: AitpRuntimePayloadProfilesProvider | undefined;
   readonly aitpWriteBridge?: AitpWriteBridgeExecutor | undefined;
   readonly mcp?: McpConnectionManager;
   readonly goals?: SessionGoalStore | undefined;
@@ -131,6 +136,7 @@ export class Agent {
   readonly goals?: SessionGoalStore;
   readonly hooks?: HookEngine;
   readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider;
+  readonly aitpRuntimePayloadProfilesProvider?: AitpRuntimePayloadProfilesProvider;
   readonly aitpWriteBridge?: AitpWriteBridgeExecutor;
   readonly log: Logger;
   readonly telemetry: TelemetryClient;
@@ -180,6 +186,7 @@ export class Agent {
     this.goals = options.goals;
     this.hooks = options.hookEngine;
     this.aitpProcessGraphProvider = options.aitpProcessGraphProvider;
+    this.aitpRuntimePayloadProfilesProvider = options.aitpRuntimePayloadProfilesProvider;
     this.aitpWriteBridge = options.aitpWriteBridge;
     this.appVersion = options.appVersion;
     this.log = options.log ?? log;
