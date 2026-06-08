@@ -13,7 +13,7 @@ import { SessionGoalStore, type SessionGoalState } from './goal';
 import { HookEngine, type HookDef } from './hooks';
 import type { PermissionManagerOptions, PermissionRule } from '../agent/permission';
 import {
-  createDynamicAitpCliProcessGraphSliceProvider,
+  createDynamicAitpMcpFirstProcessGraphSliceProvider,
   createDynamicAitpMcpFirstWriteBridgeExecutor,
   type AitpCommandRunner,
   type AitpMcpWriteBridgeTransport,
@@ -751,9 +751,11 @@ export class Session {
       runner: config?.runner,
     };
     return {
-      processGraphProvider: createDynamicAitpCliProcessGraphSliceProvider({
+      processGraphProvider: createDynamicAitpMcpFirstProcessGraphSliceProvider({
         ...bridgeOptions,
         limit: config?.graphSliceLimit,
+        mcpTransport: this.createAitpMcpTransport(config?.mcpServerName ?? 'aitp'),
+        fallbackOnMcpError: config?.fallbackOnMcpError,
       }),
       writeBridge: createDynamicAitpMcpFirstWriteBridgeExecutor({
         ...bridgeOptions,
