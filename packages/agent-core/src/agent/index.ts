@@ -18,6 +18,7 @@ import type { DomainProfileRegistry } from '../domain-profile';
 import type {
   AitpCuratedRagProvider,
   AitpProcessGraphSliceProvider,
+  AitpRecordRefLookupProvider,
   AitpRuntimePayloadProfilesProvider,
   AitpWriteBridgeExecutor,
 } from '../aitp';
@@ -111,6 +112,7 @@ export interface AgentOptions {
   readonly workflowRecipes?: WorkflowRecipeRegistry;
   readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider | undefined;
   readonly aitpRuntimePayloadProfilesProvider?: AitpRuntimePayloadProfilesProvider | undefined;
+  readonly aitpRecordRefLookupProvider?: AitpRecordRefLookupProvider | undefined;
   readonly aitpCuratedRagProvider?: AitpCuratedRagProvider | undefined;
   readonly aitpWriteBridge?: AitpWriteBridgeExecutor | undefined;
   readonly mcp?: McpConnectionManager;
@@ -139,6 +141,7 @@ export class Agent {
   readonly hooks?: HookEngine;
   readonly aitpProcessGraphProvider?: AitpProcessGraphSliceProvider;
   readonly aitpRuntimePayloadProfilesProvider?: AitpRuntimePayloadProfilesProvider;
+  readonly aitpRecordRefLookupProvider?: AitpRecordRefLookupProvider;
   readonly aitpCuratedRagProvider?: AitpCuratedRagProvider;
   readonly aitpWriteBridge?: AitpWriteBridgeExecutor;
   readonly log: Logger;
@@ -190,6 +193,7 @@ export class Agent {
     this.hooks = options.hookEngine;
     this.aitpProcessGraphProvider = options.aitpProcessGraphProvider;
     this.aitpRuntimePayloadProfilesProvider = options.aitpRuntimePayloadProfilesProvider;
+    this.aitpRecordRefLookupProvider = options.aitpRecordRefLookupProvider;
     this.aitpCuratedRagProvider = options.aitpCuratedRagProvider;
     this.aitpWriteBridge = options.aitpWriteBridge;
     this.appVersion = options.appVersion;
