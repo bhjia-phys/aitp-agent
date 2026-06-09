@@ -322,7 +322,7 @@ function requireConfiguredModel(...models: readonly (string | undefined)[]): str
   const model = configuredModel(...models);
   if (model === undefined) {
     throw new Error(
-      'No model configured. Run `kimi` and use /login to sign in, then retry; or set default_model in config.toml.',
+      'No model configured. Run `hakimi login` for Kimi for Coding, or start `hakimi` and use /login; then retry, or set default_model in ~/.hakimi/config.toml.',
     );
   }
   return model;
