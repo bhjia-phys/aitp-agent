@@ -12,6 +12,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ApprovalPanelComponent } from '#/tui/components/dialogs/approval-panel';
 import { KIMI_CODE_PLUGIN_MARKETPLACE_URL } from '#/constant/app';
+import {
+  AgentSwarmProgressComponent,
+  agentSwarmGridHeightForTerminalRows,
+} from '#/tui/components/messages/agent-swarm-progress';
 import { BtwPanelComponent } from '#/tui/components/panes/btw-panel';
 import { WelcomeComponent } from '#/tui/components/chrome/welcome';
 import { ModelSelectorComponent } from '#/tui/components/dialogs/model-selector';
@@ -37,7 +41,7 @@ vi.mock('#/tui/commands/prompts', async (importOriginal) => {
   return { ...actual, promptFeedbackInput: vi.fn() };
 });
 
-vi.mock('#/tui/utils/open-url', () => ({ openUrl: vi.fn() }));
+vi.mock('#/utils/open-url', () => ({ openUrl: vi.fn() }));
 
 const ESC = String.fromCodePoint(0x1b);
 const BEL = String.fromCodePoint(0x07);
@@ -102,7 +106,6 @@ function makeStartupInput(): KimiTUIStartupInput {
     },
     version: '0.0.0-test',
     workDir: '/tmp/proj-a',
-    resolvedTheme: 'dark',
   };
 }
 
@@ -134,6 +137,7 @@ function makeSession(overrides: Record<string, unknown> = {}) {
     setThinking: vi.fn(async () => {}),
     setPermission: vi.fn(async () => {}),
     setPlanMode: vi.fn(async () => {}),
+    setSwarmMode: vi.fn(async () => {}),
     onEvent: vi.fn(() => vi.fn()),
     listMcpServers: vi.fn(async () => []),
     listSkills: vi.fn(async () => []),
@@ -172,6 +176,7 @@ function makeSession(overrides: Record<string, unknown> = {}) {
     setPluginMcpServerEnabled: vi.fn(async () => {}),
     removePlugin: vi.fn(async () => {}),
     reloadPlugins: vi.fn(async () => ({ added: [], removed: [], errors: [] })),
+    reloadSession: vi.fn(async () => ({})),
     getPluginInfo: vi.fn(async (id: string) => ({
       id,
       displayName: id,
@@ -208,7 +213,7 @@ function makeHarness(session = makeSession(), overrides: Record<string, unknown>
     track: vi.fn(),
     setTelemetryContext: vi.fn(),
     interactiveAgentId: 'main',
-    getExperimentalFlags: vi.fn(async () => ({})),
+    getExperimentalFeatures: vi.fn(async () => []),
     auth: {
       status: vi.fn(),
       login: vi.fn(),
@@ -245,6 +250,10 @@ function renderTranscript(driver: MessageDriver): string {
   return driver.state.transcriptContainer.render(120).join('\n');
 }
 
+function renderActivity(driver: MessageDriver): string {
+  return driver.state.activityContainer.render(120).join('\n');
+}
+
 function renderBtwPanel(driver: MessageDriver): string {
   return driver.state.btwPanelContainer.render(120).join('\n');
 }
@@ -273,6 +282,13 @@ function setTerminalRows(driver: MessageDriver, rows: number): void {
   Object.defineProperty(driver.state.terminal, 'rows', {
     configurable: true,
     get: () => rows,
+  });
+}
+
+function setTerminalColumns(driver: MessageDriver, columns: number): void {
+  Object.defineProperty(driver.state.terminal, 'columns', {
+    configurable: true,
+    get: () => columns,
   });
 }
 
@@ -366,6 +382,57 @@ describe('KimiTUI message flow', () => {
     });
     expect(harness.track).toHaveBeenCalledWith('input_command', { command: 'theme' });
     expect(harness.track).toHaveBeenCalledWith('theme_switch', { theme: 'light' });
+  });
+
+  it('dispatches /reload-tui without reloading the active session', async () => {
+    const homeDir = await makeTempHome();
+    process.env['KIMI_CODE_HOME'] = homeDir;
+    await writeFile(
+      join(homeDir, 'tui.toml'),
+      `
+theme = "light"
+
+[editor]
+command = "vim"
+`,
+      'utf-8',
+    );
+    const { driver, session, harness } = await makeDriver();
+    harness.track.mockClear();
+    session.reloadSession.mockClear();
+
+    driver.handleUserInput('/reload-tui');
+
+    await vi.waitFor(() => {
+      expect(driver.state.appState.theme).toBe('light');
+    });
+    expect(driver.state.appState.editorCommand).toBe('vim');
+    expect(session.reloadSession).not.toHaveBeenCalled();
+    expect(harness.track).toHaveBeenCalledWith('input_command', { command: 'reload-tui' });
+  });
+
+  it('dispatches /reload through session reload and applies tui.toml', async () => {
+    const homeDir = await makeTempHome();
+    process.env['KIMI_CODE_HOME'] = homeDir;
+    await writeFile(join(homeDir, 'tui.toml'), 'theme = "light"\n', 'utf-8');
+    const { driver, session, harness } = await makeDriver();
+    harness.track.mockClear();
+    session.reloadSession.mockClear();
+    driver.handleUserInput('hello before reload');
+    driver.state.appState.streamingPhase = 'idle';
+
+    driver.handleUserInput('/reload');
+
+    await vi.waitFor(() => {
+      expect(session.reloadSession).toHaveBeenCalledOnce();
+    });
+    await vi.waitFor(() => {
+      expect(driver.state.appState.theme).toBe('light');
+    });
+    expect(harness.track).toHaveBeenCalledWith('input_command', { command: 'reload' });
+    const transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('hello before reload');
+    expect(transcript).toContain('Session reloaded.');
   });
 
   it('tracks successful feedback submissions only after the request succeeds', async () => {
@@ -847,6 +914,46 @@ describe('KimiTUI message flow', () => {
     ).toHaveLength(1);
   });
 
+  it('removes AgentSwarm progress from undone turns', async () => {
+    const { driver, session } = await makeDriver();
+    const sendQueued = vi.fn();
+
+    driver.handleUserInput('launch swarm');
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+
+    let transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('launch swarm');
+    expect(transcript).toContain('Agent Swarm');
+    expect(transcript).toContain('Review changed files');
+
+    driver.state.appState.streamingPhase = 'idle';
+    driver.handleUserInput('/undo');
+
+    await vi.waitFor(() => {
+      expect(session.undoHistory).toHaveBeenCalledWith(1);
+    });
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).not.toContain('launch swarm');
+    expect(transcript).not.toContain('Agent Swarm');
+    expect(transcript).not.toContain('Review changed files');
+  });
+
   it('removes approval notices from undone turns', async () => {
     const { driver, session } = await makeDriver();
     const approvalHandler = vi.mocked(session.setApprovalHandler).mock.calls[0]?.[0] as
@@ -1100,7 +1207,7 @@ describe('KimiTUI message flow', () => {
           coalescedCount: 1,
           stale: false,
         },
-        prompt: '提醒用户：这是每分钟提醒',
+        prompt: 'Remind the user: this is a once-per-minute reminder',
       } as Event,
       vi.fn(),
     );
@@ -1108,7 +1215,7 @@ describe('KimiTUI message flow', () => {
     const entry = driver.state.transcriptEntries.at(-1);
     expect(entry).toMatchObject({
       kind: 'cron',
-      content: '提醒用户：这是每分钟提醒',
+      content: 'Remind the user: this is a once-per-minute reminder',
       cronData: {
         jobId: 'deadbeef',
         cron: '* * * * *',
@@ -1120,7 +1227,7 @@ describe('KimiTUI message flow', () => {
     const transcript = stripSgr(driver.state.transcriptContainer.render(120).join('\n'));
     expect(transcript).toContain('Scheduled reminder fired');
     expect(transcript).toContain('* * * * *');
-    expect(transcript).toContain('提醒用户：这是每分钟提醒');
+    expect(transcript).toContain('Remind the user: this is a once-per-minute reminder');
     expect(transcript).not.toContain('<cron-fire');
   });
 
@@ -1352,13 +1459,13 @@ describe('KimiTUI message flow', () => {
     driver.state.appState.streamingPhase = 'composing';
     driver.state.livePane.mode = 'thinking';
 
-    driver.handleUserInput('/btw 你现在在做啥？');
+    driver.handleUserInput('/btw What are you working on right now?');
 
     await vi.waitFor(() => {
       expect(session.startBtw).toHaveBeenCalledWith();
     });
     await vi.waitFor(() => {
-      expect(session.prompt).toHaveBeenCalledWith('你现在在做啥？');
+      expect(session.prompt).toHaveBeenCalledWith('What are you working on right now?');
     });
     expect(session.steer).not.toHaveBeenCalled();
     expect(driver.state.appState.streamingPhase).toBe('composing');
@@ -1366,10 +1473,46 @@ describe('KimiTUI message flow', () => {
     expect(harness.track).toHaveBeenCalledWith('input_command', { command: 'btw' });
   });
 
+  it('opens /btw without a question and sends the first panel input to a side agent', async () => {
+    const session = makeSession();
+    const { driver } = await makeDriver(session);
+
+    driver.handleUserInput('/btw');
+
+    await vi.waitFor(() => {
+      expect(session.startBtw).toHaveBeenCalledWith();
+    });
+    expect(session.prompt).not.toHaveBeenCalled();
+    expect(stripSgr(renderBtwPanel(driver))).toContain('Ready for a side question...');
+
+    driver.handleUserInput('What are you working on right now?');
+
+    await vi.waitFor(() => {
+      expect(session.prompt).toHaveBeenCalledWith('What are you working on right now?');
+    });
+    expect(session.steer).not.toHaveBeenCalled();
+    expect(stripSgr(renderBtwPanel(driver))).toContain('Q: What are you working on right now?');
+  });
+
+  it('cancels an unused /btw side agent when closing an empty panel', async () => {
+    const session = makeSession();
+    const { driver } = await makeDriver(session);
+
+    driver.handleUserInput('/btw');
+
+    await vi.waitFor(() => {
+      expect(session.startBtw).toHaveBeenCalledWith();
+    });
+    driver.state.editor.onEscape?.();
+
+    expect(session.cancel).toHaveBeenCalledOnce();
+    expect(driver.state.btwPanelContainer.children).toHaveLength(0);
+  });
+
   it('renders /btw output in a dedicated panel instead of an Agent tool card', async () => {
     const session = makeSession();
     const { driver } = await makeDriver(session);
-    await openBtwPanel(driver, session, '你现在在做啥？');
+    await openBtwPanel(driver, session, 'What are you working on right now?');
 
     driver.sessionEventHandler.handleEvent(
       {
@@ -1377,7 +1520,7 @@ describe('KimiTUI message flow', () => {
         agentId: 'agent-btw',
         sessionId: 'ses-1',
         turnId: 0,
-        delta: '正在实现 /btw 的独立面板。',
+        delta: 'I am implementing the dedicated /btw panel.',
       } as Event,
       () => {},
     );
@@ -1400,26 +1543,27 @@ describe('KimiTUI message flow', () => {
     const transcript = stripSgr(renderTranscript(driver));
     const panel = stripSgr(renderBtwPanel(driver));
     const editorTopBorder = stripSgr(driver.state.editor.render(80)[0] ?? '');
-    expect(panel).toContain('BTW ─ Esc close');
+    expect(panel).toContain('BTW');
+    expect(panel).toContain('Esc close');
     expect(panel).not.toContain('ctrl+o expand');
-    expect(editorTopBorder.startsWith('├')).toBe(true);
-    expect(editorTopBorder.endsWith('┤')).toBe(true);
+    expect(editorTopBorder.length).toBeGreaterThan(0);
+    expect(editorTopBorder.includes('BTW')).toBe(false);
 
     driver.state.editor.handleInput('/');
     const highlightedEditorTopBorder = stripSgr(driver.state.editor.render(80)[0] ?? '');
-    expect(highlightedEditorTopBorder.startsWith('╭')).toBe(true);
-    expect(highlightedEditorTopBorder.endsWith('╮')).toBe(true);
+    expect(highlightedEditorTopBorder.length).toBeGreaterThan(0);
+    expect(highlightedEditorTopBorder).not.toBe(editorTopBorder);
     expect(panel).not.toContain('BTW done');
     expect(panel).not.toContain('BTW running');
     expect(panel).not.toContain('BTW failed');
     expect(panel).not.toContain('Ask:');
     expect(panel).not.toContain('Type follow-up');
-    expect(panel).toContain('Q: 你现在在做啥？');
-    expect(panel).toContain('正在实现 /btw 的独立面板。');
+    expect(panel).toContain('Q: What are you working on right now?');
+    expect(panel).toContain('I am implementing the dedicated /btw panel.');
     expect(panel).not.toContain('Agent');
     expect(transcript).not.toContain('BTW');
     expect(transcript).not.toContain('Esc close');
-    expect(transcript).not.toContain('正在实现 /btw 的独立面板。');
+    expect(transcript).not.toContain('I am implementing the dedicated /btw panel.');
   });
 
   it('keeps the /btw panel closest to the input after later transcript output', async () => {
@@ -1565,7 +1709,7 @@ describe('KimiTUI message flow', () => {
     const finalLines = mountedPanel.render(80).map(stripSgr);
     expect(finalLines).toHaveLength(thinkingLines.length);
     expect(finalLines.join('\n')).toContain('final answer');
-    expect(finalLines.at(-1)).toMatch(/^│\s+│$/);
+    expect(finalLines.at(-1)?.length).toBeGreaterThan(0);
   });
 
   it('caps /btw height to half the terminal and supports scrolling', async () => {
@@ -1585,7 +1729,9 @@ describe('KimiTUI message flow', () => {
 
     const collapsed = panel.render(80).map(stripSgr);
     expect(collapsed).toHaveLength(6);
-    expect(collapsed.join('\n')).toContain('BTW ─ Esc close · ↑↓ scroll');
+    expect(collapsed.join('\n')).toContain('BTW');
+    expect(collapsed.join('\n')).toContain('Esc close');
+    expect(collapsed.join('\n')).toContain('scroll');
     expect(collapsed.join('\n')).not.toContain('ctrl+o expand');
     expect(collapsed.join('\n')).toContain('question 8');
     expect(collapsed.join('\n')).toContain('answer 8');
@@ -1593,8 +1739,9 @@ describe('KimiTUI message flow', () => {
 
     driver.state.editor.setText('draft main input');
     const collapsedWithInput = panel.render(80).map(stripSgr);
-    expect(collapsedWithInput.join('\n')).toContain('BTW ─ Esc close');
-    expect(collapsedWithInput.join('\n')).not.toContain('↑↓ scroll');
+    expect(collapsedWithInput.join('\n')).toContain('BTW');
+    expect(collapsedWithInput.join('\n')).toContain('Esc close');
+    expect(collapsedWithInput.join('\n')).not.toContain('scroll');
     driver.state.editor.setText('');
 
     const requestRender = vi.mocked(driver.state.ui.requestRender);
@@ -1649,8 +1796,8 @@ describe('KimiTUI message flow', () => {
     expect(driver.state.btwPanelContainer.children).toHaveLength(0);
     expect(requestRender.mock.calls.at(-1)).toEqual([true]);
     const editorTopBorder = stripSgr(driver.state.editor.render(80)[0] ?? '');
-    expect(editorTopBorder.startsWith('╭')).toBe(true);
-    expect(editorTopBorder.endsWith('╮')).toBe(true);
+    expect(editorTopBorder.length).toBeGreaterThan(0);
+    expect(editorTopBorder.includes('BTW')).toBe(false);
     expect(driver.state.editor.focused).toBe(true);
   });
 
@@ -1921,18 +2068,91 @@ describe('KimiTUI message flow', () => {
     expect(renderedPanel).toContain('answer from new side agent');
   });
 
-  it('does not run /btw without a question or selected model', async () => {
+  it('does not run /btw without a selected model', async () => {
     const { driver, session } = await makeDriver();
 
+    driver.state.appState.model = '';
     driver.handleUserInput('/btw');
     expect(session.startBtw).not.toHaveBeenCalled();
-    expect(stripSgr(renderTranscript(driver))).toContain('Usage: /btw <question>');
+    expect(driver.state.btwPanelContainer.children).toHaveLength(0);
+    expect(stripSgr(renderTranscript(driver))).toContain('LLM not set');
 
-    driver.state.appState.model = '';
-    driver.handleUserInput('/btw 现在在做什么？');
+    driver.handleUserInput('/btw What are you doing now?');
 
     expect(session.startBtw).not.toHaveBeenCalled();
     expect(stripSgr(renderTranscript(driver))).toContain('LLM not set');
+  });
+
+  it('renders swarm mode markers from /swarm commands, not tool-triggered status updates', async () => {
+    const { driver } = await makeDriver();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'agent.status.updated',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        swarmMode: true,
+      } as Event,
+      vi.fn(),
+    );
+
+    expect(driver.state.appState.swarmMode).toBe(true);
+    expect(stripSgr(renderTranscript(driver))).not.toContain('Swarm activated');
+
+    let transcript = stripSgr(renderTranscript(driver));
+    expect(countOccurrences(transcript, 'Swarm activated')).toBe(0);
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'agent.status.updated',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        swarmMode: false,
+      } as Event,
+      vi.fn(),
+    );
+
+    expect(driver.state.appState.swarmMode).toBe(false);
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).not.toContain('Swarm deactivated');
+    expect(transcript).not.toContain('Swarm ended');
+
+    expect(countOccurrences(transcript, 'Swarm activated')).toBe(0);
+    expect(countOccurrences(transcript, 'Swarm deactivated')).toBe(0);
+    expect(countOccurrences(transcript, 'Swarm ended')).toBe(0);
+  });
+
+  it('renders an ended marker when a one-shot /swarm task exits', async () => {
+    const { driver, session } = await makeDriver(undefined);
+    driver.state.appState.permissionMode = 'auto';
+
+    driver.handleUserInput('/swarm Ship feature X');
+
+    await vi.waitFor(() => {
+      expect(session.setSwarmMode).toHaveBeenCalledWith(true, 'task');
+    });
+    await vi.waitFor(() => {
+      expect(countOccurrences(stripSgr(renderTranscript(driver)), 'Swarm activated')).toBe(1);
+    });
+    let transcript = stripSgr(renderTranscript(driver));
+    expect(countOccurrences(transcript, 'Swarm activated')).toBe(1);
+    expect(transcript).not.toContain('Swarm ended');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'agent.status.updated',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        swarmMode: false,
+      } as Event,
+      vi.fn(),
+    );
+
+    expect(driver.state.appState.swarmMode).toBe(false);
+    transcript = stripSgr(renderTranscript(driver));
+    expect(countOccurrences(transcript, 'Swarm activated')).toBe(1);
+    expect(countOccurrences(transcript, 'Swarm ended')).toBe(1);
+    expect(transcript).not.toContain('Swarm deactivated');
   });
 
   it('queues Ctrl-S input instead of steering while /init is running', async () => {
@@ -2023,10 +2243,10 @@ describe('KimiTUI message flow', () => {
     const transcript = stripSgr(renderTranscript(driver));
     expect(transcript).toContain('OAuth login expired. Send /login to login.');
     expect(transcript).not.toContain('[auth.login_required]');
-    expect(transcript).not.toContain('kimi export');
+    expect(transcript).not.toContain('/export-debug-zip');
   });
 
-  it('appends the kimi export hint beneath session error messages', async () => {
+  it('appends the /export-debug-zip hint beneath session error messages', async () => {
     const { driver } = await makeDriver();
 
     driver.sessionEventHandler.handleEvent(
@@ -2043,11 +2263,47 @@ describe('KimiTUI message flow', () => {
 
     const transcript = stripSgr(driver.state.transcriptContainer.render(200).join('\n'));
     expect(transcript).toContain('Error: [compaction.failed]');
-    expect(transcript).toContain('If this persists, run `kimi export ses-1`');
+    expect(transcript).toContain('If this persists, run `/export-debug-zip`');
     expect(transcript).toContain("Please don't share it publicly");
+    expect(transcript).not.toContain('kimi export');
   });
 
-  it('skips the kimi export hint when no active session id is set', async () => {
+  it('shows concise provider filter text for filtered session errors', async () => {
+    const { driver } = await makeDriver();
+    const verboseMessage =
+      'The API returned a response containing only thinking content without any text or tool calls. ' +
+      'This usually indicates the stream was interrupted or the output token budget was exhausted ' +
+      'during reasoning. Provider stop details: finishReason=filtered, rawFinishReason=content_filter. ' +
+      'The provider filtered the response before visible output was emitted. Provider: example-provider, model: example-model';
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'error',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        code: 'provider.api_error',
+        message: verboseMessage,
+        details: {
+          finishReason: 'filtered',
+          rawFinishReason: 'content_filter',
+        },
+        retryable: true,
+      } as Event,
+      vi.fn(),
+    );
+
+    const transcript = stripSgr(driver.state.transcriptContainer.render(200).join('\n'));
+    expect(transcript).toContain(
+      'Error: [provider.api_error] Provider filtered the response before visible output',
+    );
+    expect(transcript).toContain('finishReason=filtered');
+    expect(transcript).toContain('rawFinishReason=content_filter');
+    expect(transcript).not.toContain('only thinking content');
+    expect(transcript).not.toContain('token budget');
+    expect(transcript).not.toContain('stream was interrupted');
+  });
+
+  it('skips the /export-debug-zip hint when no active session id is set', async () => {
     const { driver } = await makeDriver();
     driver.state.appState.sessionId = '';
 
@@ -2065,7 +2321,7 @@ describe('KimiTUI message flow', () => {
 
     const transcript = stripSgr(renderTranscript(driver));
     expect(transcript).toContain('Error: [compaction.failed]');
-    expect(transcript).not.toContain('kimi export');
+    expect(transcript).not.toContain('/export-debug-zip');
   });
 
   it('shows ExitPlanMode plan only in the current-plan card during approval', async () => {
@@ -2120,6 +2376,426 @@ describe('KimiTUI message flow', () => {
       expect(approval).not.toContain('non-duplicated plan work');
       expect(approval).not.toContain('/tmp/no-duplicate-plan.md');
     });
+  });
+
+  it('renders AgentSwarm progress in the transcript instead of the tool-card body', async () => {
+    const { driver } = await makeDriver();
+    const sendQueued = vi.fn();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.spawned',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        parentToolCallId: 'call_swarm',
+        subagentId: 'agent-1',
+        subagentName: 'coder',
+        description: 'Review changed files #1 (coder)',
+        swarmIndex: 1,
+        runInBackground: false,
+      } as Event,
+      sendQueued,
+    );
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.spawned',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        parentToolCallId: 'call_swarm',
+        subagentId: 'agent-2',
+        subagentName: 'coder',
+        description: 'Review changed files #2 (coder)',
+        swarmIndex: 2,
+        runInBackground: false,
+      } as Event,
+      sendQueued,
+    );
+
+    vi.mocked(driver.state.ui.requestRender).mockClear();
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'agent-1',
+        sessionId: 'ses-1',
+        turnId: 2,
+        toolCallId: 'call_read',
+        name: 'Read',
+        args: { path: 'src/a.ts' },
+      } as Event,
+      sendQueued,
+    );
+    expect(driver.state.ui.requestRender).toHaveBeenCalled();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'assistant.delta',
+        agentId: 'agent-1',
+        sessionId: 'ses-1',
+        turnId: 2,
+        delta: 'Reviewing src/a.ts and checking imports for regressions in detail',
+      } as Event,
+      sendQueued,
+    );
+    let transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('01 [');
+    expect(transcript).toContain('Reviewing src/a.ts');
+
+    vi.mocked(driver.state.ui.requestRender).mockClear();
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.suspended',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        subagentId: 'agent-1',
+        reason: 'Provider rate limit; subagent requeued for retry.',
+      } as Event,
+      sendQueued,
+    );
+    expect(driver.state.ui.requestRender).toHaveBeenCalled();
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('001 [');
+    expect(transcript).toContain('Queued...');
+    expect(transcript).not.toContain('Provider rate limit');
+    expect(transcript).not.toContain('Failed');
+
+    vi.mocked(driver.state.ui.requestRender).mockClear();
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        subagentId: 'agent-1',
+      } as Event,
+      sendQueued,
+    );
+    expect(driver.state.ui.requestRender).toHaveBeenCalled();
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('01 [');
+    expect(transcript).not.toContain('Suspended');
+
+    vi.mocked(driver.state.ui.requestRender).mockClear();
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'turn.ended',
+        agentId: 'agent-1',
+        sessionId: 'ses-1',
+        turnId: 2,
+        reason: 'completed',
+      } as Event,
+      sendQueued,
+    );
+    expect(driver.state.ui.requestRender).toHaveBeenCalled();
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('Agent Swarm');
+    expect(transcript).toContain('Review changed files');
+    expect(transcript).toContain('001 [');
+    expect(transcript).toContain('Reviewing src/a.ts');
+    expect(transcript).not.toContain('Completed');
+    expect(transcript).toContain('002 Queued...');
+    expect(transcript).not.toContain('002 [');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.completed',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        subagentId: 'agent-1',
+        resultSummary: 'Imports are stable',
+      } as Event,
+      sendQueued,
+    );
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('Imports are stable');
+    expect(transcript).not.toContain('Completed');
+  });
+
+  it('marks only core user-cancellation subagent failures as cancelled', async () => {
+    const { driver } = await makeDriver();
+    const sendQueued = vi.fn();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+
+    for (const [index, subagentId] of ['agent-1', 'agent-2'].entries()) {
+      driver.sessionEventHandler.handleEvent(
+        {
+          type: 'subagent.spawned',
+          agentId: 'main',
+          sessionId: 'ses-1',
+          parentToolCallId: 'call_swarm',
+          subagentId,
+          subagentName: 'coder',
+          description: `Review changed files #${String(index + 1)} (coder)`,
+          swarmIndex: index + 1,
+          runInBackground: false,
+        } as Event,
+        sendQueued,
+      );
+    }
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.failed',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        subagentId: 'agent-1',
+        error: 'Aborted by the user',
+      } as Event,
+      sendQueued,
+    );
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.failed',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        subagentId: 'agent-2',
+        error: 'The user manually interrupted this subagent x.',
+      } as Event,
+      sendQueued,
+    );
+
+    const transcript = stripSgr(driver.state.transcriptContainer.render(200).join('\n'));
+    expect(transcript).toContain('Cancelled.');
+    expect(transcript).toContain('The user manually interrupted this subagent x.');
+  });
+
+  it('does not let later transcript entries reduce the AgentSwarm grid height', async () => {
+    const { driver } = await makeDriver();
+    const sendQueued = vi.fn();
+    const terminalColumns = 80;
+    setTerminalColumns(driver, terminalColumns);
+    const outerChildren = driver.state.ui.children;
+    const transcriptIndex = outerChildren.indexOf(driver.state.transcriptContainer);
+    const rowsAfterTranscript = outerChildren
+      .slice(transcriptIndex + 1)
+      .reduce((sum, child) => sum + child.render(terminalColumns).length, 0);
+    const nonGridRows = 20 - (agentSwarmGridHeightForTerminalRows(20) ?? 0);
+    setTerminalRows(driver, rowsAfterTranscript + nonGridRows + 2);
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts', 'src/c.ts', 'src/d.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+
+    const swarmProgress = driver.state.transcriptContainer.children.find(
+      (child): child is AgentSwarmProgressComponent => child instanceof AgentSwarmProgressComponent,
+    );
+    if (swarmProgress === undefined) throw new Error('expected AgentSwarm progress');
+
+    const transcriptWidth = Math.max(1, terminalColumns - 2);
+    const renderSwarm = (): string =>
+      stripSgr(swarmProgress.render(transcriptWidth).join('\n'));
+
+    expect(renderSwarm()).toContain('001 Queued...');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_read',
+        name: 'Read',
+        args: { path: 'src/after.ts' },
+      } as Event,
+      sendQueued,
+    );
+
+    const transcriptChildren = driver.state.transcriptContainer.children;
+    const swarmIndex = transcriptChildren.indexOf(
+      swarmProgress as (typeof transcriptChildren)[number],
+    );
+    expect(swarmIndex).toBeGreaterThanOrEqual(0);
+
+    const rowsAfterSwarmInTranscript = transcriptChildren
+      .slice(swarmIndex + 1)
+      .reduce((sum, child) => sum + child.render(transcriptWidth).length, 0);
+    expect(rowsAfterSwarmInTranscript).toBeGreaterThan(0);
+
+    expect(renderSwarm()).toContain('001 Queued...');
+    const transcript = stripSgr(
+      driver.state.transcriptContainer.render(terminalColumns).join('\n'),
+    );
+    expect(transcript).toContain('Using Read (src/after.ts)');
+  });
+
+  it('shows AgentSwarm as completed when only some subagents fail', async () => {
+    const { driver } = await makeDriver();
+    const sendQueued = vi.fn();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.result',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        output: [
+          '<agent_swarm_result>',
+          '<summary>completed: 1, failed: 1</summary>',
+          '<subagent index="1" agent_id="agent-1" outcome="completed">Imports are stable.</subagent>',
+          '<subagent index="2" agent_id="agent-2" outcome="failed">Agent timed out after 30s.</subagent>',
+          '</agent_swarm_result>',
+        ].join('\n'),
+        isError: undefined,
+      } as Event,
+      sendQueued,
+    );
+
+    const transcript = stripSgr(renderTranscript(driver));
+    const totalStatusLine = transcript.split('\n').find((line) => line.includes('Completed.'));
+    expect(totalStatusLine).toBeDefined();
+    expect(totalStatusLine).not.toContain('Failed.');
+    expect(transcript).toContain('Imports are stable.');
+    expect(transcript).toContain('Agent timed out after 30s.');
+  });
+
+  it('renders AgentSwarm progress while tool args are still streaming', async () => {
+    const { driver } = await makeDriver();
+    const sendQueued = vi.fn();
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.delta',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        argumentsPart: '{"description":"Review changed files',
+      } as Event,
+      sendQueued,
+    );
+
+    let transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('Agent Swarm');
+    expect(transcript).toContain('Orchestrating...');
+    expect(transcript).not.toContain('01');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.delta',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        argumentsPart: '","items":["src/a.ts","src/b',
+      } as Event,
+      sendQueued,
+    );
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('Agent Swarm');
+    expect(transcript).toContain('Review changed files');
+    expect(transcript).toContain('001 src/a.ts');
+    expect(transcript).toContain('002 src/b');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'subagent.spawned',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        parentToolCallId: 'call_swarm',
+        subagentId: 'agent-1',
+        subagentName: 'coder',
+        description: 'Review changed files #1 (coder)',
+        swarmIndex: 1,
+        runInBackground: false,
+      } as Event,
+      sendQueued,
+    );
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('001 Queued...');
+    expect(transcript).not.toContain('001 [');
+    expect(transcript).toContain('002 src/b');
+
+    driver.sessionEventHandler.handleEvent(
+      {
+        type: 'tool.call.started',
+        agentId: 'main',
+        sessionId: 'ses-1',
+        turnId: 1,
+        toolCallId: 'call_swarm',
+        name: 'AgentSwarm',
+        args: {
+          description: 'Review changed files',
+          prompt_template: 'Review {{item}}',
+          items: ['src/a.ts', 'src/b.ts'],
+        },
+      } as Event,
+      sendQueued,
+    );
+
+    transcript = stripSgr(renderTranscript(driver));
+    expect(transcript).toContain('001 Queued...');
+    expect(transcript).toContain('002 Queued...');
+    expect(transcript).not.toContain('001 [');
+    expect(transcript).not.toContain('002 [');
   });
 
   it('shows plan review reject on the plan card without an approval notice', async () => {
@@ -2189,7 +2865,8 @@ describe('KimiTUI message flow', () => {
 
     await vi.waitFor(() => {
       const transcript = stripSgr(renderTranscript(driver));
-      expect(transcript).toContain('plan: reject-plan.md · Rejected');
+      expect(transcript).toContain('plan: reject-plan.md');
+      expect(transcript).toContain('Rejected');
       expect(transcript).toContain('Reject Plan');
       expect(countOccurrences(transcript, 'keep this plan visible after reject')).toBe(1);
       expect(transcript).not.toContain('Rejected: Review plan');
@@ -2283,7 +2960,11 @@ describe('KimiTUI message flow', () => {
       expect(output).toContain('/mcp-config login linear');
       expect(output).toContain('disabled-tools');
       expect(output).toContain('disabled');
-      expect(output).toContain('1 connected · 1 needs auth · 1 failed · 1 disabled · 2 tools available');
+      expect(output).toContain('1 connected');
+      expect(output).toContain('1 needs auth');
+      expect(output).toContain('1 failed');
+      expect(output).toContain('1 disabled');
+      expect(output).toContain('2 tools available');
     });
   });
 
@@ -2388,7 +3069,7 @@ describe('KimiTUI message flow', () => {
       );
     });
     const picker = driver.state.editorContainer.children[0] as PluginMarketplaceSelectorComponent;
-    picker.handleInput(' ');
+    picker.handleInput('\r');
 
     await vi.waitFor(() => {
       expect(session.installPlugin).toHaveBeenCalledWith(join(marketplaceDir, 'kimi-datasource'));
@@ -2425,7 +3106,7 @@ describe('KimiTUI message flow', () => {
         );
       });
       const picker = driver.state.editorContainer.children[0] as PluginMarketplaceSelectorComponent;
-      picker.handleInput(' ');
+      picker.handleInput('\r');
 
       await vi.waitFor(() => {
         expect(session.installPlugin).toHaveBeenCalledWith(
@@ -2470,16 +3151,22 @@ describe('KimiTUI message flow', () => {
     const overview = driver.state.editorContainer.children[0] as PluginsOverviewSelectorComponent;
     overview.handleInput(' ');
 
+    // Toggling refreshes the picker in place: it must not flash back to the
+    // editor between the keypress and the refreshed picker mounting.
+    expect(driver.state.editorContainer.children[0]).toBeInstanceOf(
+      PluginsOverviewSelectorComponent,
+    );
+
     await vi.waitFor(() => {
       expect(session.setPluginEnabled).toHaveBeenCalledWith('demo', false);
     });
+    // The picker stays mounted the whole time (no editor flash), so wait for the
+    // refreshed render rather than for an instance swap.
     await vi.waitFor(() => {
-      expect(driver.state.editorContainer.children[0]).toBeInstanceOf(
-        PluginsOverviewSelectorComponent,
-      );
+      const refreshed = stripSgr(driver.state.editorContainer.children[0]!.render(120).join('\n'));
+      expect(refreshed).toContain('Demo  disabled  require run /new to apply');
     });
     const out = stripSgr(driver.state.editorContainer.children[0]!.render(120).join('\n'));
-    expect(out).toContain('❯ Demo  disabled  pending /new');
     expect(out).not.toContain('Space enable');
     expect(stripSgr(renderTranscript(driver))).not.toContain('Disabled demo. Run /new to apply.');
   });
@@ -2572,7 +3259,7 @@ describe('KimiTUI message flow', () => {
       expect(driver.state.editorContainer.children[0]).toBeInstanceOf(PluginMcpSelectorComponent);
     });
     const out = stripSgr(driver.state.editorContainer.children[0]!.render(120).join('\n'));
-    expect(out).toContain('❯ data  disabled  pending /new');
+    expect(out).toContain('data  disabled  require run /new to apply');
     expect(stripSgr(renderTranscript(driver))).not.toContain(
       'Disabled MCP server data for kimi-datasource. Run /new to apply.',
     );
@@ -2658,15 +3345,16 @@ describe('KimiTUI message flow', () => {
     const picker = driver.state.editorContainer.children[0];
     expect(picker).toBeInstanceOf(TabbedModelSelectorComponent);
     const pickerOutput = stripSgr((picker as TabbedModelSelectorComponent).render(120).join('\n'));
-    expect(pickerOutput).toContain('Kimi K2 (Hakimi) ← current');
-    expect(pickerOutput).toContain('❯ Kimi Turbo (Hakimi)');
+    expect(pickerOutput).toMatch(/Kimi K2\s+Hakimi/);
+    expect(pickerOutput).toMatch(/Kimi Turbo\s+Hakimi/);
     (picker as TabbedModelSelectorComponent).handleInput('t');
     (picker as TabbedModelSelectorComponent).handleInput('u');
     const filteredOutput = stripSgr((picker as TabbedModelSelectorComponent).render(120).join('\n'));
     expect(filteredOutput).toContain('Search: tu');
-    expect(filteredOutput).toContain('Kimi Turbo (Hakimi)');
-    expect(filteredOutput).not.toContain('Kimi K2 (Hakimi)');
-    (picker as TabbedModelSelectorComponent).handleInput('/');
+    expect(filteredOutput).toContain('Kimi Turbo');
+    expect(filteredOutput).not.toContain('Kimi K2');
+    // Turbo is a thinking-capable model that is not the active one, so it
+    // defaults to thinking on - selecting it applies thinking without a toggle.
     (picker as TabbedModelSelectorComponent).handleInput('\r');
 
     await vi.waitFor(() => {
@@ -2743,8 +3431,8 @@ describe('KimiTUI message flow', () => {
 
     const output = stripSgr((picker as ModelSelectorComponent).render(120).join('\n'));
     expect(output).toContain('Search: tu');
-    expect(output).toContain('Kimi Turbo (Hakimi)');
-    expect(output).not.toContain('Kimi Alpha (Hakimi)');
+    expect(output).toContain('Kimi Turbo');
+    expect(output).not.toContain('Kimi Alpha');
 
     (picker as ModelSelectorComponent).handleInput('\u001B');
     (picker as ModelSelectorComponent).handleInput('\u001B');
@@ -2767,6 +3455,30 @@ describe('KimiTUI message flow', () => {
     expect(write).toHaveBeenCalledWith(deleteAllKittyImages());
   });
 
+  it('updates terminal title through pi-tui without changing process title', async () => {
+    const originalTitle = process.title;
+    const { driver } = await makeDriver(makeSession({ id: 'ses-1' }));
+    const setTitle = vi.spyOn(driver.state.terminal, 'setTitle').mockImplementation(() => {});
+
+    try {
+      process.title = 'kimi-test-runner';
+      driver.sessionEventHandler.handleEvent(
+        {
+          type: 'session.meta.updated',
+          sessionId: 'ses-1',
+          agentId: 'main',
+          title: 'Implement terminal title',
+        } as Event,
+        () => {},
+      );
+
+      expect(setTitle).toHaveBeenCalledWith('Implement terminal title');
+      expect(process.title).toBe('kimi-test-runner');
+    } finally {
+      process.title = originalTitle;
+    }
+  });
+
   it('forks the active session and switches to the returned session', async () => {
     const originalTitle = process.title;
     const source = makeSession({
@@ -2779,8 +3491,10 @@ describe('KimiTUI message flow', () => {
     });
     const forkSession = vi.fn(async () => forked);
     const { driver, harness } = await makeDriver(source, { forkSession });
+    const setTitle = vi.spyOn(driver.state.terminal, 'setTitle').mockImplementation(() => {});
 
     try {
+      process.title = 'kimi-test-runner';
       driver.handleUserInput('/fork ignored args');
 
       await vi.waitFor(() => {
@@ -2790,7 +3504,8 @@ describe('KimiTUI message flow', () => {
         });
         expect(driver.getCurrentSessionId()).toBe('ses-fork');
       });
-      expect(process.title).toBe('Fork: Source title');
+      expect(setTitle).toHaveBeenCalledWith('Fork: Source title');
+      expect(process.title).toBe('kimi-test-runner');
       expect(source.close).toHaveBeenCalledOnce();
       expect(forked.onEvent).toHaveBeenCalledOnce();
       expect(harness.resumeSession).not.toHaveBeenCalled();

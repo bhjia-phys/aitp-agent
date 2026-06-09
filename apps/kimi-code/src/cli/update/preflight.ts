@@ -43,6 +43,7 @@ export interface RunUpdatePreflightOptions {
 
 const AUTO_INSTALL_FAILURE_PROMPT_THRESHOLD = 2;
 const AUTO_INSTALL_ACTIVE_TTL_MS = 6 * 60 * 60 * 1000;
+const USER_VISIBLE_UPDATE_REFRESH_TIMEOUT_MS = 1_000;
 
 type UpdateLogger = Pick<Logger, 'info' | 'warn'>;
 
@@ -68,6 +69,8 @@ export function installCommandFor(
       return `yarn global add ${NPM_PACKAGE_NAME}@${version}`;
     case 'bun-global':
       return `bun add -g ${NPM_PACKAGE_NAME}@${version}`;
+    case 'homebrew':
+      return 'brew upgrade kimi-code';
     case 'native':
       return platform === 'win32' ? NATIVE_INSTALL_COMMAND_WIN : NATIVE_INSTALL_COMMAND_UNIX;
     case 'unsupported':
@@ -82,6 +85,10 @@ export function canAutoInstall(source: InstallSource, platform: NodeJS.Platform)
     case 'yarn-global':
     case 'bun-global':
       return true;
+    case 'homebrew':
+      // Homebrew upgrade may mutate other dependents and the formula can lag
+      // behind the CDN release — prompt the user to run `brew upgrade` manually.
+      return false;
     case 'native':
       return platform !== 'win32';
     case 'unsupported':
@@ -108,6 +115,8 @@ export function spawnForSource(
       return { cmd: withCmdSuffix('yarn', platform), args: ['global', 'add', `${NPM_PACKAGE_NAME}@${version}`] };
     case 'bun-global':
       return { cmd: bunCommand(platform), args: ['add', '-g', `${NPM_PACKAGE_NAME}@${version}`] };
+    case 'homebrew':
+      return { cmd: 'brew', args: ['upgrade', 'kimi-code'] };
     case 'native':
       // `curl … | bash` reports only the trailing bash's exit status, so a
       // failed download (curl can't connect → empty stdin → bash exits 0)
@@ -138,6 +147,9 @@ export function renderManualUpdateMessage(
     case 'bun-global':
       sourceDesc = source;
       break;
+    case 'homebrew':
+      sourceDesc = 'homebrew';
+      break;
     case 'native':
       sourceDesc = 'native (windows). Auto-update is not supported on this platform.';
       break;
@@ -164,6 +176,56 @@ function renderBackgroundInstallSuccessNotice(version: string): string {
 
 function refreshInBackground(): void {
   void refreshUpdateCache().catch(() => {});
+}
+
+function refreshAndMaybeInstallInBackground(
+  currentVersion: string,
+  isInteractive: boolean,
+  installState: UpdateInstallState,
+  platform: NodeJS.Platform,
+  track: RunUpdatePreflightOptions['track'],
+  logger: UpdateLogger,
+): void {
+  void (async () => {
+    const refreshed = await refreshUpdateCache();
+    if (!isInteractive) return;
+    const target = selectUpdateTarget(currentVersion, refreshed.latest);
+    if (target === null) return;
+    const source = await detectInstallSource().catch(() => 'unsupported' as const);
+    await tryStartAutomaticBackgroundInstall(
+      installState,
+      currentVersion,
+      target,
+      source,
+      platform,
+      track,
+      logger,
+    );
+  })().catch(() => {});
+}
+
+async function refreshUserVisibleUpdateTarget(
+  currentVersion: string,
+  fallbackTarget: UpdateTarget,
+): Promise<UpdateTarget | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const refresh = refreshUpdateCache()
+      .then((refreshed) => selectUpdateTarget(currentVersion, refreshed.latest))
+      .catch(() => fallbackTarget);
+    const fallback = new Promise<UpdateTarget>((resolve) => {
+      timeout = setTimeout(() => {
+        resolve(fallbackTarget);
+      }, USER_VISIBLE_UPDATE_REFRESH_TIMEOUT_MS);
+    });
+    return await Promise.race([refresh, fallback]);
+  } catch {
+    return fallbackTarget;
+  } finally {
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+    }
+  }
 }
 
 function nowIso(): string {
@@ -241,6 +303,18 @@ async function showPendingBackgroundInstallNotice(
   };
   await writeUpdateInstallState(nextState).catch(() => {});
   return nextState;
+}
+
+/**
+ * `KIMI_CODE_NO_AUTO_UPDATE` (or the legacy `KIMI_CLI_NO_AUTO_UPDATE` alias)
+ * fully disables the update preflight — no check, no background install, no
+ * prompt. Migrated from kimi-cli, where the variable gated all auto-update
+ * behavior. Accepts the usual truthy values (`1`/`true`/`yes`/`on`).
+ */
+function isAutoUpdateDisabledByEnv(env: NodeJS.ProcessEnv = process.env): boolean {
+  const truthy = (value?: string): boolean =>
+    ['1', 'true', 'yes', 'on'].includes((value ?? '').trim().toLowerCase());
+  return truthy(env['KIMI_CODE_NO_AUTO_UPDATE']) || truthy(env['KIMI_CLI_NO_AUTO_UPDATE']);
 }
 
 async function shouldAutoInstallUpdates(): Promise<boolean> {
@@ -434,6 +508,35 @@ async function startBackgroundInstall(
   }
 }
 
+async function tryStartAutomaticBackgroundInstall(
+  installState: UpdateInstallState,
+  currentVersion: string,
+  target: UpdateTarget,
+  source: InstallSource,
+  platform: NodeJS.Platform,
+  track: RunUpdatePreflightOptions['track'],
+  logger: UpdateLogger,
+): Promise<boolean> {
+  const sourceCanAutoInstall = canAutoInstall(source, platform);
+  const autoInstallUpdates = sourceCanAutoInstall ? await shouldAutoInstallUpdates() : false;
+  if (!autoInstallUpdates || !sourceCanAutoInstall) return false;
+  if (failureAttemptsFor(installState, target) >= AUTO_INSTALL_FAILURE_PROMPT_THRESHOLD) {
+    return false;
+  }
+  if (!hasFreshActiveInstall(installState, target)) {
+    await startBackgroundInstall(
+      installState,
+      currentVersion,
+      target,
+      source,
+      platform,
+      track,
+      logger,
+    ).catch(() => {});
+  }
+  return true;
+}
+
 export function decideUpdateAction(
   target: UpdateTarget | null,
   isInteractive: boolean,
@@ -453,6 +556,10 @@ export async function runUpdatePreflight(
   const logger = options.logger ?? log;
   const platform = process.platform;
 
+  if (isAutoUpdateDisabledByEnv()) {
+    return 'continue';
+  }
+
   try {
     const isInteractive =
       options.isTTY ?? (process.stdin.isTTY && process.stdout.isTTY);
@@ -470,52 +577,83 @@ export async function runUpdatePreflight(
     const cache = await readUpdateCache().catch(() => null);
     const latest = cache?.latest ?? null;
     const target = selectUpdateTarget(currentVersion, latest);
-    refreshInBackground();
+    if (target === null) {
+      refreshAndMaybeInstallInBackground(
+        currentVersion,
+        isInteractive,
+        installState,
+        platform,
+        options.track,
+        logger,
+      );
+      return 'continue';
+    }
+
     const source: InstallSource =
-      target === null || !isInteractive
+      !isInteractive
         ? 'unsupported'
         : await detectInstallSource().catch(() => 'unsupported' as const);
 
     const decision = decideUpdateAction(target, isInteractive, source, platform);
-    if (decision === 'none' || target === null) return 'continue';
-
-    const installCommand = installCommandFor(source, target.version, platform);
-    const sourceCanAutoInstall = canAutoInstall(source, platform);
-    const autoInstallUpdates = sourceCanAutoInstall ? await shouldAutoInstallUpdates() : false;
-    if (autoInstallUpdates && sourceCanAutoInstall) {
-      if (failureAttemptsFor(installState, target) < AUTO_INSTALL_FAILURE_PROMPT_THRESHOLD) {
-        if (!hasFreshActiveInstall(installState, target)) {
-          await startBackgroundInstall(
-            installState,
-            currentVersion,
-            target,
-            source,
-            platform,
-            options.track,
-            logger,
-          ).catch(() => {});
-        }
-        return 'continue';
-      }
-    }
-
-    trackUpdatePrompted(options.track, currentVersion, target, source, decision);
-
-    if (decision === 'manual-command') {
-      stdout.write(renderManualUpdateMessage(currentVersion, target, source, installCommand));
+    if (decision === 'none') {
+      refreshInBackground();
       return 'continue';
     }
 
-    const choice = await promptInstall(currentVersion, target, source, installCommand);
+    if (
+      await tryStartAutomaticBackgroundInstall(
+        installState,
+        currentVersion,
+        target,
+        source,
+        platform,
+        options.track,
+        logger,
+      )
+    ) {
+      refreshInBackground();
+      return 'continue';
+    }
+
+    const userVisibleTarget = await refreshUserVisibleUpdateTarget(currentVersion, target);
+    if (userVisibleTarget === null) return 'continue';
+    if (
+      await tryStartAutomaticBackgroundInstall(
+        installState,
+        currentVersion,
+        userVisibleTarget,
+        source,
+        platform,
+        options.track,
+        logger,
+      )
+    ) {
+      return 'continue';
+    }
+
+    const installCommand = installCommandFor(source, userVisibleTarget.version, platform);
+    trackUpdatePrompted(options.track, currentVersion, userVisibleTarget, source, decision);
+
+    if (decision === 'manual-command') {
+      stdout.write(renderManualUpdateMessage(
+        currentVersion,
+        userVisibleTarget,
+        source,
+        installCommand,
+      ));
+      return 'continue';
+    }
+
+    const choice = await promptInstall(currentVersion, userVisibleTarget, source, installCommand);
     if (choice === 'skip') return 'continue';
 
     try {
-      await installUpdate(source, target.version, platform);
-      stdout.write(renderInstallSuccessMessage(target));
+      await installUpdate(source, userVisibleTarget.version, platform);
+      stdout.write(renderInstallSuccessMessage(userVisibleTarget));
       return 'exit';
     } catch (error) {
       stderr.write(
-        `warning: failed to install ${NPM_PACKAGE_NAME}@${target.version}: ` +
+        `warning: failed to install ${NPM_PACKAGE_NAME}@${userVisibleTarget.version}: ` +
           `${formatErrorMessage(error)}\n`,
       );
       return 'continue';

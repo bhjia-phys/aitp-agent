@@ -1,8 +1,9 @@
+import type { Kaos } from '@moonshot-ai/kaos';
 import {
   ErrorCodes,
   KimiError,
   withTelemetryContext,
-  type ExperimentalFlagMap,
+  type ExperimentalFeatureState,
 } from '@moonshot-ai/agent-core';
 
 import { Session } from '#/session';
@@ -84,8 +85,11 @@ export class KimiHarness {
   }
 
   async createSession(options: CreateSessionOptions): Promise<Session> {
-    const { planMode, ...coreOptions } = options;
-    const summary = await this.rpc.createSession(coreOptions);
+    const { planMode, kaos, persistenceKaos, ...coreOptions } = options;
+    const summary =
+      kaos === undefined && persistenceKaos === undefined
+        ? await this.rpc.createSession(coreOptions)
+        : await this.rpc.createSessionWithKaos(coreOptions, kaos ?? persistenceKaos as Kaos, persistenceKaos);
     const session = new Session({
       id: summary.id,
       workDir: summary.workDir,
@@ -107,9 +111,18 @@ export class KimiHarness {
   async resumeSession(input: ResumeSessionInput): Promise<Session> {
     const id = normalizeSessionId(input.id);
     const active = this.activeSessions.get(id);
-    if (active !== undefined) return active;
+    const { kaos, persistenceKaos, ...resumeInput } = input;
+    if (active !== undefined) {
+      if (kaos !== undefined || persistenceKaos !== undefined) {
+        await this.rpc.resumeSessionWithKaos({ ...resumeInput, id }, kaos ?? persistenceKaos as Kaos, persistenceKaos);
+      }
+      return active;
+    }
 
-    const summary = await this.rpc.resumeSession({ id });
+    const summary =
+      kaos === undefined && persistenceKaos === undefined
+        ? await this.rpc.resumeSession({ ...resumeInput, id })
+        : await this.rpc.resumeSessionWithKaos({ ...resumeInput, id }, kaos ?? persistenceKaos as Kaos, persistenceKaos);
     const session = new Session({
       id: summary.id,
       workDir: summary.workDir,
@@ -122,6 +135,31 @@ export class KimiHarness {
     this.activeSessions.set(session.id, session);
     this.trackSessionStarted(summary.id, true);
     this.trackSessionEvent(session.id, 'session_resume');
+    return session;
+  }
+
+  async reloadSession(input: ResumeSessionInput): Promise<Session> {
+    const id = normalizeSessionId(input.id);
+    const active = this.activeSessions.get(id);
+    if (active !== undefined) {
+      await active.reloadSession();
+      this.trackSessionEvent(active.id, 'session_reload');
+      return active;
+    }
+
+    const summary = await this.rpc.reloadSession({ sessionId: id });
+    const session = new Session({
+      id: summary.id,
+      workDir: summary.workDir,
+      summary,
+      rpc: this.rpc,
+      onClose: () => {
+        this.activeSessions.delete(summary.id);
+      },
+    });
+    this.activeSessions.set(session.id, session);
+    this.trackSessionStarted(summary.id, true);
+    this.trackSessionEvent(session.id, 'session_reload');
     return session;
   }
 
@@ -177,9 +215,8 @@ export class KimiHarness {
     return this.rpc.getConfig(options);
   }
 
-  /** Resolved enabled-state of every experimental flag (flag id → enabled). */
-  async getExperimentalFlags(): Promise<ExperimentalFlagMap> {
-    return this.rpc.getExperimentalFlags();
+  async getExperimentalFeatures(): Promise<readonly ExperimentalFeatureState[]> {
+    return this.rpc.getExperimentalFeatures();
   }
 
   async ensureConfigFile(): Promise<void> {

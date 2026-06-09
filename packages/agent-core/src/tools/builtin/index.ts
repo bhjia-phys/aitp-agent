@@ -5,6 +5,7 @@ export * from '../cron/cron-create';
 export * from '../cron/cron-delete';
 export * from '../cron/cron-list';
 export * from './collaboration/agent';
+export * from './collaboration/agent-swarm';
 export * from './collaboration/ask-user';
 export * from './collaboration/physics-memory-tool';
 export * from './collaboration/research-ledger-tool';

@@ -1,7 +1,7 @@
 import type { ContentPart, TokenUsage } from '@moonshot-ai/kosong';
 
 import type { LoopRecordedEvent } from '../../loop';
-import type { GoalActor, GoalBudgetLimits, GoalStatus } from '../../session/goal';
+import type { GoalActor, GoalBudgetLimits, GoalStatus } from '../goal';
 import type { ToolStoreUpdate } from '../../tools/store';
 import type { CompactionBeginData, CompactionResult } from '../compaction';
 import type { AgentConfigUpdateData } from '../config';
@@ -32,7 +32,12 @@ import type {
   PrimitiveToolOutputKind,
 } from '../tool-lifecycle';
 import type { WorkFrameRecordSource } from '../workframe';
+import type { SwarmModeTrigger } from '../swarm';
 
+// Agent records are the ordered event log used to rebuild agent state on resume.
+// Use records, not state.json, when correctness depends on the order in which
+// state transitions happened. Each persisted record type must have explicit
+// resume semantics in restoreAgentRecord; a write-only record is not persistence.
 export interface AgentRecordEvents {
   metadata: {
     protocol_version: string;
@@ -40,6 +45,8 @@ export interface AgentRecordEvents {
     app_version?: string;
     resumed?: boolean;
   };
+
+  forked: {};
 
   'turn.prompt': {
     input: readonly ContentPart[];
@@ -69,6 +76,11 @@ export interface AgentRecordEvents {
   'plan_mode.exit': {
     id?: string;
   };
+
+  'swarm_mode.enter': {
+    trigger: SwarmModeTrigger;
+  };
+  'swarm_mode.exit': {};
 
   'tools.register_user_tool': UserToolRegistration;
   'tools.unregister_user_tool': {
@@ -330,46 +342,21 @@ export interface AgentRecordEvents {
     toolCallId?: string | undefined;
   };
 
-  // Goal-mode audit records. These are an audit trail only: replay MUST NOT
-  // rebuild goal state from them — `state.json` (metadata.custom.goal) is the
-  // source of truth.
   'goal.create': {
     goalId: string;
     objective: string;
-    status: GoalStatus;
-    actor: GoalActor;
-    budgetLimits: GoalBudgetLimits;
+    completionCriterion?: string;
   };
   'goal.update': {
-    goalId: string;
-    status: GoalStatus;
-    actor: GoalActor;
-    reason?: string;
-    /** Usage counters at the transition, so resume can rebuild the completion card. */
-    turnsUsed?: number;
+    status?: GoalStatus;
     tokensUsed?: number;
+    turnsUsed?: number;
     wallClockMs?: number;
-  };
-  'goal.account_usage': {
-    goalId: string;
-    /** Whether the delta came from token accounting or wall-clock accounting. */
-    usageKind: 'token' | 'wall_clock';
-    delta: number;
-    agentId?: string;
-    agentType?: string;
-    source?: string;
-    tokensUsed: number;
-    wallClockMs: number;
-  };
-  'goal.continuation': {
-    goalId: string;
-    turnsUsed: number;
-  };
-  'goal.clear': {
-    goalId: string;
-    actor: GoalActor;
+    budgetLimits?: GoalBudgetLimits;
     reason?: string;
+    actor?: GoalActor;
   };
+  'goal.clear': {};
 }
 
 export type AgentRecord = {

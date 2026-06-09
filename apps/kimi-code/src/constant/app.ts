@@ -2,6 +2,7 @@ import { ErrorCodes } from '@moonshot-ai/kimi-code-sdk';
 
 export const PRODUCT_NAME = 'Hakimi';
 export const CLI_COMMAND_NAME = 'hakimi';
+export const PROCESS_NAME = 'hakimi';
 
 // Used in telemetry app names and HTTP User-Agent headers.
 export const CLI_USER_AGENT_PRODUCT = 'hakimi-cli';
@@ -19,6 +20,7 @@ export const KIMI_CODE_HOME_ENV = 'KIMI_CODE_HOME';
 export const KIMI_CODE_DATA_DIR_NAME = '.hakimi';
 export const KIMI_CODE_LOG_DIR_NAME = 'logs';
 export const KIMI_CODE_UPDATE_DIR_NAME = 'updates';
+export const KIMI_CODE_BIN_DIR_NAME = 'bin';
 export const KIMI_CODE_UPDATE_STATE_FILE_NAME = 'latest.json';
 export const KIMI_CODE_UPDATE_INSTALL_STATE_FILE_NAME = 'install.json';
 export const KIMI_CODE_UPDATE_INSTALL_LOCK_FILE_NAME = 'install.lock';

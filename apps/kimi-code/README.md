@@ -16,7 +16,9 @@ corepack pnpm --config.engine-strict=false -C apps/kimi-code pack --pack-destina
 npm install -g .\dist-pack\bhjia-phys-hakimi-0.13.0.tgz
 ```
 
-Run Hakimi:
+> On Windows, install [Git for Windows](https://gitforwindows.org/) before first launch because Hakimi inherits Kimi Code's Git Bash shell environment. If Git Bash is installed in a custom location, set `KIMI_SHELL_PATH` to the absolute path of `bash.exe`.
+
+Then run it with a new Terminal session:
 
 ```sh
 hakimi --version

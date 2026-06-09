@@ -5,7 +5,8 @@
  *
  * Geometry mirrors `ApiKeyInputDialogComponent` so the chrome stays
  * consistent with the API-key login flow. Two fields, switched with
- * Tab / Shift-Tab; Enter on the last field submits, Esc cancels.
+ * Tab / Shift-Tab / Up / Down; Enter advances to the next field (and submits
+ * on the last field), Esc cancels. Both fields are required.
  */
 
 import {
@@ -17,9 +18,8 @@ import {
   visibleWidth,
   type Focusable,
 } from '@earendil-works/pi-tui';
-import chalk from 'chalk';
 
-import type { ColorPalette } from '#/tui/theme/colors';
+import { currentTheme } from '#/tui/theme';
 
 export interface CustomRegistryImportValue {
   readonly url: string;
@@ -34,7 +34,8 @@ const TITLE = 'Import custom provider registry';
 const SUBTITLE_DEFAULT = 'Paste an api.json URL and its Bearer token.';
 const SUBTITLE_URL_EMPTY = 'Registry URL cannot be empty.';
 const SUBTITLE_TOKEN_EMPTY = 'Bearer token cannot be empty.';
-const FOOTER = 'Tab to switch  ·  Enter to submit  ·  Esc to cancel';
+const FOOTER_NOT_LAST = 'Tab / ↑↓ to switch  ·  Enter for next field  ·  Esc to cancel';
+const FOOTER_LAST = 'Tab / ↑↓ to switch  ·  Enter to submit  ·  Esc to cancel';
 
 type FieldId = 'url' | 'token';
 
@@ -52,7 +53,7 @@ function maskInputLine(raw: string): string {
 
   // Protect ANSI escape sequences (reverse-video cursor, IME marker, etc.)
   // while masking every other visible character.
-  const parts = content.split(/((?:\[[0-9;]*m|_pi:c))/);
+  const parts = content.split(/(\x1B(?:\[[0-9;]*m|_pi:c\x07))/);
   const maskedContent = parts
     .map((part, index) => {
       if (index % 2 === 1) return part; // ANSI sequence
@@ -69,25 +70,24 @@ export class CustomRegistryImportDialogComponent extends Container implements Fo
   private readonly urlInput = new Input();
   private readonly tokenInput = new Input();
   private readonly onDone: (result: CustomRegistryImportResult) => void;
-  private readonly colors: ColorPalette;
   private activeField: FieldId = 'url';
   private done = false;
   private hint: 'none' | 'url-empty' | 'token-empty' = 'none';
 
   constructor(
     onDone: (result: CustomRegistryImportResult) => void,
-    colors: ColorPalette,
     defaultUrl: string = '',
   ) {
     super();
     this.onDone = onDone;
-    this.colors = colors;
     if (defaultUrl.length > 0) this.urlInput.setValue(defaultUrl);
+    // Enter on the URL field advances to the token field; Enter on the token
+    // (last) field submits.
     this.urlInput.onSubmit = () => {
-      this.handleEnter();
+      this.focusField('token');
     };
     this.tokenInput.onSubmit = () => {
-      this.handleEnter();
+      this.handleSubmit();
     };
   }
 
@@ -104,6 +104,14 @@ export class CustomRegistryImportDialogComponent extends Container implements Fo
 
     if (matchesKey(data, Key.tab) || matchesKey(data, Key.shift('tab'))) {
       this.toggleField();
+      return;
+    }
+    if (matchesKey(data, Key.down)) {
+      this.focusField('token');
+      return;
+    }
+    if (matchesKey(data, Key.up)) {
+      this.focusField('url');
       return;
     }
 
@@ -133,27 +141,30 @@ export class CustomRegistryImportDialogComponent extends Container implements Fo
     const innerWidth = Math.max(10, safeWidth - 4);
     const pad = '  ';
 
-    const border = (s: string): string => chalk.hex(this.colors.primary)(s);
-    const titleStyled = chalk.bold.hex(this.colors.textStrong)(TITLE);
+    const border = (s: string): string => currentTheme.fg('primary', s);
+    const titleStyled = currentTheme.boldFg('textStrong', TITLE);
     const subtitleText =
       this.hint === 'url-empty'
         ? SUBTITLE_URL_EMPTY
         : this.hint === 'token-empty'
           ? SUBTITLE_TOKEN_EMPTY
           : SUBTITLE_DEFAULT;
-    const subtitleStyled = chalk.hex(this.colors.textDim)(subtitleText);
-    const footerStyled = chalk.hex(this.colors.textDim)(FOOTER);
+    const subtitleStyled = currentTheme.fg('textDim', subtitleText);
+    const footerStyled = currentTheme.fg(
+      'textDim',
+      this.activeField === 'url' ? FOOTER_NOT_LAST : FOOTER_LAST,
+    );
 
     const urlLabelText = 'Registry URL';
     const tokenLabelText = 'Bearer token';
     const urlLabelStyled =
       this.activeField === 'url'
-        ? chalk.bold.hex(this.colors.accent)(urlLabelText)
-        : chalk.hex(this.colors.textDim)(urlLabelText);
+        ? currentTheme.boldFg('accent', urlLabelText)
+        : currentTheme.fg('textDim', urlLabelText);
     const tokenLabelStyled =
       this.activeField === 'token'
-        ? chalk.bold.hex(this.colors.accent)(tokenLabelText)
-        : chalk.hex(this.colors.textDim)(tokenLabelText);
+        ? currentTheme.boldFg('accent', tokenLabelText)
+        : currentTheme.fg('textDim', tokenLabelText);
 
     const titleLine = truncateToWidth(titleStyled, innerWidth, '…');
     const subtitleLine = truncateToWidth(subtitleStyled, innerWidth, '…');
@@ -198,11 +209,15 @@ export class CustomRegistryImportDialogComponent extends Container implements Fo
   }
 
   private toggleField(): void {
-    this.hint = 'none';
-    this.activeField = this.activeField === 'url' ? 'token' : 'url';
+    this.focusField(this.activeField === 'url' ? 'token' : 'url');
   }
 
-  private handleEnter(): void {
+  private focusField(field: FieldId): void {
+    this.hint = 'none';
+    this.activeField = field;
+  }
+
+  private handleSubmit(): void {
     if (this.done) return;
 
     const urlValue = this.urlInput.getValue().trim();
@@ -211,6 +226,11 @@ export class CustomRegistryImportDialogComponent extends Container implements Fo
     if (urlValue.length === 0) {
       this.hint = 'url-empty';
       this.activeField = 'url';
+      return;
+    }
+    if (tokenValue.length === 0) {
+      this.hint = 'token-empty';
+      this.activeField = 'token';
       return;
     }
 

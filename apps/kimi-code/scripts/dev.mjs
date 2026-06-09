@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { startPluginMarketplaceServer } from './dev-plugin-marketplace-server.mjs';
 
+const require = createRequire(import.meta.url);
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = resolve(SCRIPT_DIR, '..');
 const MARKETPLACE_ENV = 'KIMI_CODE_PLUGIN_MARKETPLACE_URL';
@@ -19,15 +20,18 @@ if (env[MARKETPLACE_ENV] === undefined || env[MARKETPLACE_ENV]?.trim().length ==
   console.error(`Plugin marketplace dev server: ${marketplaceServer.marketplaceUrl}`);
 }
 
+const tsxCli = require.resolve('tsx/cli');
 const cliArgs = process.argv.slice(2);
 if (cliArgs[0] === '--') cliArgs.shift();
-const tsxArgs = ['--import', '../../build/register-raw-text-loader.mjs', './src/main.ts', ...cliArgs];
-const invocation = commandInvocation('tsx', tsxArgs);
-const child = spawn(invocation.executable, invocation.args, {
-  cwd: APP_ROOT,
-  env,
-  stdio: 'inherit',
-});
+const child = spawn(
+  process.execPath,
+  [tsxCli, '--import', '../../build/register-raw-text-loader.mjs', './src/main.ts', ...cliArgs],
+  {
+    cwd: APP_ROOT,
+    env,
+    stdio: 'inherit',
+  },
+);
 
 child.on('error', async (error) => {
   console.error(`Failed to start Hakimi dev CLI: ${error.message}`);
@@ -42,22 +46,3 @@ child.on('exit', async (code, signal) => {
   }
   process.exit(code ?? 0);
 });
-
-function commandInvocation(command, args) {
-  if (process.platform !== 'win32') {
-    return {
-      executable: command,
-      args,
-    };
-  }
-
-  const workspaceBin = resolve(APP_ROOT, '..', '..', 'node_modules', '.bin');
-  const localCmd = join(workspaceBin, `${command}.cmd`);
-  const executable = existsSync(localCmd) ? localCmd : `${command}.cmd`;
-  const shell = process.env.ComSpec ?? 'cmd.exe';
-  const shellCommand = executable.includes(' ') ? `"${executable}"` : executable;
-  return {
-    executable: shell,
-    args: ['/d', '/s', '/c', shellCommand, ...args],
-  };
-}

@@ -7,7 +7,7 @@ import type {
   CancelPlanPayload,
   CreateGoalPayload,
   EmptyPayload,
-  GoalControlPayload,
+  EnterSwarmPayload,
   GetBackgroundOutputPayload,
   GetBackgroundPayload,
   McpServerInfo,
@@ -31,7 +31,6 @@ import type {
 import type { PromisableMethods } from '#/utils/types';
 
 import type { Session, SessionMeta } from '.';
-import { flags } from '../flags';
 import {
   promptMetadataTextFromPayload,
   promptMetadataTextFromSkill,
@@ -58,28 +57,11 @@ export class SessionAPIImpl implements PromisableMethods<SessionAPI> {
   }
 
   async updateSessionMetadata(payload: UpdateSessionMetadataPayload): Promise<void> {
-    // `metadata.custom.goal` is reserved for the goal lifecycle store. Generic
-    // metadata updates must neither overwrite an active goal nor write the goal
-    // field directly.
-    const reservedGoal = this.session.metadata.custom?.['goal'];
-    const patchCustom = (payload.metadata as Partial<SessionMeta> | undefined)?.custom;
-    if (patchCustom !== undefined && 'goal' in patchCustom) {
-      throw new KimiError(
-        ErrorCodes.GOAL_METADATA_RESERVED,
-        'metadata.custom.goal is reserved; use the goal lifecycle methods',
-      );
-    }
     this.session.metadata = {
       ...this.session.metadata,
       ...payload.metadata,
       agents: this.session.metadata.agents,
     };
-    if (reservedGoal !== undefined) {
-      this.session.metadata.custom = {
-        ...this.session.metadata.custom,
-        goal: reservedGoal,
-      };
-    }
     await this.session.writeMetadata();
   }
 
@@ -108,173 +90,162 @@ export class SessionAPIImpl implements PromisableMethods<SessionAPI> {
     return this.session.generateAgentsMd();
   }
 
-  async startBtw({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>): Promise<string> {
-    return this.getAgent(agentId).startBtw(payload);
-  }
-
-  // --- Goal lifecycle (delegates to the session goal store) -------------
-
-  createGoal(payload: CreateGoalPayload) {
-    this.assertGoalCommandEnabled();
-    return this.session.goals.createGoal({ ...payload, actor: 'user' });
-  }
-
-  getGoal(_payload: EmptyPayload) {
-    this.assertGoalCommandEnabled();
-    return this.session.goals.getGoal();
-  }
-
-  pauseGoal(payload: GoalControlPayload) {
-    this.assertGoalCommandEnabled();
-    return this.session.goals.pauseGoal({ actor: 'user', reason: payload.reason });
-  }
-
-  resumeGoal(payload: GoalControlPayload) {
-    this.assertGoalCommandEnabled();
-    return this.session.goals.resumeGoal({ actor: 'user', reason: payload.reason });
-  }
-
-  async cancelGoal(payload: GoalControlPayload) {
-    this.assertGoalCommandEnabled();
-    const snapshot = await this.session.goals.cancelGoal({
-      actor: 'user',
-      reason: payload.reason,
-    });
-    this.session.agents.get('main')?.context.appendSystemReminder(
-      [
-        'The user cancelled the current goal.',
-        'Ignore earlier active-goal reminders for that goal.',
-        'Handle the next user request normally unless the user starts or resumes a goal.',
-      ].join(' '),
-      { kind: 'system_trigger', name: 'goal_cancelled' },
-    );
-    return snapshot;
-  }
-
-  private assertGoalCommandEnabled(): void {
-    if (flags.enabled('goal-command')) return;
-    throw new KimiError(ErrorCodes.NOT_IMPLEMENTED, 'Goal command is disabled');
-  }
 
   async prompt({ agentId, ...payload }: AgentScopedPayload<PromptPayload>) {
     if (agentId === 'main') {
       await this.updatePromptMetadata(promptMetadataTextFromPayload(payload));
     }
-    return this.getAgent(agentId).prompt(payload);
+    return (await this.getAgent(agentId)).prompt(payload);
   }
 
-  steer({ agentId, ...payload }: AgentScopedPayload<SteerPayload>) {
-    return this.getAgent(agentId).steer(payload);
+  async steer({ agentId, ...payload }: AgentScopedPayload<SteerPayload>) {
+    return (await this.getAgent(agentId)).steer(payload);
   }
 
-  cancel({ agentId, ...payload }: AgentScopedPayload<CancelPayload>) {
-    return this.getAgent(agentId).cancel(payload);
+  async cancel({ agentId, ...payload }: AgentScopedPayload<CancelPayload>) {
+    return (await this.getAgent(agentId)).cancel(payload);
   }
 
-  undoHistory({ agentId, ...payload }: AgentScopedPayload<UndoHistoryPayload>) {
-    return this.getAgent(agentId).undoHistory(payload);
+  async undoHistory({ agentId, ...payload }: AgentScopedPayload<UndoHistoryPayload>) {
+    return (await this.getAgent(agentId)).undoHistory(payload);
   }
 
-  setModel({ agentId, ...payload }: AgentScopedPayload<SetModelPayload>) {
-    return this.getAgent(agentId).setModel(payload);
+  async setModel({ agentId, ...payload }: AgentScopedPayload<SetModelPayload>) {
+    return (await this.getAgent(agentId)).setModel(payload);
   }
 
-  setThinking({ agentId, ...payload }: AgentScopedPayload<SetThinkingPayload>) {
-    return this.getAgent(agentId).setThinking(payload);
+  async setThinking({ agentId, ...payload }: AgentScopedPayload<SetThinkingPayload>) {
+    return (await this.getAgent(agentId)).setThinking(payload);
   }
 
-  setPermission({ agentId, ...payload }: AgentScopedPayload<SetPermissionPayload>) {
-    return this.getAgent(agentId).setPermission(payload);
+  async setPermission({ agentId, ...payload }: AgentScopedPayload<SetPermissionPayload>) {
+    return (await this.getAgent(agentId)).setPermission(payload);
   }
 
-  getModel({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getModel(payload);
+  async getModel({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getModel(payload);
   }
 
-  enterPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).enterPlan(payload);
+  async enterPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).enterPlan(payload);
   }
 
-  cancelPlan({ agentId, ...payload }: AgentScopedPayload<CancelPlanPayload>) {
-    return this.getAgent(agentId).cancelPlan(payload);
+  async cancelPlan({ agentId, ...payload }: AgentScopedPayload<CancelPlanPayload>) {
+    return (await this.getAgent(agentId)).cancelPlan(payload);
   }
 
-  clearPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).clearPlan(payload);
+  async clearPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).clearPlan(payload);
   }
 
-  beginCompaction({ agentId, ...payload }: AgentScopedPayload<BeginCompactionPayload>) {
-    return this.getAgent(agentId).beginCompaction(payload);
+  async enterSwarm({ agentId, ...payload }: AgentScopedPayload<EnterSwarmPayload>) {
+    return (await this.getAgent(agentId)).enterSwarm(payload);
   }
 
-  cancelCompaction({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).cancelCompaction(payload);
+  async exitSwarm({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).exitSwarm(payload);
   }
 
-  registerTool({ agentId, ...payload }: AgentScopedPayload<RegisterToolPayload>) {
-    return this.getAgent(agentId).registerTool(payload);
+  async getSwarmMode({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getSwarmMode(payload);
   }
 
-  unregisterTool({ agentId, ...payload }: AgentScopedPayload<UnregisterToolPayload>) {
-    return this.getAgent(agentId).unregisterTool(payload);
+  async beginCompaction({ agentId, ...payload }: AgentScopedPayload<BeginCompactionPayload>) {
+    return (await this.getAgent(agentId)).beginCompaction(payload);
   }
 
-  setActiveTools({ agentId, ...payload }: AgentScopedPayload<SetActiveToolsPayload>) {
-    return this.getAgent(agentId).setActiveTools(payload);
+  async cancelCompaction({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).cancelCompaction(payload);
   }
 
-  stopBackground({ agentId, ...payload }: AgentScopedPayload<StopBackgroundPayload>) {
-    return this.getAgent(agentId).stopBackground(payload);
+  async registerTool({ agentId, ...payload }: AgentScopedPayload<RegisterToolPayload>) {
+    return (await this.getAgent(agentId)).registerTool(payload);
   }
 
-  clearContext({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).clearContext(payload);
+  async unregisterTool({ agentId, ...payload }: AgentScopedPayload<UnregisterToolPayload>) {
+    return (await this.getAgent(agentId)).unregisterTool(payload);
+  }
+
+  async setActiveTools({ agentId, ...payload }: AgentScopedPayload<SetActiveToolsPayload>) {
+    return (await this.getAgent(agentId)).setActiveTools(payload);
+  }
+
+  async stopBackground({ agentId, ...payload }: AgentScopedPayload<StopBackgroundPayload>) {
+    return (await this.getAgent(agentId)).stopBackground(payload);
+  }
+
+  async clearContext({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).clearContext(payload);
   }
 
   async activateSkill({ agentId, ...payload }: AgentScopedPayload<ActivateSkillPayload>) {
-    await this.getAgent(agentId).activateSkill(payload);
+    await (await this.getAgent(agentId)).activateSkill(payload);
     if (agentId === 'main') {
       await this.updatePromptMetadata(promptMetadataTextFromSkill(payload));
     }
   }
 
-  getBackgroundOutput({ agentId, ...payload }: AgentScopedPayload<GetBackgroundOutputPayload>) {
-    return this.getAgent(agentId).getBackgroundOutput(payload);
+  async startBtw({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>): Promise<string> {
+    return (await this.getAgent(agentId)).startBtw(payload);
   }
 
-  getContext({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getContext(payload);
+  async createGoal({ agentId, ...payload }: AgentScopedPayload<CreateGoalPayload>) {
+    return (await this.getAgent(agentId)).createGoal(payload);
   }
 
-  getConfig({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getConfig(payload);
+  async getGoal({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getGoal(payload);
   }
 
-  getPermission({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getPermission(payload);
+  async pauseGoal({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).pauseGoal(payload);
   }
 
-  getPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getPlan(payload);
+  async resumeGoal({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).resumeGoal(payload);
   }
 
-  getUsage({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getUsage(payload);
+  async cancelGoal({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).cancelGoal(payload);
   }
 
-  getTools({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
-    return this.getAgent(agentId).getTools(payload);
+  async getBackgroundOutput({
+    agentId,
+    ...payload
+  }: AgentScopedPayload<GetBackgroundOutputPayload>) {
+    return (await this.getAgent(agentId)).getBackgroundOutput(payload);
   }
 
-  getBackground({ agentId, ...payload }: AgentScopedPayload<GetBackgroundPayload>) {
-    return this.getAgent(agentId).getBackground(payload);
+  async getContext({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getContext(payload);
   }
 
-  private getAgent(agentId: string): PromisableMethods<AgentAPI> {
-    const agent = this.session.agents.get(agentId);
-    if (agent === undefined) {
-      throw new KimiError(ErrorCodes.AGENT_NOT_FOUND, `Agent "${agentId}" was not found`);
-    }
+  async getConfig({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getConfig(payload);
+  }
+
+  async getPermission({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getPermission(payload);
+  }
+
+  async getPlan({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getPlan(payload);
+  }
+
+  async getUsage({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getUsage(payload);
+  }
+
+  async getTools({ agentId, ...payload }: AgentScopedPayload<EmptyPayload>) {
+    return (await this.getAgent(agentId)).getTools(payload);
+  }
+
+  async getBackground({ agentId, ...payload }: AgentScopedPayload<GetBackgroundPayload>) {
+    return (await this.getAgent(agentId)).getBackground(payload);
+  }
+
+  private async getAgent(agentId: string): Promise<PromisableMethods<AgentAPI>> {
+    const agent = await this.session.ensureAgentResumed(agentId);
     return agent.rpcMethods;
   }
 

@@ -57,7 +57,7 @@ const mocks = vi.hoisted(() => {
         telemetry: true,
       }),
     ),
-    harnessGetExperimentalFlags: vi.fn(async (): Promise<Record<string, boolean>> => ({})),
+    harnessGetExperimentalFeatures: vi.fn(async () => []),
     harnessCreateSession: vi.fn(async () => session),
     harnessResumeSession: vi.fn(async () => session),
     harnessListSessions: vi.fn(async () => [{ id: 'ses_previous', workDir: process.cwd() }]),
@@ -94,7 +94,7 @@ vi.mock('@moonshot-ai/kimi-code-sdk', async (importOriginal) => {
         auth: { getCachedAccessToken: mocks.harnessGetCachedAccessToken },
         ensureConfigFile: mocks.harnessEnsureConfigFile,
         getConfig: mocks.harnessGetConfig,
-        getExperimentalFlags: mocks.harnessGetExperimentalFlags,
+        getExperimentalFeatures: mocks.harnessGetExperimentalFeatures,
         createSession: mocks.harnessCreateSession,
         resumeSession: mocks.harnessResumeSession,
         listSessions: mocks.harnessListSessions,
@@ -230,6 +230,22 @@ describe('runPrompt', () => {
     expect(stderr.text()).toBe('To resume this session: hakimi --session ses_prompt\n');
     expect(mocks.shutdownTelemetry).toHaveBeenCalled();
     expect(mocks.harnessClose).toHaveBeenCalled();
+  });
+
+  it('stops prompt startup when session creation fails', async () => {
+    const stdout = writer();
+    const stderr = writer();
+    mocks.harnessCreateSession.mockRejectedValueOnce(new Error('Git Bash missing'));
+
+    await expect(runPrompt(opts(), '1.2.3-test', { stdout, stderr })).rejects.toThrow(
+      'Git Bash missing',
+    );
+
+    expect(mocks.harnessEnsureConfigFile).toHaveBeenCalledOnce();
+    expect(mocks.harnessGetConfig).toHaveBeenCalledOnce();
+    expect(mocks.harnessCreateSession).toHaveBeenCalledOnce();
+    expect(mocks.session.prompt).not.toHaveBeenCalled();
+    expect(mocks.harnessClose).toHaveBeenCalledOnce();
   });
 
   it('uses the CLI model override when creating a fresh prompt session', async () => {
@@ -440,6 +456,28 @@ describe('runPrompt', () => {
     expect(mocks.session.getStatus).toHaveBeenCalled();
     expect(mocks.session.setPermission).toHaveBeenNthCalledWith(1, 'auto');
     expect(mocks.session.setPermission).toHaveBeenNthCalledWith(2, 'manual');
+  });
+
+  it('allows resuming a concrete session when Windows workdir uses backslashes', async () => {
+    const cwd = vi.spyOn(process, 'cwd').mockReturnValue(String.raw`C:\Users\kimi\project`);
+    mocks.harnessListSessions.mockResolvedValueOnce([
+      { id: 'ses_existing', workDir: 'C:/Users/kimi/project' },
+    ]);
+
+    try {
+      await runPrompt(opts({ session: 'ses_existing' }), '1.2.3-test', {
+        stdout: { write: vi.fn(() => true) },
+        stderr: { write: vi.fn(() => true) },
+      });
+    } finally {
+      cwd.mockRestore();
+    }
+
+    expect(mocks.harnessListSessions).toHaveBeenCalledWith({
+      sessionId: 'ses_existing',
+      workDir: String.raw`C:\Users\kimi\project`,
+    });
+    expect(mocks.harnessResumeSession).toHaveBeenCalledWith({ id: 'ses_existing' });
   });
 
   it('applies the CLI model override to resumed prompt sessions', async () => {

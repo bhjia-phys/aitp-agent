@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { WelcomeComponent } from '#/tui/components/chrome/welcome';
 import { setRainbowDance, type RainbowDanceController } from '#/tui/easter-eggs/dance';
-import { darkColors } from '#/tui/theme/colors';
 import type { AppState } from '#/tui/types';
 
 const TRUECOLOR_PATTERN = /\u001B\[38;2;(\d+);(\d+);(\d+)m/g;
@@ -25,6 +24,7 @@ const appState: AppState = {
   streamingPhase: 'idle',
   streamingStartTime: 0,
   planMode: false,
+  swarmMode: false,
   theme: 'dark',
   editorCommand: null,
   notifications: { enabled: true, condition: 'unfocused' },
@@ -74,7 +74,7 @@ describe('WelcomeComponent', () => {
   });
 
   it('renders the Hakimi physics research banner', () => {
-    const text = plain(new WelcomeComponent(appState, darkColors).render(96).join('\n'));
+    const text = plain(new WelcomeComponent(appState).render(96).join('\n'));
 
     expect(text).toContain('Hakimi');
     expect(text).toContain('truth-seeking physics research agent');
@@ -83,14 +83,14 @@ describe('WelcomeComponent', () => {
   });
 
   it('renders the detailed pixel ship with multiple colors by default', () => {
-    const header = headerOf(new WelcomeComponent(appState, darkColors).render(96));
+    const header = headerOf(new WelcomeComponent(appState).render(96));
     const codes = truecolorCodes(header);
 
     expect(codes.size).toBeGreaterThanOrEqual(6);
   });
 
   it('keeps the high-detail pixel ship instead of an ASCII line drawing', () => {
-    const output = plain(new WelcomeComponent(appState, darkColors).render(120).join('\n'));
+    const output = plain(new WelcomeComponent(appState).render(120).join('\n'));
     const fullBlock = String.fromCodePoint(0x2588);
     const pixelLines = output.split('\n').filter((line) => line.includes(fullBlock));
     const blockCount = Array.from(output).filter((char) => char === fullBlock).length;
@@ -104,15 +104,15 @@ describe('WelcomeComponent', () => {
 
   it('paints the banner in rainbow while colored', () => {
     setDanceView(true, 0);
-    const codes = truecolorCodes(headerOf(new WelcomeComponent(appState, darkColors).render(96)));
+    const codes = truecolorCodes(headerOf(new WelcomeComponent(appState).render(96)));
 
     expect(codes.size).toBeGreaterThanOrEqual(5);
   });
 
   it('renders exactly the default banner when not colored', () => {
-    const base = headerOf(new WelcomeComponent(appState, darkColors).render(96));
+    const base = headerOf(new WelcomeComponent(appState).render(96));
     setDanceView(false, 5);
-    const off = headerOf(new WelcomeComponent(appState, darkColors).render(96));
+    const off = headerOf(new WelcomeComponent(appState).render(96));
 
     expect(off).toBe(base);
   });

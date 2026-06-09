@@ -1,10 +1,11 @@
 import type { FlagDefinitionInput } from './types';
 
 /**
- * Experimental feature flags. Empty by default — there are no experimental features yet.
+ * Experimental feature flags.
  *
- * To add one, append an entry and gate the feature with `flags.enabled('my-feature')`:
- *   { id: 'my-feature', env: 'KIMI_CODE_EXPERIMENTAL_MY_FEATURE', default: false, surface: 'both' }
+ * To add one, append an entry and gate runtime behavior through the scoped
+ * resolver available on `KimiCore`, `Session`, or `Agent`:
+ *   { id: 'my_feature', title: 'My feature', description: '...', env: 'KIMI_CODE_EXPERIMENTAL_MY_FEATURE', default: false, surface: 'both' }
  *
  * Keep the `as const satisfies` — it derives the literal `FlagId` union that gives `enabled()`
  * autocomplete and typo-checking. `env` must start with 'KIMI_CODE_EXPERIMENTAL_', be unique, and
@@ -13,54 +14,72 @@ import type { FlagDefinitionInput } from './types';
 export const FLAG_DEFINITIONS = [
   {
     id: 'physics-memory',
+    title: 'Physics memory',
+    description: 'Load theoretical-physics memory capsules into Hakimi sessions.',
     env: 'KIMI_CODE_EXPERIMENTAL_PHYSICS_MEMORY',
     default: true,
     surface: 'core',
   },
   {
     id: 'research-ledger',
+    title: 'Research ledger',
+    description: 'Expose append-only research progress and proposal tools.',
     env: 'KIMI_CODE_EXPERIMENTAL_RESEARCH_LEDGER',
     default: true,
     surface: 'core',
   },
   {
     id: 'research-action',
+    title: 'Research actions',
+    description: 'Expose native research-action orchestration tools.',
     env: 'KIMI_CODE_EXPERIMENTAL_RESEARCH_ACTION',
     default: true,
     surface: 'core',
   },
   {
     id: 'domain-profile',
+    title: 'Domain profiles',
+    description: 'Load domain profiles for research context compilation.',
     env: 'KIMI_CODE_EXPERIMENTAL_DOMAIN_PROFILE',
     default: true,
     surface: 'core',
   },
   {
     id: 'workflow-recipe',
+    title: 'Workflow recipes',
+    description: 'Load reusable research workflow recipes.',
     env: 'KIMI_CODE_EXPERIMENTAL_WORKFLOW_RECIPE',
     default: true,
     surface: 'core',
   },
   {
     id: 'research-harness',
+    title: 'Research harness',
+    description: 'Load local research eval cases and benchmark adapters.',
     env: 'KIMI_CODE_EXPERIMENTAL_RESEARCH_HARNESS',
     default: true,
     surface: 'core',
   },
   {
     id: 'goal-command',
+    title: 'Goal command',
+    description: 'Enable autonomous goal-mode slash commands and tools.',
     env: 'KIMI_CODE_EXPERIMENTAL_GOAL_COMMAND',
     default: true,
     surface: 'both',
   },
   {
-    id: 'micro-compaction',
+    id: 'micro_compaction',
+    title: 'Micro compaction',
+    description: 'Trim older large tool results from context while keeping recent conversation intact.',
     env: 'KIMI_CODE_EXPERIMENTAL_MICRO_COMPACTION',
-    default: false,
+    default: true,
     surface: 'core',
   },
   {
     id: 'background-ask',
+    title: 'Background ask',
+    description: 'Enable background question behavior for ask-user tools.',
     env: 'KIMI_CODE_EXPERIMENTAL_BACKGROUND_ASK',
     default: false,
     surface: 'core',

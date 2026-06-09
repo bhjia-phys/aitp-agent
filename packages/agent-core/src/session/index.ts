@@ -9,7 +9,6 @@ import type { KimiConfig, SDKSessionRPC } from '#/rpc';
 import { proxyWithExtraPayload } from '#/rpc/types';
 
 import { Agent, type AgentOptions, type AgentType } from '../agent';
-import { SessionGoalStore, type SessionGoalState } from './goal';
 import { HookEngine, type HookDef } from './hooks';
 import type { PermissionManagerOptions, PermissionRule } from '../agent/permission';
 import {
@@ -37,7 +36,6 @@ import {
 } from '../benchmark-adapter';
 import { DomainProfileRegistry, resolveDomainProfileRoots } from '../domain-profile';
 import { makeErrorPayload } from '../errors';
-import { flags } from '../flags';
 import {
   McpConnectionManager,
   McpOAuthService,
@@ -69,9 +67,11 @@ import {
 import { noopTelemetryClient, type TelemetryClient } from '../telemetry';
 import { SessionSubagentHost } from './subagent-host';
 import type { ToolServices } from '../tools/support/services';
+import { FlagResolver, type ExperimentalFlagResolver } from '../flags';
 
 export interface SessionOptions {
   readonly kaos: Kaos;
+  readonly persistenceKaos?: Kaos;
   readonly config?: KimiConfig;
   readonly id?: string | undefined;
   readonly homedir: string;
@@ -102,10 +102,13 @@ export interface SessionOptions {
   readonly telemetry?: TelemetryClient | undefined;
   readonly pluginSessionStarts?: readonly EnabledPluginSessionStart[];
   readonly appVersion?: string;
+  readonly experimentalFlags?: ExperimentalFlagResolver;
 }
 
 export interface SessionSkillConfig {
   readonly userHomeDir?: string;
+  /** Brand data dir (KIMI_CODE_HOME); user brand skills live under `<brandHomeDir>/skills`. */
+  readonly brandHomeDir?: string;
   readonly explicitDirs?: readonly string[];
   readonly extraDirs?: readonly string[];
   readonly pluginSkillRoots?: readonly SkillRoot[];
@@ -157,11 +160,20 @@ export interface AgentMeta {
   readonly homedir: string;
   readonly type: AgentType;
   readonly parentAgentId: string | null;
+  readonly swarmItem?: string;
 }
+
+interface ResumedAgent {
+  readonly agent: Agent;
+  readonly warning?: string;
+}
+
+type AgentEntry = Agent | Promise<ResumedAgent>;
 
 export interface CreateAgentOptions {
   readonly profile?: ResolvedAgentProfile;
   readonly parentAgentId?: string;
+  readonly swarmItem?: string;
   readonly persistMetadata?: boolean;
 }
 
@@ -188,12 +200,14 @@ export class Session {
   readonly benchmarkAdapters: BenchmarkAdapterRegistry;
   readonly researchHarness: ResearchEvalCaseRegistry | null;
   readonly workflowRecipes: WorkflowRecipeRegistry | null;
-  readonly agents: Map<string, Agent> = new Map();
+  readonly agents: Map<string, AgentEntry> = new Map();
   readonly mcp: McpConnectionManager;
   readonly log: Logger;
   private readonly logHandle: SessionLogHandle | undefined;
   readonly hookEngine: HookEngine;
-  readonly goals: SessionGoalStore;
+  readonly experimentalFlags: ExperimentalFlagResolver;
+  private toolKaos: Kaos;
+  private persistenceKaos: Kaos;
   private agentIdCounter = 0;
   private readonly skillsReady: Promise<void>;
   private readonly domainProfilesReady: Promise<void>;
@@ -219,52 +233,39 @@ export class Session {
       options.id === undefined
         ? undefined
         : getRootLogger().attachSession({
-            sessionId: options.id,
-            sessionDir: options.homedir,
-          });
+          sessionId: options.id,
+          sessionDir: options.homedir,
+        });
     this.log =
       this.logHandle?.logger ??
       (options.id === undefined ? log : log.createChild({ sessionId: options.id }));
     this.rpc = options.rpc;
+    this.experimentalFlags = options.experimentalFlags ?? new FlagResolver();
     this.hookEngine = new HookEngine(options.hooks, {
       cwd: options.kaos.getcwd(),
       sessionId: options.id,
     });
     this.telemetry = options.telemetry ?? noopTelemetryClient;
-    this.goals = new SessionGoalStore({
+    this.toolKaos = options.kaos;
+    this.persistenceKaos = options.persistenceKaos ?? options.kaos;
+    this.skills = new SkillRegistry({
       sessionId: options.id,
-      readState: () => this.metadata.custom?.['goal'] as SessionGoalState | undefined,
-      writeState: (state) => {
-        this.metadata.custom ??= {};
-        if (state === undefined) {
-          delete this.metadata.custom['goal'];
-        } else {
-          this.metadata.custom['goal'] = state;
-        }
-        return this.writeMetadata();
-      },
-      auditSink: () => this.agents.get('main')?.records,
-      onGoalUpdated: (snapshot, change) => {
-        void this.rpc.emitEvent({ type: 'goal.updated', agentId: 'main', snapshot, change });
-      },
-      telemetry: this.telemetry,
     });
-    this.skills = new SkillRegistry({ sessionId: options.id });
-    this.domainProfiles = flags.enabled('domain-profile')
+    this.domainProfiles = this.experimentalFlags.enabled('domain-profile')
       ? new DomainProfileRegistry({
           onWarning: (message, cause) => {
             this.log.warn('domain profile load warning', { message, cause });
           },
         })
       : null;
-    this.physicsMemory = flags.enabled('physics-memory')
+    this.physicsMemory = this.experimentalFlags.enabled('physics-memory')
       ? new PhysicsMemoryRegistry({
           onWarning: (message, cause) => {
             this.log.warn('physics memory load warning', { message, cause });
           },
         })
       : null;
-    this.researchLedger = flags.enabled('research-ledger')
+    this.researchLedger = this.experimentalFlags.enabled('research-ledger')
       ? new ResearchLedgerRegistry({
           onWarning: (message, cause) => {
             this.log.warn('research ledger load warning', { message, cause });
@@ -273,14 +274,14 @@ export class Session {
       : null;
     this.benchmarkAdapters =
       options.benchmarkAdapters ?? createDefaultBenchmarkAdapterRegistry();
-    this.researchHarness = flags.enabled('research-harness')
+    this.researchHarness = this.experimentalFlags.enabled('research-harness')
       ? new ResearchEvalCaseRegistry({
           onWarning: (message, cause) => {
             this.log.warn('research harness load warning', { message, cause });
           },
         })
       : null;
-    this.workflowRecipes = flags.enabled('workflow-recipe')
+    this.workflowRecipes = this.experimentalFlags.enabled('workflow-recipe')
       ? new WorkflowRecipeRegistry({
           onWarning: (message, cause) => {
             this.log.warn('workflow recipe load warning', { message, cause });
@@ -341,12 +342,30 @@ export class Session {
     });
   }
 
+
+  setToolKaos(kaos: Kaos) {
+    this.toolKaos = kaos;
+    for (const agent of this.readyAgents()) {
+      agent.setKaos(kaos.withCwd(agent.config.cwd));
+    }
+    this.refreshAgentBuiltinTools();
+  }
+
+  /**
+   * Kaos used by session-internal bootstrap (AGENTS.md context, cwd listing)
+   * and metadata persistence. Always backed by the persistence sink (typically
+   * the local filesystem) so a transient ACP-side failure on system files like
+   * `AGENTS.md` never blocks `bootstrapAgentProfile` — tool calls still route
+   * through `agent.kaos` and continue to honor the ACP bridge.
+   */
+  systemContextKaos(cwd: string): Kaos {
+    return this.persistenceKaos.withCwd(cwd);
+  }
+
   async createMain() {
     const { agent } = await this.createAgent({ type: 'main' }, {
       profile: DEFAULT_AGENT_PROFILES['agent'],
     });
-    // The main-agent audit sink now exists; flush any goal records queued before it.
-    this.goals.flushPendingRecords();
     await this.triggerSessionStart('startup');
     return agent;
   }
@@ -359,47 +378,48 @@ export class Session {
     await this.researchHarnessReady;
     await this.workflowRecipesReady;
     const { agents } = await this.readMetadata();
-    // Reconcile the persisted goal (active -> paused, drop malformed/stale) before
-    // agents are rebuilt. The audit record (if any) is queued and flushed below.
-    await this.goals.normalizeMetadata();
     this.agents.clear();
-    let warning: string | undefined;
-    const resumeTasks = Object.keys(agents).map(async (id) => {
-      const agent = this.ensureResumeAgentInstantiated(id, agents);
-      const result = await agent.resume();
-      agent.physicsMemory?.recordRootsLoaded('session-start');
-      agent.researchLedger?.recordRootsLoaded('session-start');
-      if (result.warning !== undefined && warning === undefined) {
-        warning = result.warning;
-      }
-    });
-    await Promise.all(resumeTasks);
-    // The main-agent audit sink now exists; flush any goal records queued during
-    // normalizeMetadata (e.g. the active -> paused resume transition).
-    this.goals.flushPendingRecords();
-    const resumeWarning = warning;
+    // Only the main agent is needed to reopen the session; subagents replay
+    // lazily when an RPC or Agent(resume=...) call asks for their state.
+    const { warning } =
+      agents['main'] === undefined ? { warning: undefined } : await this.resumeAgent('main');
     // A session migrated from an external tool ships a wire without the
     // `config.update` bootstrap events a natively-created agent writes, so the
     // main agent comes back with an empty system prompt and no tools. Apply the
     // default profile so the resumed session is usable. Native sessions always
     // replay a non-empty system prompt and never enter this branch.
-    const main = this.agents.get('main');
+    const main = this.getReadyAgent('main');
     const profile = DEFAULT_AGENT_PROFILES['agent'];
     if (main !== undefined && profile !== undefined && main.config.systemPrompt === '') {
       await this.bootstrapAgentProfile(main, profile);
     }
     await this.triggerSessionStart('resume');
-    return { warning: resumeWarning };
+    return { warning };
   }
 
   async close(): Promise<void> {
     try {
       await Promise.allSettled(
-        Array.from(this.agents.values(), async (agent) => agent.cron?.stop()),
+        Array.from(this.readyAgents(), async (agent) => agent.cron?.stop()),
       );
       await this.stopBackgroundTasksOnExit();
       await this.flushMetadata();
       await this.triggerSessionEnd('exit');
+    } finally {
+      try {
+        await this.mcp.shutdown();
+      } finally {
+        await this.logHandle?.close();
+      }
+    }
+  }
+
+  async closeForReload(): Promise<void> {
+    try {
+      await Promise.allSettled(
+        Array.from(this.readyAgents(), async (agent) => agent.cron?.stop()),
+      );
+      await this.flushMetadata();
     } finally {
       try {
         await this.mcp.shutdown();
@@ -419,7 +439,7 @@ export class Session {
     });
     if (keepAliveOnExit) return;
     await Promise.all(
-      Array.from(this.agents.values(), (agent) =>
+      Array.from(this.readyAgents(), (agent) =>
         agent.background.stopAll('Session closed'),
       ),
     );
@@ -452,11 +472,21 @@ export class Session {
         homedir,
         type,
         parentAgentId,
+        swarmItem: options.swarmItem,
       };
       void this.writeMetadata();
     }
 
     return { id, agent };
+  }
+
+  async ensureAgentResumed(id: string): Promise<Agent> {
+    const entry = this.agents.get(id);
+    if (entry !== undefined) return (await this.resolveAgentEntry(entry)).agent;
+    if (this.metadata.agents[id] === undefined) {
+      throw new KimiError(ErrorCodes.AGENT_NOT_FOUND, `Agent "${id}" was not found`);
+    }
+    return (await this.resumeAgent(id)).agent;
   }
 
   /**
@@ -468,7 +498,10 @@ export class Session {
     agent: Agent,
     profile: ResolvedAgentProfile,
   ): Promise<void> {
-    const context = await prepareSystemPromptContext(agent.kaos);
+    const context = await prepareSystemPromptContext(
+      this.systemContextKaos(agent.kaos.getcwd()),
+      this.options.kimiHomeDir,
+    );
     agent.useProfile(profile, context);
   }
 
@@ -477,17 +510,17 @@ export class Session {
     const mainAgent = this.requireMainAgent();
 
     try {
-      const handle = await mainAgent.subagentHost!.spawn('coder', {
+      const handle = await mainAgent.subagentHost!.spawn({
+        profileName: 'coder',
         parentToolCallId: 'generate-agents-md',
         prompt: DEFAULT_INIT_PROMPT,
         description: 'Initialize AGENTS.md',
         runInBackground: false,
-        origin: { kind: 'system_trigger', name: 'init' },
         signal: new AbortController().signal,
       });
       await handle.completion;
 
-      const agentsMd = await loadAgentsMd(mainAgent.kaos);
+      const agentsMd = await loadAgentsMd(mainAgent.kaos, this.options.kimiHomeDir);
       mainAgent.context.appendSystemReminder(initCompletionReminder(agentsMd), {
         kind: 'injection',
         variant: 'init',
@@ -503,7 +536,7 @@ export class Session {
   }
 
   get hasActiveTurn(): boolean {
-    for (const agent of this.agents.values()) {
+    for (const agent of this.readyAgents()) {
       if (agent.turn.hasActiveTurn) return true;
     }
     return false;
@@ -516,15 +549,15 @@ export class Session {
   writeMetadata() {
     const text = JSON.stringify(this.metadata, null, 2);
     const write = async () => {
-      await this.options.kaos.mkdir(this.options.homedir, { parents: true, existOk: true });
-      await this.options.kaos.writeText(this.metadataPath, text);
+      await this.persistenceKaos.mkdir(this.options.homedir, { parents: true, existOk: true });
+      await this.persistenceKaos.writeText(this.metadataPath, text);
     };
     this.writeMetadataPromise = this.writeMetadataPromise.then(write, write);
     return this.writeMetadataPromise;
   }
 
   async readMetadata() {
-    const text = await this.options.kaos.readText(this.metadataPath);
+    const text = await this.persistenceKaos.readText(this.metadataPath);
     this.metadata = JSON.parse(text);
     return this.metadata;
   }
@@ -532,7 +565,7 @@ export class Session {
   async flushMetadata() {
     await this.skillsReady;
     await this.writeMetadataPromise;
-    await Promise.all(Array.from(this.agents.values()).map((agent) => agent.records.flush()));
+    await Promise.all(Array.from(this.readyAgents()).map((agent) => agent.records.flush()));
   }
 
   async listSkills(): Promise<readonly SkillSummary[]> {
@@ -544,6 +577,7 @@ export class Session {
     const roots = await resolveSkillRoots({
       paths: {
         userHomeDir: this.options.skills?.userHomeDir ?? homedir(),
+        brandHomeDir: this.options.skills?.brandHomeDir ?? this.options.kimiHomeDir,
         workDir: this.options.kaos.getcwd(),
       },
       explicitDirs: this.options.skills?.explicitDirs,
@@ -691,13 +725,8 @@ export class Session {
     });
   }
 
-  private backgroundTaskTimeoutMs(): number | undefined {
-    const timeoutS = this.options.background?.agentTaskTimeoutS;
-    return timeoutS === undefined ? undefined : timeoutS * 1000;
-  }
-
   private refreshAgentBuiltinTools(): void {
-    for (const agent of this.agents.values()) {
+    for (const agent of this.readyAgents()) {
       if (!agent.config.hasProvider) continue;
       agent.tools.initializeBuiltinTools();
     }
@@ -710,15 +739,15 @@ export class Session {
     config: Partial<AgentOptions> = {},
     parentAgentId: string | null = null,
   ): Agent {
-    const parentAgent = parentAgentId !== null ? this.agents.get(parentAgentId) : undefined;
-    const cwd = parentAgent?.config.cwd ?? this.options.kaos.getcwd();
+    const parentAgent = parentAgentId !== null ? this.getReadyAgent(parentAgentId) : undefined;
+    const cwd = parentAgent?.config.cwd ?? this.toolKaos.getcwd();
     let agent: Agent | undefined;
     const basePath = () => agent?.config.cwd ?? cwd;
     const aitpBridges = this.createAitpBridges(basePath);
     agent = new Agent({
       ...config,
       type,
-      kaos: this.options.kaos.withCwd(cwd),
+      kaos: this.toolKaos.withCwd(cwd),
       toolServices: this.options.toolServices,
       config: this.options.config,
       homedir,
@@ -758,15 +787,14 @@ export class Session {
       rpc: proxyWithExtraPayload(this.rpc, { agentId: id }),
       modelProvider: this.options.providerManager,
       hookEngine: config.hookEngine ?? this.hookEngine,
-      subagentHost:
-        config.subagentHost ?? new SessionSubagentHost(this, id, this.backgroundTaskTimeoutMs()),
+      subagentHost: config.subagentHost ?? new SessionSubagentHost(this, id),
       mcp: this.mcp,
-      goals: this.goals,
       permission: this.permissionOptions(parentAgentId, config.permission),
       telemetry: this.telemetry,
       log: this.log.createChild({ agentId: id }),
       pluginSessionStarts: type === 'main' ? this.options.pluginSessionStarts : undefined,
       appVersion: this.options.appVersion,
+      experimentalFlags: this.experimentalFlags,
     });
     return agent;
   }
@@ -859,17 +887,30 @@ export class Session {
     }
     return {
       ...input,
-      parent: input?.parent ?? this.agents.get(parentAgentId)?.permission,
+      parent: input?.parent ?? this.getReadyAgent(parentAgentId)?.permission,
     };
   }
 
-  private ensureResumeAgentInstantiated(
+  getReadyAgent(id: string): Agent | undefined {
+    const entry = this.agents.get(id);
+    return entry instanceof Agent ? entry : undefined;
+  }
+
+  *readyAgents(): Iterable<Agent> {
+    for (const entry of this.agents.values()) {
+      if (entry instanceof Agent) yield entry;
+    }
+  }
+
+  private async resolveAgentEntry(entry: AgentEntry): Promise<ResumedAgent> {
+    if (entry instanceof Agent) return { agent: entry };
+    return entry;
+  }
+
+  private resumeAgent(
     id: string,
-    agents: Record<string, AgentMeta>,
     stack: readonly string[] = [],
-  ): Agent {
-    const existing = this.agents.get(id);
-    if (existing !== undefined) return existing;
+  ): Promise<ResumedAgent> {
     if (stack.includes(id)) {
       throw new KimiError(
         ErrorCodes.SESSION_STATE_INVALID,
@@ -877,19 +918,42 @@ export class Session {
       );
     }
 
-    const meta = agents[id];
+    const entry = this.agents.get(id);
+    if (entry !== undefined) return this.resolveAgentEntry(entry);
+
+    const promise = this.resumePersistedAgent(id, stack);
+    this.agents.set(id, promise);
+    return promise;
+  }
+
+  private async resumePersistedAgent(
+    id: string,
+    stack: readonly string[] = [],
+  ): Promise<ResumedAgent> {
+    await this.skillsReady;
+    const meta = this.metadata.agents[id];
     if (meta === undefined) {
       throw new KimiError(ErrorCodes.SESSION_STATE_INVALID, `Session agent "${id}" is missing`);
     }
 
     const parentAgentId = meta.parentAgentId ?? null;
-    if (parentAgentId !== null) {
-      this.ensureResumeAgentInstantiated(parentAgentId, agents, [...stack, id]);
-    }
+    const parent =
+      parentAgentId === null
+        ? undefined
+        : await this.resumeAgent(parentAgentId, [...stack, id]);
 
-    const agent = this.instantiateAgent(id, meta.homedir, meta.type, {}, parentAgentId);
-    this.agents.set(id, agent);
-    return agent;
+    try {
+      const agent = this.instantiateAgent(id, meta.homedir, meta.type, {}, parentAgentId);
+      const result = await agent.resume();
+      this.agents.set(id, agent);
+      return { agent, warning: parent?.warning ?? result.warning };
+    } catch (error) {
+      const entry = this.agents.get(id);
+      if (entry instanceof Promise) {
+        this.agents.delete(id);
+      }
+      throw error;
+    }
   }
 
   private nextGeneratedAgentId(): string {
@@ -902,7 +966,7 @@ export class Session {
   }
 
   private requireMainAgent(): Agent {
-    const agent = this.agents.get('main');
+    const agent = this.getReadyAgent('main');
     if (agent === undefined) {
       throw new KimiError(ErrorCodes.AGENT_NOT_FOUND, 'Main agent was not found');
     }

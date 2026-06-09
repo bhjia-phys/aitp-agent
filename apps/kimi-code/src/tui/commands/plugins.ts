@@ -154,9 +154,10 @@ async function showPluginsPicker(
       plugins,
       selectedId: options?.selectedId,
       pluginHint: options?.pluginHint,
-      colors: host.state.theme.colors,
       onSelect: (selection) => {
-        host.restoreEditor();
+        // Each branch of the handler either mounts the next view or restores
+        // the editor itself, so do not pre-restore here — that would flash the
+        // editor for in-place actions like toggling a plugin.
         void handlePluginsOverviewSelection(host, selection).catch((error: unknown) => {
           host.showError(`/plugins failed: ${formatErrorMessage(error)}`);
         });
@@ -177,11 +178,13 @@ async function showPluginMarketplacePicker(host: SlashCommandHost, source?: stri
     host.mountEditorReplacement(
       new PluginMarketplaceSelectorComponent({
         entries: marketplace.plugins,
-        installedIds: new Set(installed.map((plugin) => plugin.id)),
+        installed: new Map(
+          installed.map((plugin): [string, string | undefined] => [plugin.id, plugin.version]),
+        ),
         source: marketplace.source,
-        colors: host.state.theme.colors,
         onSelect: (selection) => {
-          host.restoreEditor();
+          // Every marketplace action re-mounts a picker, so let the handler do
+          // the mounting — pre-restoring the editor here would flash.
           void handlePluginMarketplaceSelection(host, selection).catch((error: unknown) => {
             host.showError(`/plugins marketplace failed: ${formatErrorMessage(error)}`);
           });
@@ -215,9 +218,9 @@ async function showPluginMcpPicker(
       info,
       selectedServer: options?.selectedServer,
       serverHint: options?.serverHint,
-      colors: host.state.theme.colors,
       onSelect: (selection) => {
-        host.restoreEditor();
+        // Every MCP action re-mounts a picker, so let the handler do the
+        // mounting — pre-restoring the editor here would flash on toggle.
         void handlePluginMcpSelection(host, selection).catch((error: unknown) => {
           host.showError(`/plugins mcp failed: ${formatErrorMessage(error)}`);
         });
@@ -243,7 +246,6 @@ async function confirmRemovePlugin(host: SlashCommandHost, id: string): Promise<
       new PluginRemoveConfirmComponent({
         id,
         displayName,
-        colors: host.state.theme.colors,
         onDone: (result: PluginRemoveConfirmResult) => {
           host.restoreEditor();
           resolveConfirmed(result.kind === 'confirm');
@@ -292,6 +294,7 @@ async function handlePluginsOverviewSelection(
       await showPluginsPicker(host);
       return;
     case 'show-list':
+      host.restoreEditor();
       await renderPluginsList(host);
       return;
     case 'toggle': {
@@ -316,6 +319,7 @@ async function handlePluginsOverviewSelection(
       await showPluginsPicker(host);
       return;
     case 'info':
+      host.restoreEditor();
       await renderPluginInfo(host, selection.id);
       return;
   }
@@ -369,20 +373,23 @@ async function renderPluginsList(
   plugins?: readonly PluginSummary[],
 ): Promise<void> {
   const currentPlugins = plugins ?? (await host.requireSession().listPlugins());
-  const lines = buildPluginsListLines({
-    colors: host.state.theme.colors,
-    plugins: currentPlugins,
-  });
   const title = ` Plugins (${currentPlugins.length}) `;
-  const panel = new UsagePanelComponent(lines, host.state.theme.colors.primary, title);
+  const panel = new UsagePanelComponent(
+    () => buildPluginsListLines({ plugins: currentPlugins }),
+    'primary',
+    title,
+  );
   host.state.transcriptContainer.addChild(panel);
   host.state.ui.requestRender();
 }
 
 async function renderPluginInfo(host: SlashCommandHost, id: string): Promise<void> {
   const info = await host.requireSession().getPluginInfo(id);
-  const lines = buildPluginsInfoLines({ colors: host.state.theme.colors, info });
-  const panel = new UsagePanelComponent(lines, host.state.theme.colors.primary, ` ${info.id} `);
+  const panel = new UsagePanelComponent(
+    () => buildPluginsInfoLines({ info }),
+    'primary',
+    ` ${info.id} `,
+  );
   host.state.transcriptContainer.addChild(panel);
   host.state.ui.requestRender();
 }
@@ -475,5 +482,5 @@ function resolvePluginInstallSource(source: string, workDir: string): string {
 }
 
 function pluginInlineChangeHint(): string {
-  return 'pending /new';
+  return 'require run /new to apply';
 }

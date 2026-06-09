@@ -13,9 +13,10 @@ import { darkColors } from '#/tui/theme/colors';
 import { pluginTrustLabel } from '#/tui/utils/plugin-source-label';
 
 const ANSI_SGR = /\[[0-9;]*m/g;
-const SGR_SEQUENCE = String.raw`\[[0-9;]*m`;
-const HIGHLIGHTED_D_REMOVE = new RegExp(`${SGR_SEQUENCE}(?:${SGR_SEQUENCE})*D(?:${SGR_SEQUENCE})+ remove`, 'g');
 const MID = '\u00B7';
+const ESC = String.fromCodePoint(27);
+const RIGHT = `${ESC}[C`;
+const LEFT = `${ESC}[D`;
 
 function strip(text: string): string {
   return text.replaceAll(ANSI_SGR, '').replaceAll('\u276F', '?');
@@ -33,10 +34,6 @@ function withAnsiColors<T>(fn: () => T): T {
 
 function renderRaw(component: { render(width: number): string[] }, width = 120): string {
   return withAnsiColors(() => component.render(width).join('\n'));
-}
-
-function primaryShortcut(text: string): string {
-  return withAnsiColors(() => chalk.hex(darkColors.primary).bold(text));
 }
 
 function dangerShortcut(text: string): string {
@@ -112,7 +109,6 @@ describe('plugins selector dialogs', () => {
           source: 'local-path',
         },
       ],
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -125,16 +121,40 @@ describe('plugins selector dialogs', () => {
     expect(out).toContain(`id kimi-datasource ${MID} 2 skills ${MID} MCP 1/1`);
     expect(out).not.toContain('Space disable');
     expect(out).not.toContain('Enter info');
-    expect(raw.match(HIGHLIGHTED_D_REMOVE)).toHaveLength(1);
-    expect(raw).toContain(primaryShortcut('Space'));
-    expect(raw).toContain(primaryShortcut('M'));
-    expect(raw).toContain(dangerShortcut('D'));
-    expect(raw).toContain(primaryShortcut('Enter'));
+    expect(out).toContain('Space toggle · M MCP servers · D remove · Enter details');
     expect(out).toContain('Marketplace');
     expect(out).toContain('Summary');
 
     picker.handleInput('\r');
     expect(onSelect).toHaveBeenCalledWith({ kind: 'info', id: 'kimi-datasource' });
+  });
+
+  it('ignores Left/Right arrows in the overview (no enter/exit by arrow)', () => {
+    const onSelect = vi.fn();
+    const onCancel = vi.fn();
+    const picker = new PluginsOverviewSelectorComponent({
+      plugins: [
+        {
+          id: 'kimi-datasource',
+          displayName: 'Kimi Datasource',
+          version: '1.0.0',
+          enabled: true,
+          state: 'ok',
+          skillCount: 2,
+          mcpServerCount: 1,
+          enabledMcpServerCount: 1,
+          hasErrors: false,
+          source: 'local-path',
+        },
+      ],
+      onSelect,
+      onCancel,
+    });
+
+    picker.handleInput(RIGHT); // must NOT open details
+    expect(onSelect).not.toHaveBeenCalled();
+    picker.handleInput(LEFT); // must NOT cancel/exit
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it('renders marketplace plugins separately from marketplace actions', () => {
@@ -151,9 +171,8 @@ describe('plugins selector dialogs', () => {
           keywords: ['workflow'],
         },
       ],
-      installedIds: new Set(),
+      installed: new Map(),
       source: '/tmp/marketplace.json',
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -163,18 +182,70 @@ describe('plugins selector dialogs', () => {
     expect(out).toContain('Marketplace (1)');
     expect(out).toContain('? Superpowers  install v5.1.0');
     expect(out).toContain(
-      `Workflow skills ${MID} id superpowers ${MID} v5.1.0 ${MID} Curated plugin ${MID} workflow`,
+      `Workflow skills ${MID} id superpowers ${MID} Curated plugin ${MID} workflow`,
     );
-    expect(raw).toContain(primaryShortcut('Enter'));
-    expect(raw).toContain(primaryShortcut('Space'));
+    expect(out).toContain('Enter install/update');
     expect(out).toContain('Actions');
     expect(out).toContain('Back to installed plugins');
 
-    picker.handleInput(' ');
+    picker.handleInput('\r');
     expect(onSelect).toHaveBeenCalledWith({
       kind: 'install',
       entry: expect.objectContaining({ id: 'superpowers' }),
     });
+  });
+
+  it('installs only on Enter, not Space, in the marketplace', () => {
+    const onSelect = vi.fn();
+    const picker = new PluginMarketplaceSelectorComponent({
+      entries: [
+        {
+          id: 'superpowers',
+          tier: 'curated',
+          displayName: 'Superpowers',
+          version: '5.1.0',
+          description: 'Workflow skills',
+          source: 'https://example.com/superpowers.zip',
+          keywords: ['workflow'],
+        },
+      ],
+      installed: new Map(),
+      source: '/tmp/marketplace.json',
+      onSelect,
+      onCancel: vi.fn(),
+    });
+
+    picker.handleInput(' '); // Space must NOT install
+    expect(onSelect).not.toHaveBeenCalled();
+    picker.handleInput('\r'); // Enter installs
+    expect(onSelect).toHaveBeenCalledWith({
+      kind: 'install',
+      entry: expect.objectContaining({ id: 'superpowers' }),
+    });
+  });
+
+  it('ignores the Left arrow in the marketplace view (Esc returns instead)', () => {
+    const onCancel = vi.fn();
+    const picker = new PluginMarketplaceSelectorComponent({
+      entries: [
+        {
+          id: 'superpowers',
+          tier: 'curated',
+          displayName: 'Superpowers',
+          version: '5.1.0',
+          description: 'Workflow skills',
+          source: 'https://example.com/superpowers.zip',
+          keywords: ['workflow'],
+        },
+      ],
+      installed: new Map(),
+      source: '/tmp/marketplace.json',
+      onSelect: vi.fn(),
+      onCancel,
+    });
+
+    picker.handleInput(LEFT); // must NOT return to the overview
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it('issues install for installed marketplace entries (update path)', () => {
@@ -187,9 +258,8 @@ describe('plugins selector dialogs', () => {
           source: 'https://example.com/superpowers.zip',
         },
       ],
-      installedIds: new Set(['superpowers']),
+      installed: new Map([['superpowers', undefined]]),
       source: '/tmp/marketplace.json',
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -203,6 +273,48 @@ describe('plugins selector dialogs', () => {
       kind: 'install',
       entry: expect.objectContaining({ id: 'superpowers' }),
     });
+  });
+
+  it('shows an update badge when the installed version is older than the marketplace', () => {
+    const picker = new PluginMarketplaceSelectorComponent({
+      entries: [
+        {
+          id: 'superpowers',
+          tier: 'curated',
+          displayName: 'Superpowers',
+          version: '5.1.0',
+          source: 'https://example.com/superpowers.zip',
+        },
+      ],
+      installed: new Map([['superpowers', '5.0.0']]),
+      source: '/tmp/marketplace.json',
+      onSelect: vi.fn(),
+      onCancel: vi.fn(),
+    });
+
+    const out = picker.render(120).map(strip).join('\n');
+    expect(out).toContain('? Superpowers  update 5.0.0 → 5.1.0');
+  });
+
+  it('shows installed with the version when already up to date', () => {
+    const picker = new PluginMarketplaceSelectorComponent({
+      entries: [
+        {
+          id: 'superpowers',
+          tier: 'curated',
+          displayName: 'Superpowers',
+          version: '5.1.0',
+          source: 'https://example.com/superpowers.zip',
+        },
+      ],
+      installed: new Map([['superpowers', '5.1.0']]),
+      source: '/tmp/marketplace.json',
+      onSelect: vi.fn(),
+      onCancel: vi.fn(),
+    });
+
+    const out = picker.render(120).map(strip).join('\n');
+    expect(out).toContain(`? Superpowers  installed ${MID} v5.1.0`);
   });
 
   it('toggles an installed plugin from the overview with space', () => {
@@ -222,7 +334,6 @@ describe('plugins selector dialogs', () => {
           source: 'local-path',
         },
       ],
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -253,7 +364,6 @@ describe('plugins selector dialogs', () => {
           source: 'local-path',
         },
       ],
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -280,7 +390,6 @@ describe('plugins selector dialogs', () => {
           source: 'local-path',
         },
       ],
-      colors: darkColors,
       onSelect,
       onCancel: vi.fn(),
     });
@@ -320,7 +429,6 @@ describe('plugins selector dialogs', () => {
         ],
         diagnostics: [],
       },
-      colors: darkColors,
       onSelect: (selection) => {
         selections.push(selection);
       },
@@ -331,8 +439,7 @@ describe('plugins selector dialogs', () => {
     const out = strip(raw);
     expect(out).toContain('MCP servers (1/1 enabled)');
     expect(out).toContain('? data  enabled');
-    expect(raw).toContain(primaryShortcut('Enter'));
-    expect(raw).toContain(primaryShortcut('Space'));
+    expect(out).toContain('Enter/Space enable/disable');
 
     picker.handleInput(' ');
 
@@ -359,7 +466,6 @@ describe('plugins selector dialogs', () => {
       ],
       selectedId: 'kimi-datasource',
       pluginHint: { id: 'kimi-datasource', text: 'pending /new' },
-      colors: darkColors,
       onSelect: vi.fn(),
       onCancel: vi.fn(),
     });
@@ -374,7 +480,6 @@ describe('plugins selector dialogs', () => {
     const picker = new PluginRemoveConfirmComponent({
       id: 'kimi-datasource',
       displayName: 'Kimi Datasource',
-      colors: darkColors,
       onDone: (result) => {
         results.push(result);
       },
@@ -395,7 +500,6 @@ describe('plugins selector dialogs', () => {
     const picker = new PluginRemoveConfirmComponent({
       id: 'kimi-datasource',
       displayName: 'Kimi Datasource',
-      colors: darkColors,
       onDone: (result) => {
         results.push(result);
       },
@@ -403,8 +507,8 @@ describe('plugins selector dialogs', () => {
 
     picker.handleInput('[B');
     const raw = renderRaw(picker);
-    expect(raw).toContain(primaryShortcut('Enter'));
-    expect(raw).toContain(primaryShortcut('Space'));
+    expect(strip(raw)).toContain('Enter/Space select');
+    // The destructive option label keeps its danger styling (error + bold).
     expect(raw).toContain(dangerShortcut('Remove plugin'));
 
     picker.handleInput('\r');

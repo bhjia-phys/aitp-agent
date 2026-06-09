@@ -3,6 +3,7 @@ import {
   KimiError,
   type AgentContextData,
   type KimiErrorCode,
+  type SwarmModeTrigger,
 } from '@moonshot-ai/agent-core';
 
 import { type ApprovalHandler, type Event, type QuestionHandler } from '#/events';
@@ -21,6 +22,7 @@ import type {
   PromptInput,
   ReloadSummary,
   ResumedSessionState,
+  ResumedSessionSummary,
   SessionPlan,
   SessionStatus,
   SessionSummary,
@@ -43,8 +45,8 @@ export interface SessionOptions {
 export class Session {
   readonly id: string;
   readonly workDir: string;
-  readonly summary?: SessionSummary | undefined;
-  private readonly resumeState: ResumedSessionState | undefined;
+  summary?: SessionSummary | undefined;
+  private resumeState: ResumedSessionState | undefined;
 
   private readonly rpc: SDKRpcClientBase;
   private readonly onClose?: (() => void | Promise<void>) | undefined;
@@ -62,6 +64,14 @@ export class Session {
   getResumeState(): ResumedSessionState | undefined {
     this.ensureOpen();
     return this.resumeState;
+  }
+
+  async reloadSession(): Promise<ResumedSessionSummary> {
+    this.ensureOpen();
+    const summary = await this.rpc.reloadSession({ sessionId: this.id });
+    this.summary = summary;
+    this.resumeState = resumeStateFromSummary(summary);
+    return summary;
   }
 
   onEvent(listener: (event: Event) => void): Unsubscribe {
@@ -94,6 +104,14 @@ export class Session {
   async steer(input: string | PromptInput): Promise<void> {
     this.ensureOpen();
     await this.rpc.steer({
+      sessionId: this.id,
+      input: normalizePromptInput(input),
+    });
+  }
+
+  async swarm(input: string | PromptInput): Promise<void> {
+    this.ensureOpen();
+    await this.rpc.swarm({
       sessionId: this.id,
       input: normalizePromptInput(input),
     });
@@ -154,6 +172,21 @@ export class Session {
       );
     }
     await this.rpc.setPlanMode({ sessionId: this.id, enabled });
+  }
+
+  async setSwarmMode(enabled: boolean, trigger: SwarmModeTrigger): Promise<void> {
+    this.ensureOpen();
+    if (typeof enabled !== 'boolean') {
+      throw new KimiError(
+        ErrorCodes.REQUEST_INVALID,
+        'Session swarm mode must be a boolean',
+      );
+    }
+    if (enabled) {
+      await this.rpc.setSwarmMode({ sessionId: this.id, enabled: true, trigger });
+    } else {
+      await this.rpc.setSwarmMode({ sessionId: this.id, enabled: false });
+    }
   }
 
   async getPlan(): Promise<SessionPlan> {
@@ -285,19 +318,19 @@ export class Session {
     return this.rpc.getGoal({ sessionId: this.id });
   }
 
-  async pauseGoal(input: { reason?: string } = {}): Promise<GoalSnapshot> {
+  async pauseGoal(): Promise<GoalSnapshot> {
     this.ensureOpen();
-    return this.rpc.pauseGoal({ sessionId: this.id, reason: input.reason });
+    return this.rpc.pauseGoal({ sessionId: this.id });
   }
 
-  async resumeGoal(input: { reason?: string } = {}): Promise<GoalSnapshot> {
+  async resumeGoal(): Promise<GoalSnapshot> {
     this.ensureOpen();
-    return this.rpc.resumeGoal({ sessionId: this.id, reason: input.reason });
+    return this.rpc.resumeGoal({ sessionId: this.id });
   }
 
-  async cancelGoal(input: { reason?: string } = {}): Promise<GoalSnapshot> {
+  async cancelGoal(): Promise<GoalSnapshot> {
     this.ensureOpen();
-    return this.rpc.cancelGoal({ sessionId: this.id, reason: input.reason });
+    return this.rpc.cancelGoal({ sessionId: this.id });
   }
 
   async listMcpServers(): Promise<readonly McpServerInfo[]> {

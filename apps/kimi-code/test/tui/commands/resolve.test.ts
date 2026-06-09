@@ -1,7 +1,7 @@
 import {
   resolveSkillCommand,
   resolveSlashCommandInput,
-  setExperimentalFlags,
+  setExperimentalFeatures,
   slashBusyMessage,
   slashCommandBusyReason,
 } from '#/tui/commands/index';
@@ -21,6 +21,10 @@ function resolve(
 }
 
 describe('resolveSlashCommandInput', () => {
+  afterEach(() => {
+    setExperimentalFeatures([]);
+  });
+
   it('returns not-command for normal text', () => {
     expect(resolve('hello')).toEqual({ kind: 'not-command' });
   });
@@ -36,10 +40,20 @@ describe('resolveSlashCommandInput', () => {
       args: 'New title',
     });
     expect(resolve('/init')).toMatchObject({ kind: 'builtin', name: 'init', args: '' });
+    expect(resolve('/btw')).toMatchObject({
+      kind: 'builtin',
+      name: 'btw',
+      args: '',
+    });
     expect(resolve('/btw what are you doing?')).toMatchObject({
       kind: 'builtin',
       name: 'btw',
       args: 'what are you doing?',
+    });
+    expect(resolve('/experiments')).toMatchObject({
+      kind: 'builtin',
+      name: 'experiments',
+      args: '',
     });
   });
 
@@ -69,6 +83,26 @@ describe('resolveSlashCommandInput', () => {
       commandName: 'undo',
       reason: 'streaming',
     });
+    expect(resolve('/reload', { isStreaming: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'reload',
+      reason: 'streaming',
+    });
+    expect(resolve('/experiments', { isStreaming: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'experiments',
+      reason: 'streaming',
+    });
+    expect(resolve('/swarm on', { isStreaming: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'swarm',
+      reason: 'streaming',
+    });
+    expect(resolve('/swarm off', { isStreaming: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'swarm',
+      reason: 'streaming',
+    });
   });
 
   it('blocks model and session pickers while compacting', () => {
@@ -80,6 +114,26 @@ describe('resolveSlashCommandInput', () => {
     expect(resolve('/resume', { isCompacting: true })).toEqual({
       kind: 'blocked',
       commandName: 'resume',
+      reason: 'compacting',
+    });
+    expect(resolve('/reload', { isCompacting: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'reload',
+      reason: 'compacting',
+    });
+    expect(resolve('/experiments', { isCompacting: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'experiments',
+      reason: 'compacting',
+    });
+    expect(resolve('/swarm on', { isCompacting: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'swarm',
+      reason: 'compacting',
+    });
+    expect(resolve('/swarm off', { isCompacting: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'swarm',
       reason: 'compacting',
     });
   });
@@ -98,6 +152,16 @@ describe('resolveSlashCommandInput', () => {
     expect(resolve('/mcp', { isCompacting: true })).toMatchObject({
       kind: 'builtin',
       name: 'mcp',
+      args: '',
+    });
+    expect(resolve('/reload-tui', { isStreaming: true })).toMatchObject({
+      kind: 'builtin',
+      name: 'reload-tui',
+      args: '',
+    });
+    expect(resolve('/reload-tui', { isCompacting: true })).toMatchObject({
+      kind: 'builtin',
+      name: 'reload-tui',
       args: '',
     });
     expect(resolve('/btw side question', { isStreaming: true })).toMatchObject({
@@ -131,6 +195,22 @@ describe('resolveSlashCommandInput', () => {
     });
   });
 
+  it('resolves unprefixed built-in skill commands and blocks them while busy', () => {
+    const skillCommandMap = new Map([['mcp-config', 'mcp-config']]);
+
+    expect(resolve('/mcp-config', { skillCommandMap })).toEqual({
+      kind: 'skill',
+      commandName: 'mcp-config',
+      skillName: 'mcp-config',
+      args: '',
+    });
+    expect(resolve('/mcp-config', { skillCommandMap, isCompacting: true })).toEqual({
+      kind: 'blocked',
+      commandName: 'mcp-config',
+      reason: 'compacting',
+    });
+  });
+
   it('returns message for unknown slash input', () => {
     expect(resolve('/does-not-exist arg')).toEqual({
       kind: 'message',
@@ -138,15 +218,22 @@ describe('resolveSlashCommandInput', () => {
     });
   });
 
+  it('resolves /swarm without an experimental flag', () => {
+    expect(resolve('/swarm Ship feature X')).toMatchObject({
+      kind: 'builtin',
+      name: 'swarm',
+      args: 'Ship feature X',
+    });
+  });
+
 });
 
 describe('goal command resolution', () => {
   afterEach(() => {
-    setExperimentalFlags({});
+    setExperimentalFeatures([]);
   });
 
-  it('resolves /goal to the builtin command when goal-command is enabled', () => {
-    setExperimentalFlags({ 'goal-command': true });
+  it('resolves /goal to the builtin command without an experimental flag', () => {
     expect(resolve('/goal Ship feature X')).toMatchObject({
       kind: 'builtin',
       name: 'goal',
@@ -154,16 +241,7 @@ describe('goal command resolution', () => {
     });
   });
 
-  it('treats /goal as a normal message when goal-command is disabled', () => {
-    setExperimentalFlags({});
-    expect(resolve('/goal Ship feature X')).toEqual({
-      kind: 'message',
-      input: '/goal Ship feature X',
-    });
-  });
-
   it('blocks goal creation while streaming', () => {
-    setExperimentalFlags({ 'goal-command': true });
     expect(resolve('/goal Ship feature X', { isStreaming: true })).toEqual({
       kind: 'blocked',
       commandName: 'goal',
@@ -172,7 +250,6 @@ describe('goal command resolution', () => {
   });
 
   it('does not block status/pause/cancel/bare goal while streaming', () => {
-    setExperimentalFlags({ 'goal-command': true });
     for (const sub of ['status', 'pause', 'cancel']) {
       expect(resolve(`/goal ${sub}`, { isStreaming: true })).toMatchObject({
         kind: 'builtin',
@@ -188,10 +265,14 @@ describe('goal command resolution', () => {
 
 describe('slash command busy helpers', () => {
   it('resolves skill command aliases with and without skill prefix', () => {
-    const map = new Map([['skill:review', 'review']]);
+    const map = new Map([
+      ['skill:review', 'review'],
+      ['mcp-config', 'mcp-config'],
+    ]);
 
     expect(resolveSkillCommand(map, 'skill:review')).toBe('review');
     expect(resolveSkillCommand(map, 'review')).toBe('review');
+    expect(resolveSkillCommand(map, 'mcp-config')).toBe('mcp-config');
   });
 
   it('formats busy messages', () => {

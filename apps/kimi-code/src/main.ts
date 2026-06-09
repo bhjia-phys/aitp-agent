@@ -8,6 +8,7 @@
 import {
   createKimiHarness,
   flushDiagnosticLogs,
+  installGlobalProxyDispatcher,
   log,
   resolveGlobalLogPath,
   type TelemetryClient,
@@ -31,12 +32,11 @@ import { handleUpgrade } from './cli/sub/upgrade';
 import { createCliTelemetryBootstrap, initializeCliTelemetry } from './cli/telemetry';
 import { runUpdatePreflight } from './cli/update/preflight';
 import { createKimiCodeHostIdentity, getVersion } from './cli/version';
-import { CLI_SHUTDOWN_TIMEOUT_MS, CLI_UI_MODE } from './constant/app';
+import { CLI_SHUTDOWN_TIMEOUT_MS, CLI_UI_MODE, PROCESS_NAME } from './constant/app';
 import { cleanupStaleNativeCacheForCurrent } from './native/native-assets';
 import { installNativeModuleHook } from './native/module-hook';
 import { runNativeAssetSmokeIfRequested } from './native/smoke';
 import { getDataDir } from './utils/paths';
-import { initProcessName } from './utils/process/proctitle';
 
 export async function handleMainCommand(opts: CLIOptions, version: string): Promise<void> {
   let validated: ReturnType<typeof validateOptions>;
@@ -116,8 +116,12 @@ const MIGRATE_CLI_OPTIONS: CLIOptions = {
 };
 
 export function main(): void {
-  initProcessName();
+  process.title = PROCESS_NAME;
   installCrashHandlers();
+  // Route all outbound fetch through HTTP_PROXY/HTTPS_PROXY (honoring NO_PROXY)
+  // before any client is constructed. No-op when no proxy variable is set; an
+  // invalid proxy URL is reported and ignored rather than aborting startup.
+  installGlobalProxyDispatcher();
   installNativeModuleHook();
   if (runNativeAssetSmokeIfRequested()) return;
 

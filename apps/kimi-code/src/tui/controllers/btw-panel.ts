@@ -10,6 +10,7 @@ import { NO_ACTIVE_SESSION_MESSAGE } from '../constant/kimi-tui';
 import { BtwPanelComponent } from '../components/panes/btw-panel';
 import { formatErrorMessage } from '../utils/event-payload';
 import { formatHookResultPlain } from '../utils/hook-result-format';
+import { createMarkdownTheme } from '../theme/pi-tui-theme';
 import type { TUIState } from '../tui-state';
 
 const BTW_BUSY_NOTICE = 'Wait for /btw to finish before sending another question.';
@@ -36,8 +37,7 @@ export class BtwPanelController {
   open(agentId: string, initialPrompt: string): void {
     let panel: BtwPanelComponent;
     panel = new BtwPanelComponent({
-      colors: this.host.state.theme.colors,
-      markdownTheme: this.host.state.theme.markdownTheme,
+      markdownTheme: createMarkdownTheme(),
       canUseScrollKeys: () => this.host.state.editor.getText().length === 0,
       terminalRows: () => this.host.state.terminal.rows,
       onPrompt: (prompt) => {
@@ -52,7 +52,7 @@ export class BtwPanelController {
 
   clear(): void {
     const active = this.active;
-    if (active?.panel.isRunning()) {
+    if (active !== undefined && this.shouldCancelOnUnmount(active.panel)) {
       void this.cancelAgent(active.agentId);
     }
     this.active = undefined;
@@ -64,9 +64,9 @@ export class BtwPanelController {
   closeOrCancel(): boolean {
     const active = this.active;
     if (active === undefined) return false;
-    const wasRunning = active.panel.isRunning();
+    const shouldCancel = this.shouldCancelOnUnmount(active.panel);
     this.close(active.panel);
-    if (wasRunning) {
+    if (shouldCancel) {
       void this.cancelAgent(active.agentId);
     }
     return true;
@@ -123,33 +123,6 @@ export class BtwPanelController {
           panel.markFailed(formatBtwTurnEnd(event));
         }
         this.host.state.ui.requestRender();
-        return true;
-      case 'agent.status.updated':
-      case 'background.task.started':
-      case 'background.task.terminated':
-      case 'compaction.blocked':
-      case 'compaction.cancelled':
-      case 'compaction.completed':
-      case 'compaction.started':
-      case 'cron.fired':
-      case 'error':
-      case 'mcp.server.status':
-      case 'session.meta.updated':
-      case 'skill.activated':
-      case 'subagent.completed':
-      case 'subagent.failed':
-      case 'subagent.spawned':
-      case 'tool.call.delta':
-      case 'tool.call.started':
-      case 'tool.list.updated':
-      case 'tool.progress':
-      case 'tool.result':
-      case 'turn.started':
-      case 'turn.step.completed':
-      case 'turn.step.interrupted':
-      case 'turn.step.retrying':
-      case 'turn.step.started':
-      case 'warning':
         return true;
       default:
         return true;
@@ -211,6 +184,10 @@ export class BtwPanelController {
     await this.withInteractiveAgent(agentId, () => session.cancel()).catch((error: unknown) => {
       this.host.showError(`Failed to cancel /btw: ${formatErrorMessage(error)}`);
     });
+  }
+
+  private shouldCancelOnUnmount(panel: BtwPanelComponent): boolean {
+    return panel.isRunning() || panel.isEmpty();
   }
 
   private withInteractiveAgent<T>(agentId: string, fn: () => Promise<T>): Promise<T> {

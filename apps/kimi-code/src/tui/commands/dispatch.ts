@@ -3,8 +3,7 @@ import type { DeviceAuthorization } from '@moonshot-ai/kimi-code-oauth';
 import type { KimiHarness, Session } from '@moonshot-ai/kimi-code-sdk';
 
 import { PRODUCT_NAME } from '#/constant/app';
-
-import type { Theme } from '../theme';
+import type { ColorToken, ThemeName } from '#/tui/theme';
 import type { ResolvedTheme } from '../theme/colors';
 import {
   LLM_NOT_SET_MESSAGE,
@@ -34,6 +33,7 @@ import {
   handlePlanCommand,
   handleThemeCommand,
   handleYoloCommand,
+  showExperimentsPanel,
   showModelPicker,
   showPermissionPicker,
   showSettingsSelector,
@@ -42,6 +42,8 @@ import { handleGoalCommand } from './goal';
 import { handleProviderCommand } from './provider';
 import { handleFeedbackCommand, showMcpServers, showStatusReport, showUsage } from './info';
 import { handlePluginsCommand } from './plugins';
+import { handleReloadCommand, handleReloadTuiCommand } from './reload';
+import { handleSwarmCommand } from './swarm';
 import {
   handleExportDebugZipCommand,
   handleExportMdCommand,
@@ -69,9 +71,11 @@ export {
   handleThemeCommand,
   handleYoloCommand,
   showModelPicker,
+  showExperimentsPanel,
   showPermissionPicker,
   showSettingsSelector,
 } from './config';
+export { handleSwarmCommand } from './swarm';
 export {
   handleFeedbackCommand,
   showMcpServers,
@@ -79,6 +83,7 @@ export {
   showUsage,
 } from './info';
 export { handlePluginsCommand } from './plugins';
+export { handleReloadCommand, handleReloadTuiCommand } from './reload';
 export { handleGoalCommand } from './goal';
 export {
   handleExportDebugZipCommand,
@@ -103,19 +108,22 @@ export interface SlashCommandHost {
   setAppState(patch: Partial<AppState>): void;
   resetLivePane(): void;
   showError(msg: string): void;
-  showStatus(msg: string, color?: string): void;
+  showStatus(msg: string, color?: ColorToken): void;
   showNotice(title: string, detail?: string): void;
   track(event: string, props?: Record<string, unknown>): void;
   mountEditorReplacement(panel: Component & Focusable): void;
   restoreEditor(): void;
   restoreInputText(text: string): void;
+  refreshSlashCommandAutocomplete(): void;
 
   // Session
   requireSession(): Session;
   switchToSession(session: Session, message: string): Promise<void>;
+  reloadCurrentSessionView(session: Session, message: string): Promise<void>;
   beginSessionRequest(): void;
   failSessionRequest(message: string): void;
   sendQueuedMessage(session: Session, item: QueuedMessage): void;
+  requestQueuedGoalPromotion?(): void;
 
   // UI
   showLoginProgressSpinner(label: string): LoginProgressSpinnerHandle;
@@ -123,7 +131,7 @@ export interface SlashCommandHost {
   showProgressSpinner(label: string): LoginProgressSpinnerHandle;
 
   // Theme
-  applyTheme(theme: Theme, resolved?: ResolvedTheme): void;
+  applyTheme(theme: ThemeName, resolved?: ResolvedTheme): Promise<void>;
   refreshTerminalThemeTracking(): void;
 
   // Dispatch
@@ -169,6 +177,13 @@ async function executeSlashCommand(host: SlashCommandHost, input: string): Promi
     case 'blocked':
       host.track('input_command_invalid', { reason: 'blocked', command: intent.commandName });
       host.showError(slashBusyMessage(intent.commandName, intent.reason));
+      return;
+    case 'invalid':
+      host.track('input_command_invalid', {
+        reason: intent.reason,
+        command: intent.commandName,
+      });
+      host.showError(`Invalid slash command: /${intent.commandName}`);
       return;
     case 'skill': {
       const session = host.session;
@@ -237,6 +252,15 @@ async function handleBuiltInSlashCommand(
     case 'plugins':
       void handlePluginsCommand(host, args);
       return;
+    case 'experiments':
+      await showExperimentsPanel(host);
+      return;
+    case 'reload':
+      await handleReloadCommand(host);
+      return;
+    case 'reload-tui':
+      await handleReloadTuiCommand(host);
+      return;
     case 'editor':
       await handleEditorCommand(host, args);
       return;
@@ -278,6 +302,9 @@ async function handleBuiltInSlashCommand(
       return;
     case 'plan':
       await handlePlanCommand(host, args);
+      return;
+    case 'swarm':
+      await handleSwarmCommand(host, args);
       return;
     case 'compact':
       await handleCompactCommand(host, args);

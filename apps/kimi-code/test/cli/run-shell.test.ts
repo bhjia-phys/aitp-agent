@@ -229,7 +229,6 @@ describe('runShell', () => {
       },
       version: '1.2.3-test',
       workDir: process.cwd(),
-      resolvedTheme: 'dark',
     });
     expect(mocks.tuiStart).toHaveBeenCalledOnce();
     expect(mocks.harnessTrack).not.toHaveBeenCalledWith('started', expect.anything());
@@ -481,7 +480,6 @@ describe('runShell', () => {
     const [, , startupInput] = mocks.kimiTuiConstructor.mock.calls[0]!;
     expect(startupInput).toMatchObject({
       startupNotice: 'Invalid TUI config in ~/.hakimi/tui.toml; using defaults.',
-      resolvedTheme: 'light',
       tuiConfig: {
         theme: 'auto',
         editorCommand: 'vim',

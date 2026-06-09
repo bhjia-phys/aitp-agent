@@ -4,7 +4,6 @@ import picomatch from 'picomatch';
 
 import type { Agent } from '..';
 import { makeErrorPayload } from '../../errors';
-import { flags } from '../../flags';
 import type { ExecutableTool } from '../../loop';
 import { createMcpAuthTool } from '../../mcp/auth-tool';
 import type { McpConnectionManager, McpServerEntry } from '../../mcp';
@@ -404,6 +403,7 @@ export class ToolManager {
       this.enabledTools.has('TaskList') &&
       this.enabledTools.has('TaskOutput') &&
       this.enabledTools.has('TaskStop');
+    const goalToolsEnabled = this.agent.type === 'main';
     this.builtinTools = new Map(
       [
         new b.ReadTool(kaos, workspace),
@@ -418,19 +418,11 @@ export class ToolManager {
           new b.ReadMediaFileTool(kaos, workspace, modelCapabilities, videoUploader),
         new b.EnterPlanModeTool(this.agent),
         new b.ExitPlanModeTool(this.agent),
-        // Goal tools are main-agent-only and gated by the goal-command flag.
-        flags.enabled('goal-command') &&
-          this.agent.type === 'main' &&
-          new b.CreateGoalTool(this.agent),
-        flags.enabled('goal-command') &&
-          this.agent.type === 'main' &&
-          new b.GetGoalTool(this.agent),
-        flags.enabled('goal-command') &&
-          this.agent.type === 'main' &&
-          new b.SetGoalBudgetTool(this.agent),
-        flags.enabled('goal-command') &&
-          this.agent.type === 'main' &&
-          new b.UpdateGoalTool(this.agent),
+        // Goal tools are main-agent-only.
+        goalToolsEnabled && new b.CreateGoalTool(this.agent),
+        goalToolsEnabled && new b.GetGoalTool(this.agent),
+        goalToolsEnabled && new b.SetGoalBudgetTool(this.agent),
+        goalToolsEnabled && new b.UpdateGoalTool(this.agent),
         this.agent.rpc?.requestQuestion && new b.AskUserQuestionTool(this.agent),
         new b.TodoListTool(this.toolStore),
         new b.TaskListTool(background),
@@ -441,13 +433,14 @@ export class ToolManager {
         this.agent.cron && new b.CronDeleteTool(this.agent.cron),
         this.agent.skills?.registry.listInvocableSkills().length &&
           new b.SkillTool(this.agent),
-        flags.enabled('physics-memory') &&
+        this.agent.experimentalFlags.enabled('physics-memory') &&
           this.agent.physicsMemory &&
           new b.PhysicsMemoryTool(this.agent.physicsMemory),
-        flags.enabled('research-ledger') &&
+        this.agent.experimentalFlags.enabled('research-ledger') &&
           this.agent.researchLedger &&
           new b.ResearchLedgerTool(this.agent.researchLedger),
-        flags.enabled('research-action') && new b.ResearchActionTool(this.agent.researchAction),
+        this.agent.experimentalFlags.enabled('research-action') &&
+          new b.ResearchActionTool(this.agent.researchAction),
         this.agent.subagentHost &&
           new b.AgentTool(
             this.agent.subagentHost,
@@ -457,6 +450,8 @@ export class ToolManager {
               log: this.agent.log,
             },
           ),
+        this.agent.subagentHost &&
+          new b.AgentSwarmTool(this.agent.subagentHost, this.agent.swarmMode),
         toolServices?.webSearcher && new b.WebSearchTool(toolServices.webSearcher),
         toolServices?.urlFetcher && new b.FetchURLTool(toolServices.urlFetcher),
       ]
@@ -512,7 +507,7 @@ export class ToolManager {
     );
     const activeNames = this.effectiveEnabledTools(state.enabledTools, state.runtimeExposure);
     // Mutation goal tools are only offered to the model while a goal exists.
-    const hideGoalMutationTools = (this.agent.goals?.getGoal().goal ?? null) === null;
+    const hideGoalMutationTools = this.agent.goal.getGoal().goal === null;
     return uniq([...activeNames, ...mcpNames])
       .toSorted((a, b) => a.localeCompare(b))
       .filter(

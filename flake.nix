@@ -62,6 +62,7 @@
       # pnpmConfigHook (dependencies for that workspace won't be fetched).
       # -------------------------------------------------------------------
       workspacePaths = [
+        ./packages/acp-adapter
         ./packages/agent-core
         ./packages/kaos
         ./packages/kosong
@@ -77,6 +78,7 @@
       ];
 
       workspaceNames = [
+        "@moonshot-ai/acp-adapter"
         "@moonshot-ai/agent-core"
         "@moonshot-ai/kaos"
         "@moonshot-ai/kosong"
@@ -138,13 +140,14 @@
               inherit (finalAttrs) pname version src pnpmWorkspaces;
               inherit pnpm;
               fetcherVersion = 3;
-              hash = "sha256-HpRlxlXZoVqAzrdMdSWhLcTRM1DvDvytVbzIGBo8QUo=";
+              hash = "sha256-x5O/+bDRoEW3juoxe3XyvTJxHitQ0hZ2nVXBItkBA5E=";
             };
 
             nativeBuildInputs = [
               nodejs
               pnpm
               (pkgs.pnpmConfigHook.override { inherit pnpm; })
+              pkgs.makeWrapper
             ]
             # The SEA inject step (postject) invalidates the macOS code
             # signature on the copied Node executable; build.mjs then re-applies
@@ -189,6 +192,10 @@
               runHook postInstall
             '';
 
+            postInstall = ''
+              wrapProgram $out/bin/kimi --prefix PATH : ${lib.makeBinPath [ pkgs.ripgrep pkgs.fd ]}
+            '';
+
             meta = {
               description = "Truth-seeking physics research agent";
               homepage = "https://github.com/bhjia-phys/Hakimi";
@@ -224,6 +231,8 @@
             packages = [
               nodejs
               pnpm
+              pkgs.ripgrep
+              pkgs.fd
             ];
           };
       });

@@ -4,6 +4,7 @@ import {
   parseSlashInput,
   resolveSlashCommandAvailability,
   sortSlashCommands,
+  swarmArgumentCompletions,
   type KimiSlashCommand,
 } from '#/tui/commands/index';
 import { describe, expect, it } from 'vitest';
@@ -47,6 +48,31 @@ describe('built-in slash command registry', () => {
     expect(resolveSlashCommandAvailability(plan!, 'clear')).toBe('idle-only');
   });
 
+  it('keeps swarm mode changes and swarm tasks idle-only', () => {
+    const swarm = findBuiltInSlashCommand('swarm');
+    expect(swarm).toBeDefined();
+    expect((swarm as KimiSlashCommand).experimentalFlag).toBeUndefined();
+    expect(resolveSlashCommandAvailability(swarm!, 'on')).toBe('idle-only');
+    expect(resolveSlashCommandAvailability(swarm!, 'off')).toBe('idle-only');
+    expect(resolveSlashCommandAvailability(swarm!, 'Ship feature X')).toBe('idle-only');
+  });
+
+  it('offers swarm subcommand argument completions', () => {
+    const values = (prefix: string): string[] | null => {
+      const items = swarmArgumentCompletions(prefix);
+      return items === null ? null : items.map((item) => item.value);
+    };
+
+    expect(values('')).toEqual(['on', 'off']);
+    expect(values('O')).toEqual(['on', 'off']);
+    expect(swarmArgumentCompletions('of')).toEqual([
+      { value: 'off', label: 'off', description: 'Turn swarm mode off' },
+    ]);
+    expect(values('on')).toBeNull();
+    expect(values('off')).toBeNull();
+    expect(values('Ship feature X')).toBeNull();
+  });
+
   it('defaults commands without explicit availability to idle-only', () => {
     const command: KimiSlashCommand = {
       name: 'example',
@@ -73,14 +99,17 @@ describe('built-in slash command registry', () => {
     ]);
   });
 
-  it('registers goal behind the goal-command flag with subcommand-aware availability', () => {
+  it('registers goal with subcommand-aware availability', () => {
     const goal = findBuiltInSlashCommand('goal');
     expect(goal).toBeDefined();
-    expect((goal as KimiSlashCommand).experimentalFlag).toBe('goal-command');
+    expect((goal as KimiSlashCommand).experimentalFlag).toBeUndefined();
     expect(resolveSlashCommandAvailability(goal!, '')).toBe('always');
     expect(resolveSlashCommandAvailability(goal!, 'status')).toBe('always');
     expect(resolveSlashCommandAvailability(goal!, 'pause')).toBe('always');
     expect(resolveSlashCommandAvailability(goal!, 'cancel')).toBe('always');
+    expect(resolveSlashCommandAvailability(goal!, 'next')).toBe('always');
+    expect(resolveSlashCommandAvailability(goal!, 'next Ship feature Y')).toBe('always');
+    expect(resolveSlashCommandAvailability(goal!, 'next manage')).toBe('always');
     expect(resolveSlashCommandAvailability(goal!, 'status report')).toBe('idle-only');
     expect(resolveSlashCommandAvailability(goal!, 'pause the rollout')).toBe('idle-only');
     expect(resolveSlashCommandAvailability(goal!, 'cancel the migration')).toBe('idle-only');
@@ -112,6 +141,8 @@ describe('built-in slash command registry', () => {
         'new',
         'permission',
         'plan',
+        'reload',
+        'reload-tui',
         'sessions',
         'settings',
         'status',
@@ -123,5 +154,15 @@ describe('built-in slash command registry', () => {
         'yolo',
       ]),
     );
+  });
+
+  it('keeps TUI reload always available and full reload idle-only', () => {
+    const reload = findBuiltInSlashCommand('reload');
+    const reloadTui = findBuiltInSlashCommand('reload-tui');
+
+    expect(reload).toBeDefined();
+    expect(reloadTui).toBeDefined();
+    expect(resolveSlashCommandAvailability(reload!, '')).toBe('idle-only');
+    expect(resolveSlashCommandAvailability(reloadTui!, '')).toBe('always');
   });
 });
