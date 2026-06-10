@@ -2,6 +2,12 @@ import type { ContentPart, TokenUsage } from '@moonshot-ai/kosong';
 
 import type { LoopRecordedEvent } from '../../loop';
 import type { GoalActor, GoalBudgetLimits, GoalStatus } from '../goal';
+import type {
+  AutoresearchEventType,
+  AutoresearchPhase,
+  AutoresearchStatus,
+  AutoresearchTerminalAnswerState,
+} from '../autoresearch';
 import type { ToolStoreUpdate } from '../../tools/store';
 import type { CompactionBeginData, CompactionResult } from '../compaction';
 import type { AgentConfigUpdateData } from '../config';
@@ -341,6 +347,39 @@ export interface AgentRecordEvents {
     }[];
     toolCallId?: string | undefined;
   };
+
+  'autoresearch.create': {
+    id: string;
+    aitpRunId: string;
+    topicId: string;
+    objective: string;
+    researchQuestion: string;
+    operator: string;
+    title?: string | undefined;
+    claimId?: string | undefined;
+    sessionId?: string | undefined;
+    hypothesis?: string | undefined;
+    status: AutoresearchStatus;
+    phase: AutoresearchPhase;
+    terminalAnswerState: AutoresearchTerminalAnswerState;
+    eventIds: readonly string[];
+    createdAt: number;
+    updatedAt: number;
+    orientationOnly: boolean;
+    canUpdateKernelState: boolean;
+    canUpdateClaimTrust: boolean;
+  };
+  'autoresearch.update': {
+    status?: AutoresearchStatus | undefined;
+    phase?: AutoresearchPhase | undefined;
+    terminalAnswerState?: AutoresearchTerminalAnswerState | undefined;
+    stopReason?: string | undefined;
+    operator?: string | undefined;
+    eventType?: AutoresearchEventType | undefined;
+    eventIds?: readonly string[] | undefined;
+    updatedAt: number;
+  };
+  'autoresearch.clear': {};
 
   'goal.create': {
     goalId: string;

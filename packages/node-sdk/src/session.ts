@@ -10,6 +10,9 @@ import { type ApprovalHandler, type Event, type QuestionHandler } from '#/events
 import type { SDKRpcClientBase } from '#/rpc';
 import type {
   BackgroundTaskInfo,
+  AutoresearchLifecycleInput,
+  AutoresearchSnapshot,
+  AutoresearchToolResult,
   CompactOptions,
   CreateGoalInput,
   GoalSnapshot,
@@ -20,6 +23,7 @@ import type {
   PluginInfo,
   PluginSummary,
   PromptInput,
+  RecordAutoresearchEventInput,
   ReloadSummary,
   ResumedSessionState,
   ResumedSessionSummary,
@@ -28,7 +32,9 @@ import type {
   SessionSummary,
   SessionUsage,
   SkillSummary,
+  StartAutoresearchInput,
   Unsubscribe,
+  UpdateAutoresearchInput,
 } from '#/types';
 
 const MAIN_AGENT_ID = 'main';
@@ -331,6 +337,47 @@ export class Session {
   async cancelGoal(): Promise<GoalSnapshot> {
     this.ensureOpen();
     return this.rpc.cancelGoal({ sessionId: this.id });
+  }
+
+  async startAutoresearch(input: StartAutoresearchInput): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.startAutoresearch({ sessionId: this.id, ...input });
+  }
+
+  async getAutoresearch(): Promise<AutoresearchToolResult> {
+    this.ensureOpen();
+    return this.rpc.getAutoresearch({ sessionId: this.id });
+  }
+
+  async updateAutoresearch(input: UpdateAutoresearchInput): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.updateAutoresearch({ sessionId: this.id, ...input });
+  }
+
+  async recordAutoresearchEvent(
+    input: RecordAutoresearchEventInput,
+  ): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.recordAutoresearchEvent({ sessionId: this.id, ...input });
+  }
+
+  async pauseAutoresearch(
+    input: AutoresearchLifecycleInput = {},
+  ): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.pauseAutoresearch({ sessionId: this.id, ...input });
+  }
+
+  async resumeAutoresearch(
+    input: AutoresearchLifecycleInput = {},
+  ): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.resumeAutoresearch({ sessionId: this.id, ...input });
+  }
+
+  async stopAutoresearch(input: AutoresearchLifecycleInput = {}): Promise<AutoresearchSnapshot> {
+    this.ensureOpen();
+    return this.rpc.stopAutoresearch({ sessionId: this.id, ...input });
   }
 
   async listMcpServers(): Promise<readonly McpServerInfo[]> {

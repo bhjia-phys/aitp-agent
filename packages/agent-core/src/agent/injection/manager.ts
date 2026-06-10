@@ -1,4 +1,5 @@
 import type { Agent } from '..';
+import { AutoresearchInjector } from './autoresearch';
 import { GoalInjector } from './goal';
 import type { DynamicInjector } from './injector';
 import { PermissionModeInjector } from './permission-mode';
@@ -15,6 +16,7 @@ export class InjectionManager {
   // near the tail without mutating the prefix, so prompt caching is preserved and
   // the context does not grow O(n^2) the way per-step injection did.
   private readonly goalInjector: GoalInjector | null;
+  private readonly autoresearchInjector: AutoresearchInjector | null;
 
   constructor(protected readonly agent: Agent) {
     this.injectors = [
@@ -25,6 +27,7 @@ export class InjectionManager {
       new ResearchContextInjector(agent),
     ];
     this.goalInjector = agent.type === 'main' ? new GoalInjector(agent) : null;
+    this.autoresearchInjector = agent.type === 'main' ? new AutoresearchInjector(agent) : null;
   }
 
   async inject(): Promise<void> {
@@ -40,6 +43,7 @@ export class InjectionManager {
    */
   async injectGoal(): Promise<void> {
     await this.activeGoalInjector()?.inject();
+    await this.autoresearchInjector?.inject();
   }
 
   onContextClear(): void {
@@ -66,8 +70,13 @@ export class InjectionManager {
 
   /** Per-step injectors plus the boundary goal injector, for lifecycle events. */
   private lifecycleInjectors(): DynamicInjector[] {
+    const boundaryInjectors: DynamicInjector[] = [];
     const goalInjector = this.activeGoalInjector();
-    return goalInjector === null ? this.injectors : [goalInjector, ...this.injectors];
+    if (goalInjector !== null) boundaryInjectors.push(goalInjector);
+    if (this.autoresearchInjector !== null) boundaryInjectors.push(this.autoresearchInjector);
+    return boundaryInjectors.length === 0
+      ? this.injectors
+      : [...boundaryInjectors, ...this.injectors];
   }
 
   private activeGoalInjector(): GoalInjector | null {

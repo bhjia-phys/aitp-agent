@@ -6,6 +6,7 @@ export * from './skills';
 export * from './types';
 
 export { dispatchInput, type SlashCommandHost } from './dispatch';
+export { handleAutoresearchCommand, parseAutoresearchCommand } from './autoresearch';
 export {
   handleLoginCommand,
   handleLogoutCommand,

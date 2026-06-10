@@ -1,5 +1,6 @@
 import type { FinishReason, TokenUsage } from '@moonshot-ai/kosong';
 
+import type { AutoresearchSnapshot } from '../agent/autoresearch';
 import type { GoalChange, GoalSnapshot } from '../agent/goal';
 import type { CronJobOrigin, PromptOrigin } from '../agent/context';
 import type { KimiErrorPayload } from '../errors';
@@ -69,6 +70,12 @@ export interface GoalUpdatedEvent {
    * markers and the completion card.
    */
   readonly change?: GoalChange;
+}
+
+export interface AutoresearchUpdatedEvent {
+  readonly type: 'autoresearch.updated';
+  /** Current AITP-backed autoresearch snapshot, or `null` when cleared. */
+  readonly snapshot: AutoresearchSnapshot | null;
 }
 
 export interface SkillActivatedEvent {
@@ -301,6 +308,7 @@ export type AgentEvent =
   | AgentStatusUpdatedEvent
   | SessionMetaUpdatedEvent
   | GoalUpdatedEvent
+  | AutoresearchUpdatedEvent
   | SkillActivatedEvent
   | TurnStartedEvent
   | TurnEndedEvent
