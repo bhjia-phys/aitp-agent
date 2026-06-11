@@ -90,6 +90,8 @@ function restoreAgentRecord(agent: Agent, input: AgentRecord): void {
     case 'context.append_loop_event':
       agent.context.appendLoopEvent(input.event);
       return;
+    case 'reasoning.audit':
+      return;
     case 'context.clear':
       agent.context.clear();
       return;

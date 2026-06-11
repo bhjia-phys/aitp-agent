@@ -16,6 +16,7 @@
     "lint:fix": "corepack pnpm --config.engine-strict=false run lint --fix",
     "lint:pkg": "corepack pnpm --config.engine-strict=false -r --filter=!@bhjia-phys/hakimi-monorepo exec publint && corepack pnpm --config.engine-strict=false -r --filter=./packages/* exec attw --pack . --profile node16",
     "sherif": "sherif",
+    "audit:hakimi-session": "node scripts/hakimi-real-session-audit.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

@@ -112,6 +112,16 @@ export interface AgentRecordEvents {
 
   'context.append_message': { message: ContextMessage };
   'context.append_loop_event': { event: LoopRecordedEvent };
+  'reasoning.audit': {
+    agentId?: string | undefined;
+    turnId: string;
+    step: number;
+    stepUuid: string;
+    partUuid: string;
+    chars: number;
+    cues: readonly string[];
+    redacted: true;
+  };
   'context.clear': {};
   'context.apply_compaction': CompactionResult;
   'context.undo': { count: number };
