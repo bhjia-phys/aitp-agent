@@ -103,6 +103,9 @@ importers:
       '@moonshot-ai/acp-adapter':
         specifier: workspace:^
         version: link:../../packages/acp-adapter
+      '@moonshot-ai/agent-core':
+        specifier: workspace:^
+        version: link:../../packages/agent-core
       '@moonshot-ai/kimi-code-oauth':
         specifier: workspace:^
         version: link:../../packages/oauth
