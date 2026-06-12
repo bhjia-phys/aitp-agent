@@ -1,12 +1,12 @@
-// Raw-string imports for prompt sources. The `raw-text-plugin` (used by both
-// tsdown and vitest) loads `.md` / `.yaml` files as their string content.
+// Raw-string imports for prompt sources. Vite/Vitest handles `?raw` natively;
+// tsdown uses the shared `raw-text-plugin` for the same import shape.
 
-declare module '*.md' {
+declare module '*?raw' {
   const content: string;
   export default content;
 }
 
-declare module '*.yaml' {
+declare module '*.md' {
   const content: string;
   export default content;
 }

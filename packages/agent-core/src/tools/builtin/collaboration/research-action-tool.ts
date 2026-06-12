@@ -90,7 +90,7 @@ import {
   type ResearchLedgerEvent,
 } from '../../../research-ledger';
 import { toInputJsonSchema } from '../../support/input-schema';
-import DESCRIPTION from './research-action-tool.md';
+import DESCRIPTION from './research-action-tool.md?raw';
 
 const ACTIONS = [
   'list_actions',

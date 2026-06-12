@@ -13,6 +13,12 @@ import type { NotificationsConfig, UpgradePreferences } from './config';
 import type { PendingApproval, PendingQuestion } from './reverse-rpc/types';
 import type { ColorToken, ThemeName } from './theme';
 
+export interface BannerState {
+  tag: string | null;
+  mainText: string;
+  subText: string | null;
+}
+
 export interface AppState {
   model: string;
   workDir: string;
@@ -41,6 +47,8 @@ export interface AppState {
   /** Current AITP-backed autoresearch run, when one is active in the session. */
   autoresearch?: AutoresearchSnapshot | null;
   mcpServersSummary: string | null;
+  /** Optional banner shown below the welcome panel; null means no banner to render. */
+  banner?: BannerState | null;
 }
 
 export interface ToolCallBlockData {
@@ -99,6 +107,7 @@ export interface BackgroundAgentStatusData {
 }
 
 export interface CompactionTranscriptData {
+  readonly result?: 'cancelled';
   readonly tokensBefore?: number;
   readonly tokensAfter?: number;
   readonly instruction?: string;

@@ -49,6 +49,7 @@ export const FEEDBACK_TELEMETRY_EVENT = 'feedback_submitted';
 // The constant name remains for compatibility with the upstream updater module.
 export const KIMI_CODE_CDN_BASE = 'https://github.com/bhjia-phys/Hakimi/releases/latest/download';
 export const KIMI_CODE_CDN_LATEST_URL = `${KIMI_CODE_CDN_BASE}/latest`;
+export const KIMI_CODE_TIPS_BANNER_URL = 'https://cdn.kimi.com/kimi-code-tips/tips.json';
 export const KIMI_CODE_PLUGIN_MARKETPLACE_URL = `${KIMI_CODE_CDN_BASE}/plugins/marketplace.json`;
 export const KIMI_CODE_PLUGIN_MARKETPLACE_URL_ENV = 'KIMI_CODE_PLUGIN_MARKETPLACE_URL';
 export const KIMI_CODE_INSTALL_SH_URL = `${KIMI_CODE_CDN_BASE}/install.sh`;

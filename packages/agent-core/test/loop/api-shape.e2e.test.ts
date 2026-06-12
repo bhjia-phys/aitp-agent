@@ -303,6 +303,7 @@ function _typeOnlyChecks(): void {
   const toolCallHookContext: ToolExecutionHookContext = {
     ...stepHookContext,
     toolCall: { type: 'function', id: 'tc1', name: 'echo', arguments: '{}' },
+    toolCalls: [{ type: 'function', id: 'tc1', name: 'echo', arguments: '{}' }],
     args: {},
   };
   void toolCallHookContext;
@@ -310,6 +311,7 @@ function _typeOnlyChecks(): void {
   const _badToolExecutionHookContext: ToolExecutionHookContext = {
     ...stepHookContext,
     toolCall: { type: 'function', id: 'tc1', name: 'echo', arguments: '{}' },
+    toolCalls: [{ type: 'function', id: 'tc1', name: 'echo', arguments: '{}' }],
     // @ts-expect-error — tool hooks receive `args`, not the old `input` field.
     input: {},
   };
@@ -488,6 +490,7 @@ function _typeOnlyChecks(): void {
   };
   const prepareToolExecutionHook: PrepareToolExecutionHook = async (ctx) => ({
     updatedArgs: ctx.args,
+    executionMetadata: ctx.toolCalls,
   });
   const finalizeToolResultHook: FinalizeToolResultHook = async (ctx) => ctx.result;
   const shouldContinueAfterStopHook: ShouldContinueAfterStopHook = async (ctx) => ({
